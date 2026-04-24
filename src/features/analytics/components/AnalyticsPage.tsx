@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import {
   BarChart3,
   TrendingUp,
@@ -21,7 +21,12 @@ import {
 } from '@/shared/components/ui';
 import { PageHeader, LoadingState, ErrorState, StatCard } from '@/shared/components/feedback';
 import { cn } from '@/shared/utils';
-import { api } from '@/shared/lib/api';
+import {
+  useGetAnalyticsSummaryQuery,
+  useGetAnalyticsTrendsQuery,
+  useGetAnalyticsResourcesQuery,
+} from '@/features/analytics/services/analyticsApi';
+import { errorMessage } from '@/shared/lib/api';
 
 interface TimeSeriesData {
   date: string;
@@ -73,93 +78,76 @@ interface AnalyticsSummary {
 
 export function AnalyticsPage() {
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('7d');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  // State for all analytics data
-  const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
-  const [deploymentsData, setDeploymentsData] = useState<TimeSeriesData[]>([]);
-  const [topResources, setTopResources] = useState<TopResource[]>([]);
-  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
-  const [healthDistribution, setHealthDistribution] = useState<HealthDistribution>({ healthy: 0, degraded: 0, unhealthy: 0 });
-  const [resourcesByKind, setResourcesByKind] = useState<ResourceByKind[]>([]);
+  const summaryQuery = useGetAnalyticsSummaryQuery();
+  const trendsQuery = useGetAnalyticsTrendsQuery(timeRange);
+  const resourcesQuery = useGetAnalyticsResourcesQuery();
 
-  const fetchAnalytics = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      // Fetch all analytics data in parallel
-      const [summaryRes, trendsRes, resourcesRes] = await Promise.all([
-        api.getAnalyticsSummary(),
-        api.getAnalyticsTrends(timeRange),
-        api.getAnalyticsResources(),
-      ]);
+  const loading = summaryQuery.isLoading || trendsQuery.isLoading || resourcesQuery.isLoading;
+  const rtkError = summaryQuery.error || trendsQuery.error || resourcesQuery.error;
+  const error = rtkError ? errorMessage(rtkError) || 'Failed to load analytics' : null;
+  const refetchAnalytics = () => {
+    summaryQuery.refetch();
+    trendsQuery.refetch();
+    resourcesQuery.refetch();
+  };
 
-      // Map summary data
-      if (summaryRes) {
-        const s = summaryRes;
-        setSummary({
-          totalResources: s.resources?.total || 0,
-          deploymentsToday: 0, // Not available in current API
-          activeTeams: s.teams?.total || 0,
-          avgDeployTime: '0m', // Not available in current API
-          resourcesChange: s.resources?.growth?.daily || 0,
-          deploymentsChange: 0, // Not available in current API
-          teamsChange: 0, // Not available in current API
-          deployTimeChange: 0, // Not available in current API
-          successRate: 0, // Not available in current API
-          mttr: '0m', // Not available in current API
-          changeFrequency: 0, // Not available in current API
-        });
-        
-        // Health distribution from resources byStatus
-        const byStatus = s.resources?.byStatus || {};
-        setHealthDistribution({
-          healthy: byStatus.Healthy || 0,
-          degraded: byStatus.Degraded || 0,
-          unhealthy: byStatus.Unhealthy || 0,
-        });
-        
-        // Top resources - not available in current structure
-        setTopResources([]);
-        
-        // Recent activity - not available in current structure
-        setRecentActivity([]);
-      }
-
-      // Map trends data
-      if (trendsRes) {
-        const deployments = trendsRes.deployments || [];
-        if (Array.isArray(deployments)) {
-          setDeploymentsData(deployments.map((d: any) => ({
-            date: d.date,
-            value: d.value || d.count || 0,
-          })));
+  const summary = useMemo<AnalyticsSummary | null>(() => {
+    const raw = summaryQuery.data as
+      | {
+          resources?: { total?: number; growth?: { daily?: number }; byStatus?: Record<string, number> };
+          teams?: { total?: number };
         }
-      }
+      | undefined;
+    if (!raw) return null;
+    return {
+      totalResources: raw.resources?.total || 0,
+      deploymentsToday: 0,
+      activeTeams: raw.teams?.total || 0,
+      avgDeployTime: '0m',
+      resourcesChange: raw.resources?.growth?.daily || 0,
+      deploymentsChange: 0,
+      teamsChange: 0,
+      deployTimeChange: 0,
+      successRate: 0,
+      mttr: '0m',
+      changeFrequency: 0,
+    };
+  }, [summaryQuery.data]);
 
-      // Map resources by kind
-      if (resourcesRes) {
-        const byKind = resourcesRes.byKind || {};
-        const total = resourcesRes.total || 0;
-        const kindEntries = Object.entries(byKind).map(([kind, count]) => ({
-          kind,
-          count: count as number,
-          percentage: total > 0 ? Math.round((count as number / total) * 100) : 0,
-        }));
-        setResourcesByKind(kindEntries);
-      }
-    } catch (err: any) {
-      console.error('Failed to fetch analytics:', err);
-      setError(err.message || 'Failed to load analytics');
-    } finally {
-      setLoading(false);
-    }
-  }, [timeRange]);
+  const healthDistribution = useMemo<HealthDistribution>(() => {
+    const byStatus =
+      (summaryQuery.data as { resources?: { byStatus?: Record<string, number> } } | undefined)
+        ?.resources?.byStatus || {};
+    return {
+      healthy: byStatus.Healthy || 0,
+      degraded: byStatus.Degraded || 0,
+      unhealthy: byStatus.Unhealthy || 0,
+    };
+  }, [summaryQuery.data]);
 
-  useEffect(() => {
-    fetchAnalytics();
-  }, [fetchAnalytics]);
+  const deploymentsData = useMemo<TimeSeriesData[]>(() => {
+    const raw = trendsQuery.data as { deployments?: Array<{ date: string; value?: number; count?: number }> } | undefined;
+    const deployments = raw?.deployments ?? [];
+    if (!Array.isArray(deployments)) return [];
+    return deployments.map((d) => ({ date: d.date, value: d.value ?? d.count ?? 0 }));
+  }, [trendsQuery.data]);
+
+  const resourcesByKind = useMemo<ResourceByKind[]>(() => {
+    const raw = resourcesQuery.data as
+      | { byKind?: Record<string, number>; total?: number }
+      | undefined;
+    const byKind = raw?.byKind ?? {};
+    const total = raw?.total ?? 0;
+    return Object.entries(byKind).map(([kind, count]) => ({
+      kind,
+      count: count as number,
+      percentage: total > 0 ? Math.round(((count as number) / total) * 100) : 0,
+    }));
+  }, [resourcesQuery.data]);
+
+  // Top resources and recent activity are not yet exposed by the backend.
+  const topResources: TopResource[] = [];
+  const recentActivity: ActivityItem[] = [];
 
   const formatRelativeTime = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -201,7 +189,7 @@ export function AnalyticsPage() {
   }
 
   if (error) {
-    return <ErrorState message={error} onRetry={fetchAnalytics} />;
+    return <ErrorState message={error} onRetry={refetchAnalytics} />;
   }
 
   const maxDeployments = Math.max(...deploymentsData.map((d) => d.value), 1);
@@ -216,7 +204,7 @@ export function AnalyticsPage() {
         iconClassName="text-indigo-400"
         title="Analytics"
         description="Platform metrics and insights"
-        onRefresh={fetchAnalytics}
+        onRefresh={refetchAnalytics}
         actions={
           <Select
             value={timeRange}

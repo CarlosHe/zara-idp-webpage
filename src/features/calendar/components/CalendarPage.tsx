@@ -8,7 +8,7 @@ import {
   Clock,
   Users,
 } from 'lucide-react';
-import { useAppSelector } from '@/shared/hooks/redux';
+import { useListFreezesQuery } from '@/features/freezes/services/freezesApi';
 import {
   Card,
   CardHeader,
@@ -30,9 +30,9 @@ interface CalendarDay {
 
 export function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const freezes = useAppSelector((state) => state.freezes.items);
-  
-  const safeFreezes = useMemo(() => Array.isArray(freezes) ? freezes : [], [freezes]);
+  const { data: freezes } = useListFreezesQuery();
+
+  const safeFreezes = useMemo(() => (Array.isArray(freezes) ? freezes : []), [freezes]);
 
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',

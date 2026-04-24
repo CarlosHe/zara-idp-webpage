@@ -33,7 +33,8 @@ import {
   Alert,
 } from '@/shared/components/ui';
 import { PageHeader } from '@/shared/components/feedback';
-import { api } from '@/shared/lib/api';
+import { useApplyYamlMutation } from '@/features/resources/services/resourcesApi';
+import { errorMessage } from '@/shared/lib/api';
 
 interface GoldenPath {
   id: string;
@@ -821,7 +822,8 @@ export function GoldenPathsPage() {
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [generatedYaml, setGeneratedYaml] = useState<string>('');
   const [copied, setCopied] = useState(false);
-  const [applying, setApplying] = useState(false);
+  const [applyYaml, applyState] = useApplyYamlMutation();
+  const applying = applyState.isLoading;
   const [applyStatus, setApplyStatus] = useState<{
     type: 'idle' | 'success' | 'error';
     message?: string;
@@ -876,17 +878,14 @@ export function GoldenPathsPage() {
       return;
     }
 
-    setApplying(true);
     setApplyStatus({ type: 'idle' });
 
     try {
-      // Use the new /apply endpoint to send the entire YAML at once
-      const result = await api.applyYaml(generatedYaml);
+      const result = await applyYaml({ yaml: generatedYaml }).unwrap();
 
-      // Transform backend response to frontend format
-      const details = result.results.map(r => ({
+      const details = result.results.map((r) => ({
         resource: `${r.kind}/${r.namespace}/${r.name}`,
-        status: r.action === 'ERROR' ? 'error' as const : 'success' as const,
+        status: r.action === 'ERROR' ? ('error' as const) : ('success' as const),
         message: r.error || (r.action === 'CREATED' ? 'Created' : 'Updated'),
       }));
 
@@ -898,13 +897,11 @@ export function GoldenPathsPage() {
           : `Successfully applied ${result.summary.total} resource(s) (${result.summary.created} created, ${result.summary.updated} updated)`,
         details,
       });
-    } catch (error: any) {
+    } catch (err) {
       setApplyStatus({
         type: 'error',
-        message: error.message || 'Failed to apply resources',
+        message: errorMessage(err as Parameters<typeof errorMessage>[0]) || 'Failed to apply resources',
       });
-    } finally {
-      setApplying(false);
     }
   };
 
