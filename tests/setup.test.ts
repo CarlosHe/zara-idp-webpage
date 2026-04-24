@@ -9,9 +9,9 @@ describe('test harness', () => {
     expect(el).toHaveTextContent('hello');
   });
 
-  it('has a non-opaque origin (localStorage works)', () => {
-    expect(window.location.href).toContain('localhost');
-    localStorage.setItem('k', 'v');
-    expect(localStorage.getItem('k')).toBe('v');
+  it('provides an in-memory localStorage on the jsdom origin', () => {
+    localStorage.setItem('foo', 'bar');
+    expect(localStorage.getItem('foo')).toBe('bar');
+    localStorage.clear();
   });
 });

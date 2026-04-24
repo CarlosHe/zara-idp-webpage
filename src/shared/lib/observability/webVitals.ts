@@ -63,7 +63,7 @@ export function serializeMetric(metric: Metric) {
   };
 }
 
-function defaultReporter(endpoint: string | undefined): VitalsReporter {
+export function defaultReporter(endpoint: string | undefined): VitalsReporter {
   if (endpoint) return (metric) => sendToAnalytics(endpoint, metric);
   return devLogger;
 }
