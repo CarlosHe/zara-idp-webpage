@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   Snowflake,
@@ -7,8 +6,11 @@ import {
   User,
   AlertTriangle,
 } from 'lucide-react';
-import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
-import { fetchFreezes, fetchFreeze, clearSelectedFreeze } from '@/features/freezes/store/freezesSlice';
+import {
+  useListFreezesQuery,
+  useGetFreezeQuery,
+} from '@/features/freezes/services/freezesApi';
+import { errorMessage } from '@/shared/lib/api';
 import { ROUTES } from '@/shared/config';
 import {
   Card,
@@ -30,19 +32,15 @@ import { cn, formatDateTime, formatRelativeTime } from '@/shared/utils';
 import type { Freeze } from '@/shared/types';
 
 export function FreezesPage() {
-  const dispatch = useAppDispatch();
-  const { items: freezes, loading, error } = useAppSelector((state) => state.freezes);
-
-  useEffect(() => {
-    dispatch(fetchFreezes());
-  }, [dispatch]);
+  const { data: freezes, isLoading: loading, error, refetch } = useListFreezesQuery();
 
   const safeFreezes = Array.isArray(freezes) ? freezes : [];
   const activeFreezes = safeFreezes.filter((f) => f.active);
   const inactiveFreezes = safeFreezes.filter((f) => !f.active);
 
   if (error) {
-    return <ErrorState message={error} onRetry={() => dispatch(fetchFreezes())} />;
+    const message = errorMessage(error) || 'Failed to load freezes';
+    return <ErrorState message={message} onRetry={refetch} />;
   }
 
   return (
@@ -53,7 +51,7 @@ export function FreezesPage() {
         iconClassName="text-cyan-400"
         title="Freezes"
         description="View active deployment freezes and change restrictions"
-        onRefresh={() => dispatch(fetchFreezes())}
+        onRefresh={refetch}
       />
 
       {/* Active Freezes Warning */}
@@ -194,17 +192,9 @@ function FreezeRow({ freeze, inactive }: FreezeRowProps) {
 // Freeze Detail Page
 export function FreezeDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const dispatch = useAppDispatch();
-  const { selected: selectedFreeze, loading, error } = useAppSelector((state) => state.freezes);
-
-  useEffect(() => {
-    if (id) {
-      dispatch(fetchFreeze(id));
-    }
-    return () => {
-      dispatch(clearSelectedFreeze());
-    };
-  }, [dispatch, id]);
+  const { data: selectedFreeze, isLoading: loading, error } = useGetFreezeQuery(id ?? '', {
+    skip: !id,
+  });
 
   if (loading && !selectedFreeze) {
     return <LoadingState message="Loading freeze..." />;
@@ -213,7 +203,7 @@ export function FreezeDetailPage() {
   if (error) {
     return (
       <Alert type="error" title="Failed to load freeze">
-        {error}
+        {errorMessage(error) || 'Unable to load freeze details.'}
       </Alert>
     );
   }
