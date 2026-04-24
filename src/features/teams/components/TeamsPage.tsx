@@ -50,24 +50,23 @@ interface TeamFormModalProps {
 }
 
 function TeamFormModal({ isOpen, onClose, team }: TeamFormModalProps) {
-  const dispatch = useAppDispatch();
-  const { saving, saveError } = useAppSelector((state) => state.teams);
-  
-  // Derive initial state from team prop - reset when team changes
+  const [createTeam, createState] = useCreateTeamMutation();
+  const [updateTeam, updateState] = useUpdateTeamMutation();
+  const saving = createState.isLoading || updateState.isLoading;
+  const saveError =
+    errorMessage(createState.error) || errorMessage(updateState.error) || null;
+
   const getInitialFormData = () => ({
     metadata: { name: team?.metadata?.name || '' },
-    spec: { 
+    spec: {
       displayName: team?.spec?.displayName || '',
-      channels: { general: team?.spec?.channels?.general || '' }
+      channels: { general: team?.spec?.channels?.general || '' },
     },
   });
-  
+
   const [formData, setFormData] = useState(getInitialFormData());
-  
-  // Track the team ID to detect when we need to reset
   const [prevTeamId, setPrevTeamId] = useState<string | undefined>(team?.id);
-  
-  // Reset form when team changes
+
   useEffect(() => {
     if (team?.id !== prevTeamId) {
       setPrevTeamId(team?.id);
@@ -77,27 +76,26 @@ function TeamFormModal({ isOpen, onClose, team }: TeamFormModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (team?.id) {
-      const result = await dispatch(updateTeam({ 
-        id: team.id, 
-        data: { 
+
+    try {
+      if (team?.id) {
+        await updateTeam({
+          id: team.id,
+          data: {
+            displayName: formData.spec.displayName,
+            slackChannel: formData.spec.channels.general,
+          },
+        }).unwrap();
+      } else {
+        await createTeam({
+          name: formData.metadata.name,
           displayName: formData.spec.displayName,
           slackChannel: formData.spec.channels.general,
-        } 
-      }));
-      if (!result.type.endsWith('/rejected')) {
-        onClose();
+        }).unwrap();
       }
-    } else {
-      const result = await dispatch(createTeam({
-        name: formData.metadata.name,
-        displayName: formData.spec.displayName,
-        slackChannel: formData.spec.channels.general,
-      }));
-      if (!result.type.endsWith('/rejected')) {
-        onClose();
-      }
+      onClose();
+    } catch {
+      // Error surfaces via `saveError` derived from mutation state above.
     }
   };
 
@@ -151,40 +149,35 @@ function TeamFormModal({ isOpen, onClose, team }: TeamFormModalProps) {
 }
 
 export function TeamsPage() {
-  const dispatch = useAppDispatch();
-  const { items, loading, error, saving } = useAppSelector((state) => state.teams);
+  const { data: items = [], isLoading: loading, error, refetch } = useListTeamsQuery();
+  const [deleteTeam, deleteState] = useDeleteTeamMutation();
+  const saving = deleteState.isLoading;
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [deletingTeam, setDeletingTeam] = useState<Team | null>(null);
 
-  useEffect(() => {
-    dispatch(fetchTeams());
-  }, [dispatch]);
-
   const handleCreate = () => {
     setEditingTeam(null);
-    dispatch(clearSaveError());
     setIsFormOpen(true);
   };
 
   const handleEdit = (team: Team) => {
     setEditingTeam(team);
-    dispatch(clearSaveError());
     setIsFormOpen(true);
   };
 
   const handleDelete = async () => {
     if (deletingTeam?.id) {
-      await dispatch(deleteTeam(deletingTeam.id));
+      await deleteTeam(deletingTeam.id).unwrap().catch(() => undefined);
       setDeletingTeam(null);
     }
   };
 
   if (error) {
     return (
-      <ErrorState 
-        message={error} 
-        onRetry={() => dispatch(fetchTeams())} 
+      <ErrorState
+        message={errorMessage(error) || 'Failed to load teams'}
+        onRetry={refetch}
       />
     );
   }
@@ -197,7 +190,7 @@ export function TeamsPage() {
         iconClassName="text-indigo-400"
         title="Teams"
         description="Manage team ownership and on-call information"
-        onRefresh={() => dispatch(fetchTeams())}
+        onRefresh={refetch}
         actions={
           <Button size="sm" onClick={handleCreate}>
             <Plus className="h-4 w-4 mr-2" />
@@ -317,18 +310,10 @@ function TeamCard({ team, onEdit, onDelete }: TeamCardProps) {
 // Team Detail Page
 export function TeamDetailPage() {
   const { name } = useParams<{ name: string }>();
-  const dispatch = useAppDispatch();
-  const { selectedTeam, onCall, loading, error } = useAppSelector((state) => state.teams);
-
-  useEffect(() => {
-    if (name) {
-      dispatch(fetchTeam(name));
-      dispatch(fetchTeamOnCall(name));
-    }
-    return () => {
-      dispatch(clearSelectedTeam());
-    };
-  }, [dispatch, name]);
+  const { data: selectedTeam, isLoading: loading, error } = useGetTeamQuery(name ?? '', {
+    skip: !name,
+  });
+  const { data: onCall } = useGetTeamOnCallQuery(name ?? '', { skip: !name });
 
   if (loading && !selectedTeam) {
     return <LoadingState message="Loading team..." />;
@@ -337,7 +322,7 @@ export function TeamDetailPage() {
   if (error) {
     return (
       <Alert type="error" title="Failed to load team">
-        {error}
+        {errorMessage(error) || 'Unable to load team details.'}
       </Alert>
     );
   }

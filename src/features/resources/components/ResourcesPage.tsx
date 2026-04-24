@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   Box,
@@ -18,14 +18,19 @@ import {
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { ROUTES } from '@/shared/config';
 import {
-  fetchResources,
   setKindFilter,
   setNamespaceFilter,
   clearFilters,
-  updateResource,
-  deleteResource,
 } from '@/features/resources/store/resourcesSlice';
-import { fetchNamespaces } from '@/features/namespaces/store/namespacesSlice';
+import {
+  useListResourcesQuery,
+  useUpdateResourceMutation,
+  useDeleteResourceMutation,
+  useLazyDetectDriftQuery,
+  useReconcileResourceMutation,
+} from '@/features/resources/services/resourcesApi';
+import { useListNamespacesQuery } from '@/features/namespaces/services/namespacesApi';
+import { errorMessage } from '@/shared/lib/api';
 import {
   Card,
   CardHeader,
@@ -49,7 +54,6 @@ import {
 import { PageHeader, DataEmptyState, LoadingState, ErrorState } from '@/shared/components/feedback';
 import { formatRelativeTime } from '@/shared/utils';
 import type { ResourceKind, Resource, HealthStatus, DriftReport } from '@/shared/types';
-import { api } from '@/shared/lib/api';
 
 const kindIcons: Record<string, typeof Box> = {
   Application: Box,

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   CheckSquare,
@@ -11,15 +11,14 @@ import {
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { ROUTES } from '@/shared/config';
+import { setFilter } from '@/features/approvals/store/approvalsSlice';
 import {
-  fetchApprovals,
-  fetchApproval,
-  approveRequest,
-  rejectRequest,
-  setFilter,
-  clearSelectedApproval,
-  clearError,
-} from '@/features/approvals/store/approvalsSlice';
+  useListApprovalsQuery,
+  useGetApprovalQuery,
+  useApproveRequestMutation,
+  useRejectRequestMutation,
+} from '@/features/approvals/services/approvalsApi';
+import { errorMessage } from '@/shared/lib/api';
 import {
   Card,
   CardHeader,
@@ -50,23 +49,20 @@ const statusFilters: { value: ApprovalStatus | 'all'; label: string }[] = [
 
 export function ApprovalsPage() {
   const dispatch = useAppDispatch();
-  const { items, loading, error, filter } = useAppSelector((state) => state.approvals);
-
-  useEffect(() => {
-    dispatch(fetchApprovals(filter));
-  }, [dispatch, filter]);
+  const filter = useAppSelector((state) => state.approvals.filter);
+  const { data: items = [], isLoading: loading, error, refetch } = useListApprovalsQuery({ status: filter });
 
   const handleFilterChange = (newFilter: ApprovalStatus | 'all') => {
     dispatch(setFilter(newFilter));
   };
 
-  // Filter items client-side if needed
-  const safeItems = items || [];
-  const filteredItems = filter === 'all' ? safeItems : safeItems.filter((a) => a.status === filter);
-  const pendingCount = safeItems.filter((a) => a.status === 'pending').length;
+  // Defensive: when the filter is 'all' we trust the server; otherwise
+  // re-filter on the client to guard against stale cache entries.
+  const filteredItems = filter === 'all' ? items : items.filter((a) => a.status === filter);
+  const pendingCount = items.filter((a) => a.status === 'pending').length;
 
   if (error) {
-    return <ErrorState message={error} onRetry={() => dispatch(fetchApprovals(filter))} />;
+    return <ErrorState message={errorMessage(error) || 'Failed to load approvals'} onRetry={refetch} />;
   }
 
   return (
@@ -77,7 +73,7 @@ export function ApprovalsPage() {
         iconClassName="text-amber-400"
         title="Approvals"
         description="Review and manage resource change approvals"
-        onRefresh={() => dispatch(fetchApprovals(filter))}
+        onRefresh={refetch}
         actions={
           pendingCount > 0 ? (
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-yellow-500/20 text-yellow-400">
@@ -207,30 +203,25 @@ function ApprovalRow({ approval }: ApprovalRowProps) {
 // Approval Detail Page
 export function ApprovalDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const dispatch = useAppDispatch();
-  const { selectedApproval, loading, submitting, error } = useAppSelector((state) => state.approvals);
+  const { data: selectedApproval, isLoading: loading, error } = useGetApprovalQuery(
+    id ?? '',
+    { skip: !id },
+  );
+  const [approveRequest, approveState] = useApproveRequestMutation();
+  const [rejectRequest, rejectState] = useRejectRequestMutation();
+  const submitting = approveState.isLoading || rejectState.isLoading;
   const [rejectReason, setRejectReason] = useState('');
   const [showRejectForm, setShowRejectForm] = useState(false);
 
-  useEffect(() => {
-    if (id) {
-      dispatch(fetchApproval(id));
-    }
-    return () => {
-      dispatch(clearSelectedApproval());
-      dispatch(clearError());
-    };
-  }, [dispatch, id]);
-
   const handleApprove = async () => {
     if (id) {
-      await dispatch(approveRequest({ id }));
+      await approveRequest({ id }).unwrap().catch(() => undefined);
     }
   };
 
   const handleReject = async () => {
     if (id && rejectReason.trim()) {
-      await dispatch(rejectRequest({ id, reason: rejectReason }));
+      await rejectRequest({ id, reason: rejectReason }).unwrap().catch(() => undefined);
       setShowRejectForm(false);
       setRejectReason('');
     }
@@ -260,12 +251,19 @@ export function ApprovalDetailPage() {
         Back to approvals
       </Link>
 
-      {/* Error Alert */}
-      {error && (
-        <Alert type="error" title="Action failed">
-          {error}
-        </Alert>
-      )}
+      {/* Error Alert — surfaces load, approve, and reject failures */}
+      {(() => {
+        const rawMessage =
+          errorMessage(error) ||
+          errorMessage(approveState.error) ||
+          errorMessage(rejectState.error);
+        if (!rawMessage) return null;
+        return (
+          <Alert type="error" title="Action failed">
+            {rawMessage}
+          </Alert>
+        );
+      })()}
 
       {/* Header */}
       <div className="flex items-start justify-between">
