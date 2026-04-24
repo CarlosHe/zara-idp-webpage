@@ -78,14 +78,10 @@ describe('resources feature — list → create → update → delete', () => {
       .unwrap();
     expect(updated.spec).toMatchObject({ type: 'LoadBalancer' });
 
-    // Delete
+    // Delete — endpoint takes the stable aggregate id produced by create.
     await store
       .dispatch(
-        resourcesApi.endpoints.deleteResource.initiate({
-          kind: 'Service',
-          namespace: 'platform',
-          name: 'web',
-        }),
+        resourcesApi.endpoints.deleteResource.initiate({ id: created.id }),
       )
       .unwrap();
 
