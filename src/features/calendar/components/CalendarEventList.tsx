@@ -39,7 +39,7 @@ export function CalendarEventList({
               ))}
             </div>
           ) : (
-            <p className="text-sm text-slate-500 text-center py-4">
+            <p className="text-sm text-slate-400 text-center py-4">
               No active freezes
             </p>
           )}
@@ -62,7 +62,7 @@ export function CalendarEventList({
               ))}
             </div>
           ) : (
-            <p className="text-sm text-slate-500 text-center py-4">
+            <p className="text-sm text-slate-400 text-center py-4">
               No upcoming freezes scheduled
             </p>
           )}

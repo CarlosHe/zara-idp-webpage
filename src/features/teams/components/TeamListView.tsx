@@ -58,7 +58,7 @@ export function TeamListView() {
         <LoadingState message="Loading teams..." iconClassName="text-indigo-400" />
       ) : items.length === 0 ? (
         <DataEmptyState
-          icon={<Users className="h-6 w-6 text-slate-500" />}
+          icon={<Users className="h-6 w-6 text-slate-400" />}
           title="No teams found"
           description="Teams will appear here once configured."
         />

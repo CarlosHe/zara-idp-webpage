@@ -43,7 +43,7 @@ export function DashboardActivity({ auditLogs, summary }: DashboardActivityProps
                     {' on '}
                     <span className="text-blue-400">{log.resourceKind}/{log.resourceName}</span>
                   </p>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-slate-400 mt-1">
                     {log.actor || 'system'} • {formatRelativeTime(log.timestamp)}
                   </p>
                 </div>
@@ -71,7 +71,7 @@ export function DashboardActivity({ auditLogs, summary }: DashboardActivityProps
                 />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-slate-200">{event.message}</p>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-slate-400 mt-1">
                     {event.reason} • {formatRelativeTime(event.lastTimestamp)}
                   </p>
                 </div>
@@ -82,7 +82,7 @@ export function DashboardActivity({ auditLogs, summary }: DashboardActivityProps
           <div className="text-center py-8">
             <Activity className="h-8 w-8 text-slate-600 mx-auto mb-2" />
             <p className="text-sm text-slate-400">No recent activity</p>
-            <p className="text-xs text-slate-500 mt-1">Activity will appear here as changes are made</p>
+            <p className="text-xs text-slate-400 mt-1">Activity will appear here as changes are made</p>
           </div>
         )}
       </CardContent>

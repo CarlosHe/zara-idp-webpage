@@ -34,8 +34,23 @@ export function BusinessDomainCard({
 }: BusinessDomainCardProps) {
   const healthPercentage = getHealthPercentage(domain);
 
+  const handleSelectKey = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onSelect(domain);
+    }
+  };
+
   return (
-    <div className="relative" onClick={() => onSelect(domain)}>
+    <div
+      role="button"
+      tabIndex={0}
+      aria-pressed={isSelected}
+      aria-label={`Select domain ${domain.displayName}`}
+      onClick={() => onSelect(domain)}
+      onKeyDown={handleSelectKey}
+      className="relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg"
+    >
       <Card
         className={cn(
           'transition-all cursor-pointer hover:bg-slate-700/50',
@@ -89,7 +104,7 @@ export function BusinessDomainCard({
                 >
                   {healthPercentage}%
                 </span>
-                <span className="text-xs text-slate-500">health</span>
+                <span className="text-xs text-slate-400">health</span>
               </div>
               <div className="flex gap-1">
                 <span className="flex items-center gap-0.5 text-xs text-emerald-400">
@@ -113,24 +128,28 @@ export function BusinessDomainCard({
       {/* Action buttons */}
       <div className="absolute top-2 right-2 flex gap-1">
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             onEdit(domain);
           }}
-          className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-600 transition-colors bg-slate-800/80"
-          title="Edit domain"
+          className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-600 transition-colors bg-slate-800/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          aria-label={`Edit domain ${domain.displayName}`}
+          title={`Edit domain ${domain.displayName}`}
         >
-          <Pencil className="h-4 w-4" />
+          <Pencil className="h-4 w-4" aria-hidden />
         </button>
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             onDelete(domain);
           }}
-          className="p-1.5 rounded-md text-slate-400 hover:text-red-400 hover:bg-red-500/20 transition-colors bg-slate-800/80"
-          title="Delete domain"
+          className="p-1.5 rounded-md text-slate-400 hover:text-red-400 hover:bg-red-500/20 transition-colors bg-slate-800/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          aria-label={`Delete domain ${domain.displayName}`}
+          title={`Delete domain ${domain.displayName}`}
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="h-4 w-4" aria-hidden />
         </button>
       </div>
     </div>

@@ -1,4 +1,5 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { RootState } from '@/app/store';
 import type { ResourceKind } from '@/shared/types';
 
 // Server state for resources lives in RTK Query (see
@@ -43,5 +44,22 @@ const resourcesSlice = createSlice({
 
 export const { setKindFilter, setNamespaceFilter, setHealthFilter, clearFilters } =
   resourcesSlice.actions;
+
+// Memoized filter selector so consumers read a stable reference across
+// renders that don't touch `state.resources.filters`. Returning the
+// inner state directly (without createSelector) would be fine today
+// because RTK produces immutable slices — but derived selectors start
+// relying on reference equality the moment we compose them.
+const selectResourcesState = (state: RootState) => state.resources;
+
+export const selectResourcesFilters = createSelector(
+  [selectResourcesState],
+  (resources) => resources.filters,
+);
+
+export const selectHasActiveResourceFilters = createSelector(
+  [selectResourcesFilters],
+  (filters) => Boolean(filters.kind || filters.namespace || filters.healthStatus),
+);
 
 export default resourcesSlice.reducer;

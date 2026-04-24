@@ -53,7 +53,7 @@ export function RecentActivityCard({ activities }: RecentActivityCardProps) {
                     <span className="font-medium">{activity.action}</span>{' '}
                     <span className="text-blue-400">{activity.resource}</span>
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-400">
                     {activity.actor} • {formatRelativeTime(activity.timestamp)}
                   </p>
                 </div>
@@ -61,7 +61,7 @@ export function RecentActivityCard({ activities }: RecentActivityCardProps) {
             ))}
           </div>
         ) : (
-          <p className="text-slate-500 text-center py-4">No recent activity</p>
+          <p className="text-slate-400 text-center py-4">No recent activity</p>
         )}
       </CardContent>
     </Card>

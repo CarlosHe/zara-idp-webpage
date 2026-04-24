@@ -27,7 +27,7 @@ export function ApprovalListView({ items, filter, loading }: ApprovalListViewPro
           <LoadingState message="Loading approvals..." />
         ) : items.length === 0 ? (
           <DataEmptyState
-            icon={<CheckSquare className="h-6 w-6 text-slate-500" />}
+            icon={<CheckSquare className="h-6 w-6 text-slate-400" />}
             title="No approvals found"
             description={
               filter === 'pending'

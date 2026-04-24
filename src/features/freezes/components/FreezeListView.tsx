@@ -40,7 +40,7 @@ export function FreezeListView({
             <LoadingState message="Loading freezes..." />
           ) : activeFreezes.length === 0 ? (
             <DataEmptyState
-              icon={<Snowflake className="h-6 w-6 text-slate-500" />}
+              icon={<Snowflake className="h-6 w-6 text-slate-400" />}
               title="No active freezes"
               description="All systems are open for changes."
             />

@@ -50,3 +50,5 @@ export type { TableProps, TableRowProps } from './Table';
 
 export { Toaster, toastStore, useToast, useToasts } from './Toast';
 export type { Toast, ToastKind } from './Toast';
+
+export { VIRTUALIZATION_THRESHOLD, VirtualList } from './VirtualList';

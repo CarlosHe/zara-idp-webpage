@@ -34,10 +34,10 @@ export function TopResourcesCard({ resources }: TopResourcesCardProps) {
                 key={resource.name}
                 className="flex items-center gap-3 p-2 rounded-lg bg-slate-800/50"
               >
-                <span className="text-xs font-medium text-slate-500 w-4">{index + 1}</span>
+                <span className="text-xs font-medium text-slate-400 w-4">{index + 1}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-white truncate">{resource.name}</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-400">
                     {resource.namespace} • {resource.kind}
                   </p>
                 </div>
@@ -49,7 +49,7 @@ export function TopResourcesCard({ resources }: TopResourcesCardProps) {
             ))}
           </div>
         ) : (
-          <p className="text-slate-500 text-center py-4">No active resources</p>
+          <p className="text-slate-400 text-center py-4">No active resources</p>
         )}
       </CardContent>
     </Card>

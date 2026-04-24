@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import {
   setKindFilter,
   setNamespaceFilter,
   clearFilters,
+  selectResourcesFilters,
 } from '@/features/resources/store/resourcesSlice';
 import {
   useListResourcesQuery,
@@ -19,7 +20,7 @@ import type { Resource, ResourceKind, DriftReport } from '@/shared/types';
 export function useResourcesDashboard() {
   const dispatch = useAppDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
-  const filters = useAppSelector((state) => state.resources.filters);
+  const filters = useAppSelector(selectResourcesFilters);
 
   const {
     data: items = [],
@@ -132,13 +133,16 @@ export function useResourcesDashboard() {
     }
   };
 
-  // Apply filters
-  let filteredItems = items;
-  if (filters.namespace) {
-    filteredItems = filteredItems.filter(
+  // Apply filters. useMemo keeps the array reference stable when filters
+  // and the upstream cache haven't changed — critical for `ResourceListView`
+  // which otherwise re-renders on every `useResourcesDashboard` invocation
+  // even when the logical list is identical.
+  const filteredItems = useMemo(() => {
+    if (!filters.namespace) return items;
+    return items.filter(
       (r) => (r.metadata?.namespace || r.namespace) === filters.namespace,
     );
-  }
+  }, [items, filters.namespace]);
 
   return {
     // data

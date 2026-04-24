@@ -59,10 +59,29 @@ export default defineConfig([
       // design tokens (dark-mode, theming) apply consistently.
       'no-restricted-syntax': [
         'error',
+        // Target inline object literals only: `style={{ ... }}`. This
+        // lets us pass `style={rowStyle}` from libraries that compute
+        // absolute positions at runtime (react-window, animation engines)
+        // without fighting the rule every row.
         {
-          selector: "JSXAttribute[name.name='style']",
+          selector:
+            "JSXAttribute[name.name='style'] > JSXExpressionContainer > ObjectExpression",
           message:
-            'Use Tailwind utilities / CVA variants instead of inline `style={...}`. For legit dynamic values (e.g. width/height %) add `// eslint-disable-next-line no-restricted-syntax` with a justification — see `.claude/docs/front/12-STYLING.md`.',
+            'Use Tailwind utilities / CVA variants instead of inline `style={{...}}`. For legit dynamic values (e.g. width/height %) add `// eslint-disable-next-line no-restricted-syntax` with a justification — see `.claude/docs/front/12-STYLING.md`.',
+        },
+        // Sprint 10 (L-1009): bitmap <img> without alt and loading fails
+        // accessibility (WCAG 1.1.1) and hurts LCP. The rule forces both
+        // attributes on the JSX element; decorative images use alt="" +
+        // aria-hidden. Use lucide-react SVG icons whenever possible.
+        {
+          selector: "JSXOpeningElement[name.name='img']:not(:has(JSXAttribute[name.name='alt']))",
+          message:
+            '<img> needs an explicit `alt` (empty string + `aria-hidden` for decorative images). See `.claude/docs/front/13-ACCESSIBILITY.md`.',
+        },
+        {
+          selector: "JSXOpeningElement[name.name='img']:not(:has(JSXAttribute[name.name='loading']))",
+          message:
+            '<img> needs a `loading` attribute (`lazy` below the fold, `eager` for LCP). See `.claude/docs/front/10-PERFORMANCE.md`.',
         },
       ],
     },

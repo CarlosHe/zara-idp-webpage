@@ -42,7 +42,7 @@ export function FreezeDetailPage() {
   if (!selectedFreeze) {
     return (
       <EmptyState
-        icon={<Snowflake className="h-6 w-6 text-slate-500" />}
+        icon={<Snowflake className="h-6 w-6 text-slate-400" />}
         title="Freeze not found"
         description="The requested freeze could not be found."
       />
@@ -65,7 +65,7 @@ export function FreezeDetailPage() {
         )}>
           <Snowflake className={cn(
             'h-6 w-6',
-            selectedFreeze.active ? 'text-cyan-400' : 'text-slate-500'
+            selectedFreeze.active ? 'text-cyan-400' : 'text-slate-400'
           )} />
         </div>
         <div>
@@ -87,7 +87,7 @@ export function FreezeDetailPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-3">
-              <User className="h-5 w-5 text-slate-500" />
+              <User className="h-5 w-5 text-slate-400" />
               <div>
                 <p className="text-sm text-slate-400">Created By</p>
                 <p className="text-slate-200">{selectedFreeze.createdBy}</p>
@@ -95,7 +95,7 @@ export function FreezeDetailPage() {
             </div>
 
             <div className="flex items-center gap-3">
-              <Clock className="h-5 w-5 text-slate-500" />
+              <Clock className="h-5 w-5 text-slate-400" />
               <div>
                 <p className="text-sm text-slate-400">Created At</p>
                 <p className="text-slate-200">{formatDateTime(selectedFreeze.createdAt)}</p>
@@ -104,7 +104,7 @@ export function FreezeDetailPage() {
 
             {selectedFreeze.expiresAt && (
               <div className="flex items-center gap-3">
-                <AlertTriangle className="h-5 w-5 text-slate-500" />
+                <AlertTriangle className="h-5 w-5 text-slate-400" />
                 <div>
                   <p className="text-sm text-slate-400">Expires At</p>
                   <p className="text-slate-200">{formatDateTime(selectedFreeze.expiresAt)}</p>

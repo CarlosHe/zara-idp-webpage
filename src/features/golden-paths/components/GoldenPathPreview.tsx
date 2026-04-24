@@ -87,7 +87,7 @@ export function GoldenPathPreview({
             </div>
           </div>
         ) : (
-          <div className="text-center py-12 text-slate-500">
+          <div className="text-center py-12 text-slate-400">
             <FileCode className="h-12 w-12 mx-auto mb-3 opacity-50" aria-hidden />
             <p>Fill in the configuration and click Generate</p>
           </div>

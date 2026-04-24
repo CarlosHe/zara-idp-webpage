@@ -35,7 +35,7 @@ export function ResourcesByKindCard({ resources }: ResourcesByKindCardProps) {
             ))}
           </div>
         ) : (
-          <p className="text-slate-500 text-center py-4">No resource data available</p>
+          <p className="text-slate-400 text-center py-4">No resource data available</p>
         )}
       </CardContent>
     </Card>

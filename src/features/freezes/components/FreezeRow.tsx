@@ -61,7 +61,7 @@ export function FreezeRow({ freeze, inactive }: FreezeRowProps) {
         {freeze.expiresAt ? (
           <span className="text-slate-400">{formatRelativeTime(freeze.expiresAt)}</span>
         ) : (
-          <span className="text-slate-500">No expiration</span>
+          <span className="text-slate-400">No expiration</span>
         )}
       </TableCell>
     </TableRow>

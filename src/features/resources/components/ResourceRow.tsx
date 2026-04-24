@@ -40,7 +40,7 @@ export function ResourceRow({
     <TableRow>
       <TableCell>
         <div className="flex items-center gap-2">
-          <KindIcon className="h-4 w-4 text-gray-400" />
+          <KindIcon className="h-4 w-4 text-gray-400" aria-hidden />
           <span className="font-mono text-sm">{resource.kind}</span>
         </div>
       </TableCell>
@@ -80,33 +80,37 @@ export function ResourceRow({
             variant="secondary"
             size="sm"
             onClick={() => onDetectDrift(resource)}
+            aria-label={`Detect drift on ${resource.kind} ${name}`}
             title="Detect Drift"
           >
-            <GitCompare className="h-3 w-3" />
+            <GitCompare className="h-3 w-3" aria-hidden />
           </Button>
           <Button
             variant="secondary"
             size="sm"
             onClick={() => onReconcile(resource)}
+            aria-label={`Reconcile ${resource.kind} ${name}`}
             title="Reconcile"
           >
-            <RefreshCw className="h-3 w-3" />
+            <RefreshCw className="h-3 w-3" aria-hidden />
           </Button>
           <Button
             variant="secondary"
             size="sm"
             onClick={() => onEdit(resource)}
+            aria-label={`Edit ${resource.kind} ${name}`}
             title="Edit"
           >
-            <Pencil className="h-3 w-3" />
+            <Pencil className="h-3 w-3" aria-hidden />
           </Button>
           <Button
             variant="secondary"
             size="sm"
             onClick={() => onDelete(resource)}
+            aria-label={`Delete ${resource.kind} ${name}`}
             title="Delete"
           >
-            <Trash2 className="h-3 w-3" />
+            <Trash2 className="h-3 w-3" aria-hidden />
           </Button>
         </div>
       </TableCell>

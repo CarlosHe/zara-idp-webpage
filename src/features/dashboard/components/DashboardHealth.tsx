@@ -76,11 +76,11 @@ export function DashboardHealth({ summary, health }: DashboardHealthProps) {
               <>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-slate-400">API</span>
-                  <span className="text-sm font-medium text-slate-500">N/A</span>
+                  <span className="text-sm font-medium text-slate-400">N/A</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-slate-400">Database</span>
-                  <span className="text-sm font-medium text-slate-500">N/A</span>
+                  <span className="text-sm font-medium text-slate-400">N/A</span>
                 </div>
               </>
             )}

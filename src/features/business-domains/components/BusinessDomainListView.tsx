@@ -65,7 +65,7 @@ export function BusinessDomainListView({
       <div className="space-y-4">
         {domains.length === 0 ? (
           <DataEmptyState
-            icon={<Building2 className="h-8 w-8 text-slate-500" />}
+            icon={<Building2 className="h-8 w-8 text-slate-400" />}
             title="No business domains found"
             description="No domains match your current filters."
           />

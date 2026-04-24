@@ -25,7 +25,7 @@ export function CalendarDayCell({ day }: CalendarDayCellProps) {
         <span
           className={cn(
             'text-sm font-medium',
-            day.isCurrentMonth ? 'text-slate-200' : 'text-slate-600',
+            day.isCurrentMonth ? 'text-slate-200' : 'text-slate-400',
             day.isToday && 'text-blue-400',
           )}
         >
@@ -56,7 +56,7 @@ export function CalendarDayCell({ day }: CalendarDayCellProps) {
             </div>
           ))}
           {day.freezes.length > 2 && (
-            <span className="text-xs text-slate-500">+{day.freezes.length - 2} more</span>
+            <span className="text-xs text-slate-400">+{day.freezes.length - 2} more</span>
           )}
         </div>
       )}

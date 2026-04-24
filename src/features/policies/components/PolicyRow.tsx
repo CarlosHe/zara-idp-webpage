@@ -36,7 +36,7 @@ export function PolicyRow({ policy, disabled }: PolicyRowProps) {
         >
           {policy.name}
         </Link>
-        <p className="text-xs text-slate-500">{policy.namespace}</p>
+        <p className="text-xs text-slate-400">{policy.namespace}</p>
       </TableCell>
       <TableCell>
         <span className="text-slate-400">{policy.description}</span>

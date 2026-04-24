@@ -79,7 +79,7 @@ function TimelineItem({ icon, label, value, timestamp, active, isLast }: Timelin
       <div className="pb-4">
         <p className="text-sm font-medium text-slate-200">{label}</p>
         {value && <p className="text-sm text-slate-400">{value}</p>}
-        <p className="text-xs text-slate-500">{formatDateTime(timestamp)}</p>
+        <p className="text-xs text-slate-400">{formatDateTime(timestamp)}</p>
       </div>
     </div>
   );

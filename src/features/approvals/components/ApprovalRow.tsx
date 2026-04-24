@@ -2,9 +2,9 @@ import { Link } from 'react-router-dom';
 import { ROUTES } from '@/shared/config';
 import {
   StatusBadge,
-  Button,
   TableRow,
   TableCell,
+  buttonVariants,
 } from '@/shared/components/ui';
 import { cn, formatRelativeTime } from '@/shared/utils';
 import type { Approval } from '@/shared/types';
@@ -28,7 +28,7 @@ export function ApprovalRow({ approval }: ApprovalRowProps) {
           className="hover:text-blue-400 transition-colors"
         >
           <span className="font-medium">{approval.resourceName}</span>
-          <span className="text-slate-500 ml-2">
+          <span className="text-slate-400 ml-2">
             {approval.resourceKind}/{approval.resourceNamespace}
           </span>
         </Link>
@@ -50,16 +50,18 @@ export function ApprovalRow({ approval }: ApprovalRowProps) {
         <StatusBadge status={approval.status} type="approval" />
       </TableCell>
       <TableCell>
-        <span className="text-slate-500">{formatRelativeTime(approval.requestedAt)}</span>
+        <span className="text-slate-400">{formatRelativeTime(approval.requestedAt)}</span>
       </TableCell>
       <TableCell>
-        <span className="text-slate-500">{formatRelativeTime(approval.expiresAt)}</span>
+        <span className="text-slate-400">{formatRelativeTime(approval.expiresAt)}</span>
       </TableCell>
       <TableCell>
-        <Link to={ROUTES.APPROVALS.DETAIL(approval.id)}>
-          <Button variant="ghost" size="sm">
-            View
-          </Button>
+        <Link
+          to={ROUTES.APPROVALS.DETAIL(approval.id)}
+          aria-label={`View approval for ${approval.resourceKind}/${approval.resourceName}`}
+          className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}
+        >
+          View
         </Link>
       </TableCell>
     </TableRow>

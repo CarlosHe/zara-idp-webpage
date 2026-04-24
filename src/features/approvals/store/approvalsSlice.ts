@@ -1,4 +1,5 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { RootState } from '@/app/store';
 import type { ApprovalStatus } from '@/shared/types';
 
 // Server state for approvals is owned by
@@ -25,5 +26,12 @@ const approvalsSlice = createSlice({
 });
 
 export const { setFilter } = approvalsSlice.actions;
+
+const selectApprovalsState = (state: RootState) => state.approvals;
+
+export const selectApprovalsFilter = createSelector(
+  [selectApprovalsState],
+  (approvals) => approvals.filter,
+);
 
 export default approvalsSlice.reducer;

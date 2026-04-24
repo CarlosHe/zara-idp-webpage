@@ -35,7 +35,7 @@ export function DataEmptyState({
         'rounded-full bg-slate-800 flex items-center justify-center mb-4',
         compact ? 'h-10 w-10' : 'h-12 w-12'
       )}>
-        {icon || <Package className={cn(compact ? 'h-5 w-5' : 'h-6 w-6', 'text-slate-500')} />}
+        {icon || <Package className={cn(compact ? 'h-5 w-5' : 'h-6 w-6', 'text-slate-400')} />}
       </div>
       <h3 className={cn(
         'font-medium text-slate-300',
@@ -45,7 +45,7 @@ export function DataEmptyState({
       </h3>
       {description && (
         <p className={cn(
-          'mt-1 text-slate-500',
+          'mt-1 text-slate-400',
           compact ? 'text-xs' : 'text-sm'
         )}>
           {description}

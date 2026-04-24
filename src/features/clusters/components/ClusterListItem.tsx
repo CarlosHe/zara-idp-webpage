@@ -117,7 +117,7 @@ export function ClusterListItem({
                   {cluster.resourceCount}
                 </span>
               </div>
-              <span className="text-xs text-slate-500 flex items-center gap-1">
+              <span className="text-xs text-slate-400 flex items-center gap-1">
                 <Activity className="h-3 w-3" />
                 {formatRelativeTime(cluster.lastSyncAt)}
               </span>
@@ -128,24 +128,28 @@ export function ClusterListItem({
       </Card>
       <div className="absolute top-2 right-2 flex gap-1">
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             onEdit(cluster);
           }}
-          className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-600 transition-colors bg-slate-800/80"
-          title="Edit cluster"
+          className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-600 transition-colors bg-slate-800/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          aria-label={`Edit cluster ${cluster.name}`}
+          title={`Edit cluster ${cluster.name}`}
         >
-          <Pencil className="h-4 w-4" />
+          <Pencil className="h-4 w-4" aria-hidden />
         </button>
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             onDelete(cluster);
           }}
-          className="p-1.5 rounded-md text-slate-400 hover:text-red-400 hover:bg-red-500/20 transition-colors bg-slate-800/80"
-          title="Delete cluster"
+          className="p-1.5 rounded-md text-slate-400 hover:text-red-400 hover:bg-red-500/20 transition-colors bg-slate-800/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          aria-label={`Delete cluster ${cluster.name}`}
+          title={`Delete cluster ${cluster.name}`}
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="h-4 w-4" aria-hidden />
         </button>
       </div>
     </div>

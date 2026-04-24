@@ -1,6 +1,9 @@
 import { useCallback, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
-import { setFilter } from '@/features/approvals/store/approvalsSlice';
+import {
+  selectApprovalsFilter,
+  setFilter,
+} from '@/features/approvals/store/approvalsSlice';
 import { useListApprovalsQuery } from '@/features/approvals/services/approvalsApi';
 import type { Approval, ApprovalStatus } from '@/shared/types';
 
@@ -19,7 +22,7 @@ interface UseApprovalsDashboardResult {
 
 export function useApprovalsDashboard(): UseApprovalsDashboardResult {
   const dispatch = useAppDispatch();
-  const filter = useAppSelector((state) => state.approvals.filter);
+  const filter = useAppSelector(selectApprovalsFilter);
   const {
     data: items = [],
     isLoading: loading,

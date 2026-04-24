@@ -95,7 +95,7 @@ export function BusinessDomainDetailPanel({
               ))}
             </div>
           ) : (
-            <p className="text-sm text-slate-500">No teams assigned</p>
+            <p className="text-sm text-slate-400">No teams assigned</p>
           )}
         </CardContent>
       </Card>
@@ -109,26 +109,27 @@ export function BusinessDomainDetailPanel({
             <div className="space-y-2">
               {domain.dependencies.map((dep) => {
                 const depDomain = domains.find((d) => d.id === dep);
+                const depLabel = depDomain?.displayName || dep;
                 return (
                   <button
                     key={dep}
+                    type="button"
                     onClick={() => {
                       const found = domains.find((d) => d.id === dep);
                       if (found) onSelect(found);
                     }}
-                    className="w-full flex items-center gap-2 p-2 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 transition-colors"
+                    aria-label={`Open dependency ${depLabel}`}
+                    className="w-full flex items-center gap-2 p-2 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   >
-                    <Database className="h-4 w-4 text-blue-400" />
-                    <span className="text-sm text-slate-200">
-                      {depDomain?.displayName || dep}
-                    </span>
-                    <ChevronRight className="h-4 w-4 text-slate-600 ml-auto" />
+                    <Database className="h-4 w-4 text-blue-400" aria-hidden />
+                    <span className="text-sm text-slate-200">{depLabel}</span>
+                    <ChevronRight className="h-4 w-4 text-slate-600 ml-auto" aria-hidden />
                   </button>
                 );
               })}
             </div>
           ) : (
-            <p className="text-sm text-slate-500">No dependencies</p>
+            <p className="text-sm text-slate-400">No dependencies</p>
           )}
         </CardContent>
       </Card>

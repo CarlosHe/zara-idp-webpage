@@ -39,7 +39,7 @@ export function PolicyDetailPage() {
   if (!policy) {
     return (
       <EmptyState
-        icon={<Shield className="h-6 w-6 text-slate-500" />}
+        icon={<Shield className="h-6 w-6 text-slate-400" />}
         title="Policy not found"
         description="The requested policy could not be found."
       />
@@ -66,7 +66,7 @@ export function PolicyDetailPage() {
           <Shield
             className={cn(
               'h-6 w-6',
-              policy.enabled ? 'text-blue-400' : 'text-slate-500',
+              policy.enabled ? 'text-blue-400' : 'text-slate-400',
             )}
           />
         </div>
@@ -109,7 +109,7 @@ export function PolicyDetailPage() {
                 </div>
                 {Object.keys(trigger.conditions).length > 0 && (
                   <div className="mt-2">
-                    <p className="text-xs text-slate-500 mb-1">Conditions</p>
+                    <p className="text-xs text-slate-400 mb-1">Conditions</p>
                     <pre className="text-xs text-slate-300 font-mono">
                       {JSON.stringify(trigger.conditions, null, 2)}
                     </pre>
@@ -143,7 +143,7 @@ export function PolicyDetailPage() {
                   ))}
                 </div>
               ) : (
-                <span className="text-slate-500">All namespaces</span>
+                <span className="text-slate-400">All namespaces</span>
               )}
             </div>
 
@@ -156,7 +156,7 @@ export function PolicyDetailPage() {
                   ))}
                 </div>
               ) : (
-                <span className="text-slate-500">All kinds</span>
+                <span className="text-slate-400">All kinds</span>
               )}
             </div>
 
@@ -171,7 +171,7 @@ export function PolicyDetailPage() {
                   ))}
                 </div>
               ) : (
-                <span className="text-slate-500">No label selectors</span>
+                <span className="text-slate-400">No label selectors</span>
               )}
             </div>
           </CardContent>

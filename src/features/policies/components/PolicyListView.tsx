@@ -39,7 +39,7 @@ export function PolicyListView({
             <LoadingState message="Loading policies..." />
           ) : enabledPolicies.length === 0 ? (
             <DataEmptyState
-              icon={<Shield className="h-6 w-6 text-slate-500" />}
+              icon={<Shield className="h-6 w-6 text-slate-400" />}
               title="No active policies"
               description="No runtime policies are currently enabled."
             />

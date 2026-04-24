@@ -2,12 +2,13 @@ import { Link } from 'react-router-dom';
 import { Box, Sparkles } from 'lucide-react';
 import { ROUTES } from '@/shared/config';
 import {
-  Button,
+  buttonVariants,
   ConfirmModal,
   Alert,
   DriftReportModal,
 } from '@/shared/components/ui';
 import { PageHeader, ErrorState } from '@/shared/components/feedback';
+import { cn } from '@/shared/utils';
 import { errorMessage } from '@/shared/lib/api';
 import { ResourceFilterBar } from './ResourceFilterBar';
 import { ResourceListView } from './ResourceListView';
@@ -58,11 +59,12 @@ export function ResourcesPage() {
         description="Browse and manage infrastructure resources"
         onRefresh={refetch}
         actions={
-          <Link to={ROUTES.GOLDEN_PATHS}>
-            <Button size="sm">
-              <Sparkles className="h-4 w-4 mr-2" />
-              Create via Golden Path
-            </Button>
+          <Link
+            to={ROUTES.GOLDEN_PATHS}
+            className={cn(buttonVariants({ size: 'sm' }))}
+          >
+            <Sparkles className="h-4 w-4 mr-2" aria-hidden />
+            Create via Golden Path
           </Link>
         }
       />

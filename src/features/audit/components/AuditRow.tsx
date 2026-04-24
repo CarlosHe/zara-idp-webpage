@@ -48,7 +48,7 @@ export function AuditRow({ entry }: AuditRowProps) {
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
-          <ActorIcon className="h-4 w-4 text-slate-500" />
+          <ActorIcon className="h-4 w-4 text-slate-400" />
           <span className="text-slate-300">{entry.actor}</span>
         </div>
       </TableCell>

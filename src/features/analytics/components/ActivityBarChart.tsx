@@ -43,7 +43,7 @@ export function ActivityBarChart({ data }: ActivityBarChartProps) {
                       // eslint-disable-next-line no-restricted-syntax -- dynamic bar-chart height
                       style={{ height: `${height}%` }}
                     />
-                    <span className="text-[10px] text-slate-500">
+                    <span className="text-[10px] text-slate-400">
                       {new Date(point.date).getDate()}
                     </span>
                   </div>
@@ -65,14 +65,14 @@ export function ActivityBarChart({ data }: ActivityBarChartProps) {
                   <span className="text-xs text-slate-400">Low (&lt;50)</span>
                 </div>
               </div>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-slate-400">
                 Total: {totalDeployments} deployments
               </span>
             </div>
           </>
         ) : (
           <div className="h-48 flex items-center justify-center">
-            <p className="text-slate-500">No deployment data available</p>
+            <p className="text-slate-400">No deployment data available</p>
           </div>
         )}
       </CardContent>

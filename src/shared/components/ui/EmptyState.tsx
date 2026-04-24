@@ -17,7 +17,7 @@ const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
       {...rest}
     >
       <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-800">
-        {icon ?? <Package className="h-6 w-6 text-slate-500" aria-hidden />}
+        {icon ?? <Package className="h-6 w-6 text-slate-400" aria-hidden />}
       </div>
       <h3 className="text-sm font-medium text-slate-200">{title}</h3>
       {description ? (

@@ -34,7 +34,7 @@ export function ApprovalDetailPage() {
   if (!approval) {
     return (
       <DataEmptyState
-        icon={<CheckSquare className="h-6 w-6 text-slate-500" />}
+        icon={<CheckSquare className="h-6 w-6 text-slate-400" />}
         title="Approval not found"
         description="The requested approval could not be found."
       />

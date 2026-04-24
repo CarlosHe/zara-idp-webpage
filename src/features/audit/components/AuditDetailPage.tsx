@@ -43,7 +43,7 @@ export function AuditDetailPage() {
   if (!selectedAuditEntry) {
     return (
       <EmptyState
-        icon={<History className="h-6 w-6 text-slate-500" />}
+        icon={<History className="h-6 w-6 text-slate-400" />}
         title="Audit entry not found"
         description="The requested audit entry could not be found."
       />

@@ -26,7 +26,7 @@ export function ErrorPage() {
     >
       <AlertTriangle className="h-10 w-10 text-amber-400" aria-hidden />
       <h1 className="text-2xl font-semibold">{heading}</h1>
-      <p className="text-slate-400">{message}</p>
+      <p className="text-slate-300">{message}</p>
       <div className="mt-2 flex gap-3">
         <Link
           to="/"

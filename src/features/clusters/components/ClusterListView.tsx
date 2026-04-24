@@ -21,7 +21,7 @@ export function ClusterListView({
   if (clusters.length === 0) {
     return (
       <DataEmptyState
-        icon={<Globe className="h-8 w-8 text-slate-500" />}
+        icon={<Globe className="h-8 w-8 text-slate-400" />}
         title="No clusters found"
         description="No clusters match your current filters."
       />
