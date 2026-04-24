@@ -1,35 +1,30 @@
 import { configureStore } from '@reduxjs/toolkit';
+import { setupListeners } from '@reduxjs/toolkit/query';
+import { baseApi } from '@/shared/lib/api';
 import resourcesReducer from '@/features/resources/store/resourcesSlice';
-import namespacesReducer from '@/features/namespaces/store/namespacesSlice';
-import teamsReducer from '@/features/teams/store/teamsSlice';
 import approvalsReducer from '@/features/approvals/store/approvalsSlice';
-import auditReducer from '@/features/audit/store/auditSlice';
-import freezesReducer from '@/features/freezes/store/freezesSlice';
-import policiesReducer from '@/features/policies/store/policiesSlice';
-import dashboardReducer from '@/features/dashboard/store/dashboardSlice';
-import clustersReducer from '@/features/clusters/store/clustersSlice';
-import businessDomainsReducer from '@/features/business-domains/store/businessDomainsSlice';
 
+// Single RTK Query slice + the two feature slices that still own UI
+// state (filters, table selection). Every other "slice" from the
+// pre-Sprint-7 world was server state and now lives in the RTK Query
+// cache under `baseApi.reducerPath`.
 export const store = configureStore({
   reducer: {
+    [baseApi.reducerPath]: baseApi.reducer,
     resources: resourcesReducer,
-    namespaces: namespacesReducer,
-    teams: teamsReducer,
     approvals: approvalsReducer,
-    audit: auditReducer,
-    freezes: freezesReducer,
-    policies: policiesReducer,
-    dashboard: dashboardReducer,
-    clusters: clustersReducer,
-    businessDomains: businessDomainsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: ['persist/PERSIST'],
       },
-    }),
+    }).concat(baseApi.middleware),
 });
+
+// Enables `refetchOnFocus` / `refetchOnReconnect` behaviours. Required
+// any time the store is used outside of a Provider-less SSR context.
+setupListeners(store.dispatch);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
