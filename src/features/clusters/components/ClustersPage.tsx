@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Server,
   Globe,
@@ -31,15 +31,14 @@ import {
 } from '@/shared/components/ui';
 import { PageHeader, DataEmptyState, LoadingState, ErrorState, StatCard } from '@/shared/components/feedback';
 import { cn } from '@/shared/utils';
-import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
-import { 
-  fetchClusters, 
-  createCluster, 
-  updateCluster, 
-  deleteCluster, 
-  clearSaveError,
-  type Cluster as ClusterType 
-} from '@/features/clusters/store/clustersSlice';
+import {
+  useListClustersQuery,
+  useCreateClusterMutation,
+  useUpdateClusterMutation,
+  useDeleteClusterMutation,
+} from '@/features/clusters/services/clustersApi';
+import type { Cluster as ClusterType } from '@/features/clusters/store/clusterTypes';
+import { errorMessage } from '@/shared/lib/api';
 
 interface Cluster {
   id: string;
@@ -69,8 +68,11 @@ interface ClusterFormModalProps {
 }
 
 function ClusterFormModal({ isOpen, onClose, cluster }: ClusterFormModalProps) {
-  const dispatch = useAppDispatch();
-  const { saving, saveError } = useAppSelector((state) => state.clusters);
+  const [createCluster, createState] = useCreateClusterMutation();
+  const [updateCluster, updateState] = useUpdateClusterMutation();
+  const saving = createState.isLoading || updateState.isLoading;
+  const saveError =
+    errorMessage(createState.error) || errorMessage(updateState.error) || null;
   const [formData, setFormData] = useState({
     name: '',
     displayName: '',
@@ -95,29 +97,28 @@ function ClusterFormModal({ isOpen, onClose, cluster }: ClusterFormModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (cluster?.id) {
-      const result = await dispatch(updateCluster({ 
-        id: cluster.id, 
-        data: { 
+
+    try {
+      if (cluster?.id) {
+        await updateCluster({
+          id: cluster.id,
+          data: {
+            displayName: formData.displayName,
+            environment: formData.environment,
+          },
+        }).unwrap();
+      } else {
+        await createCluster({
+          name: formData.name,
           displayName: formData.displayName,
+          provider: formData.provider,
           environment: formData.environment,
-        } 
-      }));
-      if (!result.type.endsWith('/rejected')) {
-        onClose();
+          region: formData.region,
+        }).unwrap();
       }
-    } else {
-      const result = await dispatch(createCluster({
-        name: formData.name,
-        displayName: formData.displayName,
-        provider: formData.provider,
-        environment: formData.environment,
-        region: formData.region,
-      }));
-      if (!result.type.endsWith('/rejected')) {
-        onClose();
-      }
+      onClose();
+    } catch {
+      // Error surfaces via derived `saveError` above.
     }
   };
 
@@ -202,15 +203,21 @@ function ClusterFormModal({ isOpen, onClose, cluster }: ClusterFormModalProps) {
 }
 
 export function ClustersPage() {
-  const dispatch = useAppDispatch();
-  const { items: reduxClusters, loading, error, saving } = useAppSelector((state) => state.clusters);
-  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedEnvironment, setSelectedEnvironment] = useState<string | null>(null);
   const [selectedCluster, setSelectedCluster] = useState<Cluster | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCluster, setEditingCluster] = useState<Cluster | null>(null);
   const [deletingCluster, setDeletingCluster] = useState<Cluster | null>(null);
+
+  const {
+    data: reduxClusters = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useListClustersQuery({ environment: selectedEnvironment ?? undefined });
+  const [deleteCluster, deleteState] = useDeleteClusterMutation();
+  const saving = deleteState.isLoading;
 
   // Map Redux state to local Cluster interface
   const clusters: Cluster[] = useMemo(() => {
@@ -232,29 +239,23 @@ export function ClustersPage() {
     }));
   }, [reduxClusters]);
 
-  const loadClusters = useCallback(() => {
-    dispatch(fetchClusters({ environment: selectedEnvironment || undefined }));
-  }, [dispatch, selectedEnvironment]);
-
-  useEffect(() => {
-    loadClusters();
-  }, [loadClusters]);
+  const loadClusters = () => {
+    refetch();
+  };
 
   const handleCreate = () => {
     setEditingCluster(null);
-    dispatch(clearSaveError());
     setIsFormOpen(true);
   };
 
   const handleEdit = (cluster: Cluster) => {
     setEditingCluster(cluster);
-    dispatch(clearSaveError());
     setIsFormOpen(true);
   };
 
   const handleDelete = async () => {
     if (deletingCluster?.id) {
-      await dispatch(deleteCluster(deletingCluster.id));
+      await deleteCluster(deletingCluster.id).unwrap().catch(() => undefined);
       setDeletingCluster(null);
       if (selectedCluster?.id === deletingCluster.id) {
         setSelectedCluster(null);
@@ -351,7 +352,12 @@ export function ClustersPage() {
   }
 
   if (error) {
-    return <ErrorState message={error} onRetry={loadClusters} />;
+    return (
+      <ErrorState
+        message={errorMessage(error) || 'Failed to load clusters'}
+        onRetry={loadClusters}
+      />
+    );
   }
 
   return (

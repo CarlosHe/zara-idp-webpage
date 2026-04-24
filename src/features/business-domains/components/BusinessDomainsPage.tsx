@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Building2,
   Users,
@@ -29,15 +29,14 @@ import {
 } from '@/shared/components/ui';
 import { PageHeader, DataEmptyState, LoadingState, ErrorState, StatCard } from '@/shared/components/feedback';
 import { cn } from '@/shared/utils';
-import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
-import { 
-  fetchDomains, 
-  createDomain, 
-  updateDomain, 
-  deleteDomain, 
-  clearSaveError,
-  type BusinessDomain as DomainType 
-} from '@/features/business-domains/store/businessDomainsSlice';
+import {
+  useListBusinessDomainsQuery,
+  useCreateBusinessDomainMutation,
+  useUpdateBusinessDomainMutation,
+  useDeleteBusinessDomainMutation,
+} from '@/features/business-domains/services/businessDomainsApi';
+import type { BusinessDomain as DomainType } from '@/features/business-domains/store/businessDomainTypes';
+import { errorMessage } from '@/shared/lib/api';
 
 interface BusinessDomain {
   id: string;
@@ -67,8 +66,11 @@ interface DomainFormModalProps {
 }
 
 function DomainFormModal({ isOpen, onClose, domain }: DomainFormModalProps) {
-  const dispatch = useAppDispatch();
-  const { saving, saveError } = useAppSelector((state) => state.businessDomains);
+  const [createDomain, createState] = useCreateBusinessDomainMutation();
+  const [updateDomain, updateState] = useUpdateBusinessDomainMutation();
+  const saving = createState.isLoading || updateState.isLoading;
+  const saveError =
+    errorMessage(createState.error) || errorMessage(updateState.error) || null;
   const [formData, setFormData] = useState({
     name: '',
     displayName: '',
@@ -91,29 +93,28 @@ function DomainFormModal({ isOpen, onClose, domain }: DomainFormModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (domain?.id) {
-      const result = await dispatch(updateDomain({ 
-        id: domain.id, 
-        data: { 
+
+    try {
+      if (domain?.id) {
+        await updateDomain({
+          id: domain.id,
+          data: {
+            displayName: formData.displayName,
+            description: formData.description,
+            team: formData.team,
+          },
+        }).unwrap();
+      } else {
+        await createDomain({
+          name: formData.name,
           displayName: formData.displayName,
           description: formData.description,
           team: formData.team,
-        } 
-      }));
-      if (!result.type.endsWith('/rejected')) {
-        onClose();
+        }).unwrap();
       }
-    } else {
-      const result = await dispatch(createDomain({
-        name: formData.name,
-        displayName: formData.displayName,
-        description: formData.description,
-        team: formData.team,
-      }));
-      if (!result.type.endsWith('/rejected')) {
-        onClose();
-      }
+      onClose();
+    } catch {
+      // Error surfaces via derived `saveError` above.
     }
   };
 
