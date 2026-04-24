@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   Shield,
@@ -8,8 +7,7 @@ import {
   Clock,
   CheckSquare,
 } from 'lucide-react';
-import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
-import { fetchRuntimePolicies } from '@/features/policies/store/policiesSlice';
+import { useListRuntimePoliciesQuery } from '@/features/policies/services/policiesApi';
 import { ROUTES } from '@/shared/config';
 import {
   Card,
@@ -31,19 +29,16 @@ import { cn } from '@/shared/utils';
 import type { RuntimePolicy, RuntimeAction } from '@/shared/types';
 
 export function PoliciesPage() {
-  const dispatch = useAppDispatch();
-  const { items: runtimePolicies, loading, error } = useAppSelector((state) => state.policies);
-
-  useEffect(() => {
-    dispatch(fetchRuntimePolicies());
-  }, [dispatch]);
+  const { data: runtimePolicies, isLoading: loading, error, refetch } =
+    useListRuntimePoliciesQuery();
 
   const safePolicies = Array.isArray(runtimePolicies) ? runtimePolicies : [];
   const enabledPolicies = safePolicies.filter((p) => p.enabled);
   const disabledPolicies = safePolicies.filter((p) => !p.enabled);
 
   if (error) {
-    return <ErrorState message={error} onRetry={() => dispatch(fetchRuntimePolicies())} />;
+    const message = errorMessage(error) || 'Failed to load runtime policies';
+    return <ErrorState message={message} onRetry={refetch} />;
   }
 
   return (
