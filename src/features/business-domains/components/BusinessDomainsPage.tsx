@@ -176,9 +176,15 @@ function DomainFormModal({ isOpen, onClose, domain }: DomainFormModalProps) {
 }
 
 export function BusinessDomainsPage() {
-  const dispatch = useAppDispatch();
-  const { items: reduxDomains, loading, error, saving } = useAppSelector((state) => state.businessDomains);
-  
+  const {
+    data: reduxDomains = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useListBusinessDomainsQuery();
+  const [deleteDomain, deleteState] = useDeleteBusinessDomainMutation();
+  const saving = deleteState.isLoading;
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTier, setSelectedTier] = useState<number | null>(null);
   const [selectedDomain, setSelectedDomain] = useState<BusinessDomain | null>(null);
