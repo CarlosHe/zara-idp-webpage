@@ -90,6 +90,7 @@ export function ClusterDetailPanel({ cluster }: ClusterDetailPanelProps) {
             <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
               <div
                 className={cn('h-full rounded-full transition-all', getUsageBarColor(cluster.cpu.used))}
+                // eslint-disable-next-line no-restricted-syntax -- dynamic CPU utilization bar
                 style={{ width: `${cluster.cpu.used}%` }}
               />
             </div>
@@ -109,6 +110,7 @@ export function ClusterDetailPanel({ cluster }: ClusterDetailPanelProps) {
                   'h-full rounded-full transition-all',
                   getUsageBarColor(cluster.memory.used),
                 )}
+                // eslint-disable-next-line no-restricted-syntax -- dynamic memory utilization bar
                 style={{ width: `${cluster.memory.used}%` }}
               />
             </div>

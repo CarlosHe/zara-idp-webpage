@@ -80,6 +80,7 @@ export function ClusterListItem({
                         'h-full rounded-full transition-all',
                         getUsageBarColor(cluster.cpu.used),
                       )}
+                      // eslint-disable-next-line no-restricted-syntax -- dynamic CPU utilization bar
                       style={{ width: `${cluster.cpu.used}%` }}
                     />
                   </div>
@@ -97,6 +98,7 @@ export function ClusterListItem({
                         'h-full rounded-full transition-all',
                         getUsageBarColor(cluster.memory.used),
                       )}
+                      // eslint-disable-next-line no-restricted-syntax -- dynamic memory utilization bar
                       style={{ width: `${cluster.memory.used}%` }}
                     />
                   </div>

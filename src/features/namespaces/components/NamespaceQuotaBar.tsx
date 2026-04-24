@@ -24,6 +24,7 @@ export function NamespaceQuotaBar({ label, used, quota }: NamespaceQuotaBarProps
       <div className="w-full bg-slate-700/50 rounded-full h-1 mt-1">
         <div
           className={cn('h-1 rounded-full', getQuotaBarColor(percentage))}
+          // eslint-disable-next-line no-restricted-syntax -- dynamic quota bar width
           style={{ width: `${clampedPercentage}%` }}
         />
       </div>

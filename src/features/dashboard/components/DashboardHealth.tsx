@@ -163,6 +163,7 @@ function HealthBar({ summary, health }: HealthBarProps) {
           <div
             key={index}
             className={cn(segment.color, 'transition-all')}
+            // eslint-disable-next-line no-restricted-syntax -- dynamic stacked health bar segment
             style={{ width: `${width}%` }}
           />
         );

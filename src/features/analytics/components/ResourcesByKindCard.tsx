@@ -27,6 +27,7 @@ export function ResourcesByKindCard({ resources }: ResourcesByKindCardProps) {
                 <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-purple-500 rounded-full"
+                    // eslint-disable-next-line no-restricted-syntax -- dynamic distribution bar width
                     style={{ width: `${item.percentage}%` }}
                   />
                 </div>

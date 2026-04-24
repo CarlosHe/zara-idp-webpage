@@ -20,6 +20,13 @@ export default defineConfig([
       globals: globals.browser,
     },
     rules: {
+      // CVA `*Variants` functions and constants live alongside the
+      // component they style (shadcn/ui convention). Fast-refresh still
+      // works thanks to `allowConstantExport`.
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true },
+      ],
       // Sprint 7 (L-707): every data fetch must flow through
       // `@/shared/lib/api` (RTK Query). Keeps the 401/403 + correlation-id
       // + retry behaviour consistent and prevents re-introducing a second

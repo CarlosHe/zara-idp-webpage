@@ -36,7 +36,7 @@ const TableBody = forwardRef<HTMLTableSectionElement, ComponentPropsWithoutRef<'
 );
 TableBody.displayName = 'TableBody';
 
-interface TableRowProps extends ComponentPropsWithoutRef<'tr'> {}
+type TableRowProps = ComponentPropsWithoutRef<'tr'>;
 
 const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(
   ({ className, onClick, ...rest }, ref) => (

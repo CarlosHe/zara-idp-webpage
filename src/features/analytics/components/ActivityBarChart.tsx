@@ -40,6 +40,7 @@ export function ActivityBarChart({ data }: ActivityBarChartProps) {
                             ? 'bg-blue-500'
                             : 'bg-slate-500'
                       )}
+                      // eslint-disable-next-line no-restricted-syntax -- dynamic bar-chart height
                       style={{ height: `${height}%` }}
                     />
                     <span className="text-[10px] text-slate-500">
