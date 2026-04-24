@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   History,
@@ -12,8 +11,11 @@ import {
   ShieldBan,
   Search,
 } from 'lucide-react';
-import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
-import { fetchAuditLogs, fetchAuditEntry, clearSelectedAuditEntry } from '@/features/audit/store/auditSlice';
+import {
+  useListAuditLogsQuery,
+  useGetAuditEntryQuery,
+} from '@/features/audit/services/auditApi';
+import { errorMessage } from '@/shared/lib/api';
 import { ROUTES } from '@/shared/config';
 import {
   Card,
@@ -36,15 +38,11 @@ import { cn, formatDateTime } from '@/shared/utils';
 import type { AuditEntry } from '@/shared/types';
 
 export function AuditPage() {
-  const dispatch = useAppDispatch();
-  const { auditLogs, loading, error } = useAppSelector((state) => state.audit);
-
-  useEffect(() => {
-    dispatch(fetchAuditLogs({}));
-  }, [dispatch]);
+  const { data: auditLogs, isLoading: loading, error, refetch } = useListAuditLogsQuery();
 
   if (error) {
-    return <ErrorState message={error} onRetry={() => dispatch(fetchAuditLogs({}))} />;
+    const message = errorMessage(error) || 'Failed to load audit logs';
+    return <ErrorState message={message} onRetry={refetch} />;
   }
 
   return (
@@ -55,7 +53,7 @@ export function AuditPage() {
         iconClassName="text-slate-400"
         title="Audit Log"
         description="Track all resource changes and system events"
-        onRefresh={() => dispatch(fetchAuditLogs({}))}
+        onRefresh={refetch}
       />
 
       {/* Filters */}
