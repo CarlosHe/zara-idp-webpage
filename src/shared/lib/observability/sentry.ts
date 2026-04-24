@@ -1,13 +1,27 @@
 // Thin Sentry wrapper. We keep the surface small so the rest of the app
 // never imports `@sentry/react` directly — that indirection lets us swap
 // providers, disable telemetry in tests, and, most importantly, keep the
-// Sentry SDK OUT of the initial JS bundle (it's ~75 KB gzipped). Sentry
+// Sentry SDK OUT of the initial JS bundle (it's ~143 KB gzipped). Sentry
 // is only loaded on demand via dynamic import when a DSN is configured;
 // without a DSN the module is never fetched.
 
 import { AppError } from '@/shared/errors';
 
-type SentryModule = typeof import('@sentry/react');
+// Narrow surface of @sentry/react that we consume. Typed against the
+// real module with `typeof import(...)` so mismatches still break the
+// build; the subset is what the wrapper actually calls.
+type SentryScope = {
+  setTag(key: string, value: string): void;
+  setContext(key: string, value: Record<string, unknown>): void;
+};
+
+type SentryModule = {
+  init(options: Record<string, unknown>): void;
+  withScope(cb: (scope: SentryScope) => void): void;
+  captureException(error: unknown): void;
+};
+
+export type { SentryModule };
 
 interface SentryInitOptions {
   dsn?: string;
@@ -16,16 +30,26 @@ interface SentryInitOptions {
   tracesSampleRate?: number;
 }
 
+type SentryLoader = () => Promise<SentryModule | null>;
+
+// Default loader: dynamic import of @sentry/react. Stashed outside
+// initialiseSentry so tests can swap it (see _setSentryLoaderForTests).
+let loader: SentryLoader = async () => {
+  try {
+    const sentry = await import('@sentry/react');
+    return sentry as unknown as SentryModule;
+  } catch (error) {
+    console.warn('[zara] failed to load Sentry SDK', error);
+    return null;
+  }
+};
+
 let initialized = false;
 let sentryPromise: Promise<SentryModule | null> | null = null;
 
 function loadSentry(): Promise<SentryModule | null> {
   if (!sentryPromise) {
-    sentryPromise = import('@sentry/react').catch((error) => {
-      // The app must survive a Sentry load failure — telemetry is best-effort.
-      console.warn('[zara] failed to load Sentry SDK', error);
-      return null;
-    });
+    sentryPromise = loader();
   }
   return sentryPromise;
 }
@@ -83,9 +107,14 @@ export function logErrorToService(
   });
 }
 
-// Test seam: allows unit tests to reset the global flag between cases.
+// Test seams.
 export function _resetSentryForTests(): void {
   initialized = false;
+  sentryPromise = null;
+}
+
+export function _setSentryLoaderForTests(nextLoader: SentryLoader | null): void {
+  loader = nextLoader ?? (async () => null);
   sentryPromise = null;
 }
 
