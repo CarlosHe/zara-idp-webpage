@@ -7,7 +7,23 @@ import {
 } from '@reduxjs/toolkit/query/react';
 import { publishToast } from '@/shared/lib/toasts';
 
-const API_BASE_URL = '/api/v1';
+// Relative by default so Vite's dev proxy + the production Nginx
+// front-door both "just work". Test runners set
+// `VITE_API_BASE_URL=http://localhost:3000/api/v1` via `tests/setup.ts`
+// so that Undici (Node's global fetch) can build a valid absolute URL.
+const API_BASE_URL = readBaseUrl();
+
+function readBaseUrl(): string {
+  try {
+    const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env;
+    const override = env?.VITE_API_BASE_URL;
+    if (override && override.trim().length > 0) return override;
+  } catch {
+    // ignore — fall through
+  }
+  return '/api/v1';
+}
+
 const AUTH_TOKEN_KEY = 'zara.authToken';
 const LOGIN_ROUTE = '/login';
 

@@ -4,7 +4,11 @@ import { http, HttpResponse, delay } from 'msw';
 // smallest shape the current screen needs — tests add more on demand via
 // `server.use(...)` without having to rewrite the whole tree.
 
-const API = '/api/v1';
+// MSW matches URLs after resolving them against the current origin. We
+// prefix with `*` so these handlers work both when tests issue absolute
+// URLs (http://localhost:3000/api/v1/...) and when the runtime resolves
+// relative paths against a different origin under the jsdom base URL.
+const API = '*/api/v1';
 
 // Mutable in-memory fixture tables — tests hydrate and mutate these via
 // helpers exposed from `./fixtures`. Keeping state inside this module
@@ -118,6 +122,11 @@ export const handlers = [
   http.delete(`${API}/resources/:kind/:namespace/:name`, ({ params }) => {
     const id = resourceKey(String(params.kind), String(params.namespace), String(params.name));
     fixtures.resources.delete(id);
+    return new HttpResponse(null, { status: 204 });
+  }),
+
+  http.delete(`${API}/resources/:id`, ({ params }) => {
+    fixtures.resources.delete(String(params.id));
     return new HttpResponse(null, { status: 204 });
   }),
 

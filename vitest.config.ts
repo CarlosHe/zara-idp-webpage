@@ -3,12 +3,24 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
+// `import.meta.env.*` entries are baked in at build time — vitest does
+// not inject them via `test.env`. We map them explicitly here so both
+// `webVitals.ts` (reads VITE_ANALYTICS_ENDPOINT) and `baseQuery.ts`
+// (reads VITE_API_BASE_URL) resolve the right values at test time.
+const VITE_ENV: Record<string, string> = {
+  'import.meta.env.VITE_API_BASE_URL': JSON.stringify('http://localhost:3000/api/v1'),
+  'import.meta.env.VITE_SENTRY_DSN': JSON.stringify(''),
+  'import.meta.env.VITE_ANALYTICS_ENDPOINT': JSON.stringify(''),
+  'import.meta.env.MODE': JSON.stringify('test'),
+};
+
 // Vitest config intentionally forked from vite.config.ts — we don't want
 // the Tailwind plugin (no CSS compilation needed in jsdom) or the proxy
 // (MSW intercepts all fetches). Shared: the React plugin + the `@/`
 // alias so import paths in tests match runtime.
 export default defineConfig({
   plugins: [react()],
+  define: VITE_ENV,
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
