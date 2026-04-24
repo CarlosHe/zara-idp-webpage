@@ -43,6 +43,21 @@ export default defineConfig([
           ],
         },
       ],
+      // Sprint 8 (L-808): forbid inline `style={...}` JSX attributes. The
+      // only legit cases are dynamic CSS values that Tailwind cannot
+      // compile (e.g. `width: ${computed}%`). Each such site must
+      // escape-hatch with `// eslint-disable-next-line no-restricted-syntax`
+      // and a one-line comment explaining *why* the value is dynamic.
+      // Rationale: static styling belongs in Tailwind utilities + CVA so
+      // design tokens (dark-mode, theming) apply consistently.
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "JSXAttribute[name.name='style']",
+          message:
+            'Use Tailwind utilities / CVA variants instead of inline `style={...}`. For legit dynamic values (e.g. width/height %) add `// eslint-disable-next-line no-restricted-syntax` with a justification — see `.claude/docs/front/12-STYLING.md`.',
+        },
+      ],
     },
   },
 ])
