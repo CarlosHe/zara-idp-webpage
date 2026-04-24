@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useListRuntimePoliciesQuery } from '@/features/policies/services/policiesApi';
 import { ROUTES } from '@/shared/config';
+import { errorMessage } from '@/shared/lib/api';
 import {
   Card,
   CardHeader,
