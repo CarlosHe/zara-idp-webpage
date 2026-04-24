@@ -1,6 +1,7 @@
 import { Provider as ReduxProvider } from 'react-redux';
 import type { ReactNode } from 'react';
 import { Toaster } from '@/shared/components/ui';
+import { ErrorBoundary } from '@/shared/components/feedback';
 import { useThemeEffect } from '@/features/theme';
 import { store } from './store';
 
@@ -16,17 +17,19 @@ function ThemeBridge({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-// AppProviders is the single place where global providers (Redux, theme
-// side-effects, toasts, future ErrorBoundary) are composed. Keeping them
-// in one file means the composition order (outer → inner) is visible at
-// a glance.
+// AppProviders composes every global provider in one place. The outer
+// ErrorBoundary (boundaryName="root") is the last line of defence: any
+// render error that escapes the router-level `errorElement` lands here.
+// `logErrorToService` flushes to Sentry when a DSN is configured.
 export function AppProviders({ children }: AppProvidersProps) {
   return (
-    <ReduxProvider store={store}>
-      <ThemeBridge>
-        {children}
-        <Toaster />
-      </ThemeBridge>
-    </ReduxProvider>
+    <ErrorBoundary boundaryName="root">
+      <ReduxProvider store={store}>
+        <ThemeBridge>
+          {children}
+          <Toaster />
+        </ThemeBridge>
+      </ReduxProvider>
+    </ErrorBoundary>
   );
 }

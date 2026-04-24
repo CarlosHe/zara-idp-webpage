@@ -9,7 +9,11 @@
     "lint": "eslint .",
     "lint:ratchet": "node scripts/lint-ratchet.mjs",
     "typecheck": "tsc -b --noEmit",
-    "test": "echo '[verify] test skipped: no test runner wired yet (Sprint 9 target)'",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "audit:prod": "npm audit --omit=dev --audit-level=high",
     "preview": "vite preview",
     "verify": "npm run typecheck && npm run lint:ratchet && npm run test && npm run build && npm run audit:prod",
@@ -17,6 +21,7 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.0",
+    "@sentry/react": "^10.50.0",
     "@tailwindcss/vite": "^4.1.17",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -27,20 +32,29 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.10.1",
     "tailwind-merge": "^3.5.0",
-    "tailwindcss": "^4.1.17"
+    "tailwindcss": "^4.1.17",
+    "web-vitals": "^5.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@playwright/test": "^1.59.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "@vitest/coverage-v8": "^4.1.5",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "jsdom": "^25.0.1",
+    "msw": "^2.13.6",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "vitest": "^4.1.5"
   }
 }

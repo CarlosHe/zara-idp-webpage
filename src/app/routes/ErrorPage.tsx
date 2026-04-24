@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { isRouteErrorResponse, Link, useRouteError } from 'react-router-dom';
 import { AlertTriangle } from 'lucide-react';
+import { logErrorToService } from '@/shared/lib/observability';
 
 export function ErrorPage() {
   const error = useRouteError();
@@ -8,6 +10,14 @@ export function ErrorPage() {
     ? 'The page you are looking for does not exist.'
     : 'Something went wrong while loading this page.';
   const heading = is404 ? 'Page Not Found' : 'Unexpected Error';
+
+  // Only non-404 routing errors are worth reporting — a 404 is expected
+  // UX and would otherwise flood Sentry with benign noise.
+  useEffect(() => {
+    if (!is404 && error !== undefined) {
+      logErrorToService(error, { boundary: 'route' });
+    }
+  }, [error, is404]);
 
   return (
     <main
