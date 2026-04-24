@@ -27,9 +27,9 @@ describe('errorMessage', () => {
     expect(errorMessage({ status: 'FETCH_ERROR', error: 'ECONNRESET' })).toContain(
       'Network error',
     );
-    expect(errorMessage({ status: 'PARSING_ERROR', originalStatus: 200, data: '<html>' })).toContain(
-      'invalid response',
-    );
+    expect(
+      errorMessage({ status: 'PARSING_ERROR', originalStatus: 200, data: '<html>', error: 'bad' }),
+    ).toContain('invalid response');
     expect(errorMessage({ status: 'TIMEOUT_ERROR', error: 'timeout' })).toBe(
       'The request timed out.',
     );

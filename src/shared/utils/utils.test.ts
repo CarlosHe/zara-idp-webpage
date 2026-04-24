@@ -11,7 +11,9 @@ import {
 
 describe('cn', () => {
   it('joins truthy classes and drops falsey ones', () => {
-    expect(cn('a', false && 'b', 'c', null, undefined, 0 && 'd')).toBe('a c');
+    const maybeB: string | false = false;
+    const maybeD: string | 0 = 0;
+    expect(cn('a', maybeB && 'b', 'c', null, undefined, maybeD && 'd')).toBe('a c');
   });
 
   it('merges conflicting Tailwind utilities so the last one wins', () => {

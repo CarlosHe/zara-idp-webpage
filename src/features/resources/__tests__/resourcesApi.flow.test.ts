@@ -28,7 +28,7 @@ beforeEach(() => {
 describe('resources feature — list → create → update → delete', () => {
   it('runs the full CRUD flow against MSW and keeps the RTK cache coherent', async () => {
     seedResource({
-      kind: 'Deployment',
+      kind: 'Application',
       metadata: { name: 'api', namespace: 'platform' },
       status: 'Ready',
       version: 1,
@@ -96,7 +96,7 @@ describe('resources feature — list → create → update → delete', () => {
     const store = createIntegrationStore();
     const result = await store.dispatch(
       resourcesApi.endpoints.getResource.initiate({
-        kind: 'Pod',
+        kind: 'Service',
         namespace: 'platform',
         name: 'nope',
       }),

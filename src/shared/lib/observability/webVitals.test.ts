@@ -41,9 +41,9 @@ describe('sendToAnalytics', () => {
     });
     sendToAnalytics('/vitals', METRIC);
     expect(sendBeacon).toHaveBeenCalledOnce();
-    const [url, blob] = sendBeacon.mock.calls[0];
-    expect(url).toBe('/vitals');
-    expect(blob).toBeInstanceOf(Blob);
+    const call = sendBeacon.mock.calls[0] as unknown as [string, Blob];
+    expect(call[0]).toBe('/vitals');
+    expect(call[1]).toBeInstanceOf(Blob);
   });
 
   it('falls back to fetch when sendBeacon returns false', () => {
