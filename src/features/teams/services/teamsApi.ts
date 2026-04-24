@@ -1,5 +1,5 @@
 import { baseApi, unwrapItems } from '@/shared/lib/api';
-import type { Team, Resource, ApiResponse, PaginationParams } from '@/shared/types';
+import type { Team, Resource, ApiResponse, PaginationParams, OnCallInfo } from '@/shared/types';
 
 interface TeamCreate {
   name: string;
@@ -13,10 +13,10 @@ interface TeamUpdate {
   slackChannel?: string;
 }
 
-interface OnCallResponse {
-  primary: string;
-  secondary?: string;
-}
+// Backend historically returned `{ primary: string, secondary?: string }`
+// but today ships full `OnCallInfo` shapes. Accept both until the server
+// settles on one contract; consumers narrow as needed.
+type OnCallResponse = OnCallInfo;
 
 export const teamsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({

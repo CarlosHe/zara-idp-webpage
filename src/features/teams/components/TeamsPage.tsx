@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   Users,
@@ -56,23 +56,15 @@ function TeamFormModal({ isOpen, onClose, team }: TeamFormModalProps) {
   const saveError =
     errorMessage(createState.error) || errorMessage(updateState.error) || null;
 
-  const getInitialFormData = () => ({
+  // Initial state derived once; the parent re-keys the modal on team
+  // change so re-mount does the reset.
+  const [formData, setFormData] = useState(() => ({
     metadata: { name: team?.metadata?.name || '' },
     spec: {
       displayName: team?.spec?.displayName || '',
       channels: { general: team?.spec?.channels?.general || '' },
     },
-  });
-
-  const [formData, setFormData] = useState(getInitialFormData());
-  const [prevTeamId, setPrevTeamId] = useState<string | undefined>(team?.id);
-
-  useEffect(() => {
-    if (team?.id !== prevTeamId) {
-      setPrevTeamId(team?.id);
-      setFormData(getInitialFormData());
-    }
-  }, [team?.id, prevTeamId]);
+  }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -221,8 +213,10 @@ export function TeamsPage() {
         </div>
       )}
 
-      {/* Form Modal */}
+      {/* Form Modal — re-keyed on team change so it remounts with a
+          fresh form state instead of syncing via useEffect. */}
       <TeamFormModal
+        key={editingTeam?.id ?? 'new'}
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
         team={editingTeam}

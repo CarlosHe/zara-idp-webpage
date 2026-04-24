@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Building2,
   Users,
@@ -71,25 +71,14 @@ function DomainFormModal({ isOpen, onClose, domain }: DomainFormModalProps) {
   const saving = createState.isLoading || updateState.isLoading;
   const saveError =
     errorMessage(createState.error) || errorMessage(updateState.error) || null;
-  const [formData, setFormData] = useState({
-    name: '',
-    displayName: '',
-    description: '',
-    team: '',
-  });
-
-  useEffect(() => {
-    if (domain) {
-      setFormData({
-        name: domain.name || '',
-        displayName: domain.displayName || '',
-        description: domain.description || '',
-        team: domain.team || domain.owner || '',
-      });
-    } else {
-      setFormData({ name: '', displayName: '', description: '', team: '' });
-    }
-  }, [domain, isOpen]);
+  // Initial state derived once; the parent re-keys the modal on
+  // domain change so re-mount does the reset.
+  const [formData, setFormData] = useState(() => ({
+    name: domain?.name || '',
+    displayName: domain?.displayName || '',
+    description: domain?.description || '',
+    team: domain?.team || domain?.owner || '',
+  }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -605,8 +594,10 @@ export function BusinessDomainsPage() {
         </div>
       </div>
 
-      {/* Form Modal */}
+      {/* Form Modal — re-keyed on domain change so it remounts with a
+          fresh form state instead of syncing via useEffect. */}
       <DomainFormModal
+        key={editingDomain?.id ?? 'new'}
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
         domain={editingDomain}

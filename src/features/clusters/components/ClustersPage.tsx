@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Server,
   Globe,
@@ -73,27 +73,21 @@ function ClusterFormModal({ isOpen, onClose, cluster }: ClusterFormModalProps) {
   const saving = createState.isLoading || updateState.isLoading;
   const saveError =
     errorMessage(createState.error) || errorMessage(updateState.error) || null;
-  const [formData, setFormData] = useState({
-    name: '',
-    displayName: '',
-    provider: 'aws',
-    environment: 'development',
-    region: '',
-  });
-
-  useEffect(() => {
-    if (cluster) {
-      setFormData({
-        name: cluster.name || '',
-        displayName: cluster.displayName || '',
-        provider: cluster.provider || 'aws',
-        environment: cluster.environment || 'development',
-        region: cluster.region || '',
-      });
-    } else {
-      setFormData({ name: '', displayName: '', provider: 'aws', environment: 'development', region: '' });
-    }
-  }, [cluster, isOpen]);
+  // Initial state derived once; the parent re-keys the modal on
+  // cluster change so re-mount does the reset.
+  const [formData, setFormData] = useState<{
+    name: string;
+    displayName: string;
+    provider: string;
+    environment: string;
+    region: string;
+  }>(() => ({
+    name: cluster?.name || '',
+    displayName: cluster?.displayName || '',
+    provider: cluster?.provider || 'aws',
+    environment: cluster?.environment || 'development',
+    region: cluster?.region || '',
+  }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -722,8 +716,10 @@ export function ClustersPage() {
         </div>
       </div>
 
-      {/* Form Modal */}
+      {/* Form Modal — re-keyed on cluster change so it remounts with a
+          fresh form state instead of syncing via useEffect. */}
       <ClusterFormModal
+        key={editingCluster?.id ?? 'new'}
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
         cluster={editingCluster}

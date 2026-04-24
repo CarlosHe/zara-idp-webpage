@@ -36,7 +36,7 @@ interface NamespaceFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   namespace?: Namespace | null;
-  onSubmit: (data: any) => Promise<void>;
+  onSubmit: (data: Partial<Namespace>) => Promise<void>;
 }
 
 function NamespaceFormModal({ isOpen, onClose, namespace, onSubmit }: NamespaceFormModalProps) {
@@ -301,8 +301,7 @@ function NamespaceFormModal({ isOpen, onClose, namespace, onSubmit }: NamespaceF
 
 // Main Page Component
 export function NamespacesPage() {
-  const { data: namespacesData, isLoading: loading, error, refetch } = useListNamespacesQuery();
-  const namespaces = namespacesData ?? [];
+  const { data: namespaces = [], isLoading: loading, error, refetch } = useListNamespacesQuery();
   const [createNamespace] = useCreateNamespaceMutation();
   const [updateNamespace] = useUpdateNamespaceMutation();
   const [deleteNamespace] = useDeleteNamespaceMutation();
@@ -337,8 +336,10 @@ export function NamespacesPage() {
     return { total, active, totalDatabases, totalStorage };
   }, [namespaces]);
 
-  const handleCreateNamespace = async (data: Parameters<typeof createNamespace>[0]) => {
-    await createNamespace(data).unwrap().catch(() => undefined);
+  const handleCreateNamespace = async (data: Partial<Namespace>) => {
+    await createNamespace(data as Parameters<typeof createNamespace>[0])
+      .unwrap()
+      .catch(() => undefined);
     setIsCreateModalOpen(false);
   };
 

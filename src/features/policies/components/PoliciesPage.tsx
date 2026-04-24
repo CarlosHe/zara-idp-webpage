@@ -50,7 +50,7 @@ export function PoliciesPage() {
         iconClassName="text-blue-400"
         title="Runtime Policies"
         description="Manage policies that control runtime behavior and change restrictions"
-        onRefresh={() => dispatch(fetchRuntimePolicies())}
+        onRefresh={refetch}
       />
 
       {/* Enabled Policies */}
@@ -182,10 +182,10 @@ function PolicyRow({ policy, disabled }: PolicyRowProps) {
 // Policy Detail Page
 export function PolicyDetailPage() {
   const { namespace, name } = useParams<{ namespace: string; name: string }>();
-  const { items: runtimePolicies, loading, error } = useAppSelector((state) => state.policies);
+  const { data: runtimePolicies = [], isLoading: loading, error } = useListRuntimePoliciesQuery();
 
   const policy = runtimePolicies.find(
-    (p) => p.namespace === namespace && p.name === name
+    (p) => p.namespace === namespace && p.name === name,
   );
 
   if (loading && runtimePolicies.length === 0) {
@@ -195,7 +195,7 @@ export function PolicyDetailPage() {
   if (error) {
     return (
       <Alert type="error" title="Failed to load policy">
-        {error}
+        {errorMessage(error) || 'Unable to load policy.'}
       </Alert>
     );
   }
