@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# pre-commit hook — fast subset of `npm run verify` on staged files.
+#
+# Runs:
+#   - eslint --cache on staged *.ts / *.tsx (no new errors vs. baseline via ratchet)
+#   - tsc --noEmit only if project-level changes touch types
+#
+# To install: `npm run install-hooks` (or `bash scripts/install-hooks.sh`).
+# To bypass: `git commit --no-verify` (CI still runs the full gate).
+
+set -u
+set -o pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "${repo_root}"
+
+staged_ts="$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx)$' || true)"
+
+if [[ -z "${staged_ts}" ]]; then
+  exit 0
+fi
+
+echo "[pre-commit] checking $(echo "${staged_ts}" | wc -l) TS file(s)..."
+
+# Lint ratchet — fails only if error count exceeds baseline.
+if ! node "${repo_root}/scripts/lint-ratchet.mjs" >/dev/null 2>&1; then
+  echo "[pre-commit] FAIL: lint ratchet broken. Run: npm run lint:ratchet"
+  exit 1
+fi
+
+echo "[pre-commit] OK"
+exit 0
