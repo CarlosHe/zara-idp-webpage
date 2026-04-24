@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Box,
@@ -10,35 +9,41 @@ import {
   Clock,
   LayoutDashboard,
 } from 'lucide-react';
-import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
-import { fetchDashboardSummary, fetchDashboardHealth } from '@/features/dashboard/store/dashboardSlice';
+import {
+  useGetDashboardSummaryQuery,
+  useGetDashboardHealthQuery,
+} from '@/features/dashboard/services/dashboardApi';
+import { useListAuditLogsQuery } from '@/features/audit/services/auditApi';
+import { errorMessage } from '@/shared/lib/api';
 import { ROUTES } from '@/shared/config';
-import { fetchAuditLogs } from '@/features/audit/store/auditSlice';
 import { Card, CardHeader, CardTitle, CardContent, StatusBadge } from '@/shared/components/ui';
 import { PageHeader, LoadingState, ErrorState, StatCard } from '@/shared/components/feedback';
 import { cn, formatRelativeTime } from '@/shared/utils';
 import type { HealthStatus } from '@/shared/types';
 
 export function DashboardPage() {
-  const dispatch = useAppDispatch();
-  const { summary, health, loading, error } = useAppSelector((state) => state.dashboard);
-  const { auditLogs } = useAppSelector((state) => state.audit);
+  const summaryQuery = useGetDashboardSummaryQuery();
+  const healthQuery = useGetDashboardHealthQuery();
+  const auditQuery = useListAuditLogsQuery();
 
-  useEffect(() => {
-    dispatch(fetchDashboardSummary());
-    dispatch(fetchDashboardHealth());
-    dispatch(fetchAuditLogs({}));
-  }, [dispatch]);
+  const summary = summaryQuery.data;
+  const health = healthQuery.data;
+  const auditLogs = auditQuery.data;
+  const loading = summaryQuery.isLoading || healthQuery.isLoading;
+  const error = summaryQuery.error || healthQuery.error;
+
+  const refreshDashboard = () => {
+    summaryQuery.refetch();
+    healthQuery.refetch();
+  };
 
   if (loading && !summary && !health) {
     return <LoadingState message="Loading dashboard..." />;
   }
 
   if (error) {
-    return <ErrorState message={error} onRetry={() => {
-      dispatch(fetchDashboardSummary());
-      dispatch(fetchDashboardHealth());
-    }} />;
+    const message = errorMessage(error) || 'Failed to load dashboard';
+    return <ErrorState message={message} onRetry={refreshDashboard} />;
   }
 
   return (
