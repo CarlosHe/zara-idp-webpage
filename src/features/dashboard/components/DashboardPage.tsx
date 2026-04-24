@@ -54,10 +54,7 @@ export function DashboardPage() {
         iconClassName="text-blue-400"
         title="Dashboard"
         description="Overview of your infrastructure state"
-        onRefresh={() => {
-          dispatch(fetchDashboardSummary());
-          dispatch(fetchDashboardHealth());
-        }}
+        onRefresh={refreshDashboard}
       />
 
       {/* Stats Grid */}
