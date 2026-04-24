@@ -281,7 +281,7 @@ export function ResourcesPage() {
   } = useListResourcesQuery({ kind: filters.kind });
   const { data: namespaces = [] } = useListNamespacesQuery();
   const [deleteResource, deleteState] = useDeleteResourceMutation();
-  const [triggerDetectDrift, driftQueryState] = useLazyDetectDriftQuery();
+  const [triggerDetectDrift] = useLazyDetectDriftQuery();
   const [reconcileResource, reconcileState] = useReconcileResourceMutation();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -394,7 +394,9 @@ export function ResourcesPage() {
   }
 
   if (error) {
-    return <ErrorState message={error} onRetry={() => dispatch(fetchResources())} />;
+    return (
+      <ErrorState message={errorMessage(error) || 'Failed to load resources'} onRetry={refetch} />
+    );
   }
 
   return (
@@ -404,7 +406,7 @@ export function ResourcesPage() {
         iconClassName="text-purple-400"
         title="Resources"
         description="Browse and manage infrastructure resources"
-        onRefresh={() => dispatch(fetchResources())}
+        onRefresh={refetch}
         actions={
           <Link to={ROUTES.GOLDEN_PATHS}>
             <Button size="sm">
@@ -609,7 +611,7 @@ export function ResourcesPage() {
         title="Delete Resource"
         message={`Are you sure you want to delete ${deletingResource?.metadata?.name}? This action cannot be undone.`}
         confirmText="Delete"
-        loading={loading}
+        loading={deleteState.isLoading}
       />
 
       <DriftReportModal
