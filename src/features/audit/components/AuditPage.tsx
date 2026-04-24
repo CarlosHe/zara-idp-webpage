@@ -177,17 +177,10 @@ function AuditRow({ entry }: AuditRowProps) {
 // Audit Detail Page
 export function AuditDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const dispatch = useAppDispatch();
-  const { selectedAuditEntry, loading, error } = useAppSelector((state) => state.audit);
-
-  useEffect(() => {
-    if (id) {
-      dispatch(fetchAuditEntry(id));
-    }
-    return () => {
-      dispatch(clearSelectedAuditEntry());
-    };
-  }, [dispatch, id]);
+  const { data: selectedAuditEntry, isLoading: loading, error } = useGetAuditEntryQuery(
+    id ?? '',
+    { skip: !id },
+  );
 
   if (loading && !selectedAuditEntry) {
     return <LoadingState message="Loading audit entry..." />;
@@ -196,7 +189,7 @@ export function AuditDetailPage() {
   if (error) {
     return (
       <Alert type="error" title="Failed to load audit entry">
-        {error}
+        {errorMessage(error) || 'Unable to load audit entry.'}
       </Alert>
     );
   }
