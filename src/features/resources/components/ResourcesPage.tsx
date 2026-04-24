@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   Box,
@@ -92,10 +92,10 @@ interface ResourceFormModalProps {
 }
 
 function ResourceFormModal({ isOpen, onClose, resource }: ResourceFormModalProps) {
-  const dispatch = useAppDispatch();
-  const { loading } = useAppSelector((state) => state.resources);
+  const [updateResource, updateState] = useUpdateResourceMutation();
+  const loading = updateState.isLoading;
   const [error, setError] = useState<string | null>(null);
-  
+
   const initialFormData = {
     kind: resource.kind,
     name: resource.metadata?.name || '',
@@ -131,22 +131,20 @@ function ResourceFormModal({ isOpen, onClose, resource }: ResourceFormModalProps
     });
 
     try {
-      const result = await dispatch(updateResource({
-        kind: resource.kind,
-        namespace: resource.metadata?.namespace || resource.namespace || '',
-        name: resource.metadata?.name || resource.name || '',
-        data: {
+      await updateResource({
+        key: {
+          kind: resource.kind,
+          namespace: resource.metadata?.namespace || resource.namespace || '',
+          name: resource.metadata?.name || resource.name || '',
+        },
+        body: {
           spec,
           metadata: { labels },
         },
-      }));
-      if (!result.type.endsWith('/rejected')) {
-        onClose();
-      } else {
-        setError('Failed to update resource');
-      }
+      }).unwrap();
+      onClose();
     } catch (err) {
-      setError((err as Error).message);
+      setError(errorMessage(err as Parameters<typeof errorMessage>[0]) || 'Failed to update resource');
     }
   };
 
@@ -274,38 +272,36 @@ function ResourceFormModal({ isOpen, onClose, resource }: ResourceFormModalProps
 export function ResourcesPage() {
   const dispatch = useAppDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { items, loading, error, filters } = useAppSelector((state) => state.resources);
-  const { items: namespaces } = useAppSelector((state) => state.namespaces);
+  const filters = useAppSelector((state) => state.resources.filters);
+  const {
+    data: items = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useListResourcesQuery({ kind: filters.kind });
+  const { data: namespaces = [] } = useListNamespacesQuery();
+  const [deleteResource, deleteState] = useDeleteResourceMutation();
+  const [triggerDetectDrift, driftQueryState] = useLazyDetectDriftQuery();
+  const [reconcileResource, reconcileState] = useReconcileResourceMutation();
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<Resource | null>(null);
   const [deletingResource, setDeletingResource] = useState<Resource | null>(null);
-  
+
   // Drift detection and reconcile state
   const [isDriftModalOpen, setIsDriftModalOpen] = useState(false);
   const [driftReport, setDriftReport] = useState<DriftReport | null>(null);
-  const [, setIsLoadingDrift] = useState(false);
-  const [isReconciling, setIsReconciling] = useState(false);
   const [driftError, setDriftError] = useState<string | null>(null);
+  const isReconciling = reconcileState.isLoading;
 
   const namespaceParam = searchParams.get('namespace');
   const kindParam = searchParams.get('kind');
 
+  // Hydrate filters from URL query params on mount / URL change.
   useEffect(() => {
-    dispatch(fetchNamespaces());
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (namespaceParam) {
-      dispatch(setNamespaceFilter(namespaceParam));
-    }
-    if (kindParam) {
-      dispatch(setKindFilter(kindParam as ResourceKind));
-    }
+    if (namespaceParam) dispatch(setNamespaceFilter(namespaceParam));
+    if (kindParam) dispatch(setKindFilter(kindParam as ResourceKind));
   }, [dispatch, namespaceParam, kindParam]);
-
-  useEffect(() => {
-    dispatch(fetchResources());
-  }, [dispatch, filters.kind]);
 
   const handleKindChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
@@ -335,37 +331,30 @@ export function ResourcesPage() {
   };
 
   const handleDetectDrift = async (resource: Resource) => {
-    setIsLoadingDrift(true);
     setDriftError(null);
     setDriftReport(null);
-    
+
     try {
-      const report = await api.detectDrift(resource.id);
+      const report = await triggerDetectDrift({ resourceId: resource.id }).unwrap();
       setDriftReport(report);
       setIsDriftModalOpen(true);
     } catch (err) {
-      setDriftError((err as Error).message || 'Failed to detect drift');
-    } finally {
-      setIsLoadingDrift(false);
+      setDriftError(errorMessage(err as Parameters<typeof errorMessage>[0]) || 'Failed to detect drift');
     }
   };
 
   const handleReconcile = async (resource: Resource) => {
-    setIsReconciling(true);
     setDriftError(null);
-    
+
     try {
-      const response = await api.reconcileResource(resource.id);
-      // Close drift modal and refresh resources
+      const response = await reconcileResource({ resourceId: resource.id }).unwrap();
       setIsDriftModalOpen(false);
       setDriftReport(null);
-      dispatch(fetchResources());
-      // Show success message
+      // The mutation already invalidates Resource/LIST so the list
+      // refetches automatically. We just need the user-facing toast.
       alert(`Reconciliation started: ${response.message}`);
     } catch (err) {
-      setDriftError((err as Error).message || 'Failed to reconcile resource');
-    } finally {
-      setIsReconciling(false);
+      setDriftError(errorMessage(err as Parameters<typeof errorMessage>[0]) || 'Failed to reconcile resource');
     }
   };
 
@@ -391,9 +380,7 @@ export function ResourcesPage() {
 
   const handleDelete = async () => {
     if (deletingResource) {
-      await dispatch(deleteResource({
-        id: deletingResource.id,
-      }));
+      await deleteResource({ id: deletingResource.id }).unwrap().catch(() => undefined);
       setDeletingResource(null);
     }
   };
