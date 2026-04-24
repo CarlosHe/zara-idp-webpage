@@ -11,8 +11,15 @@ import {
   Pencil,
   Trash2,
 } from 'lucide-react';
-import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
-import { fetchTeams, fetchTeam, fetchTeamOnCall, clearSelectedTeam, createTeam, updateTeam, deleteTeam, clearSaveError } from '@/features/teams/store/teamsSlice';
+import {
+  useListTeamsQuery,
+  useGetTeamQuery,
+  useGetTeamOnCallQuery,
+  useCreateTeamMutation,
+  useUpdateTeamMutation,
+  useDeleteTeamMutation,
+} from '@/features/teams/services/teamsApi';
+import { errorMessage } from '@/shared/lib/api';
 import { ROUTES } from '@/shared/config';
 import {
   Card,

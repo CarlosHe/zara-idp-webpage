@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import {
   FolderTree,
   Users,
@@ -22,8 +22,13 @@ import {
 } from '@/shared/components/ui';
 import { PageHeader, DataEmptyState, StatCard, LoadingState } from '@/shared/components/feedback';
 import { cn } from '@/shared/utils';
-import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
-import { fetchNamespaces, createNamespace as createNamespaceAction, updateNamespace as updateNamespaceAction, deleteNamespace as deleteNamespaceAction } from '@/features/namespaces/store/namespacesSlice';
+import {
+  useListNamespacesQuery,
+  useCreateNamespaceMutation,
+  useUpdateNamespaceMutation,
+  useDeleteNamespaceMutation,
+} from '@/features/namespaces/services/namespacesApi';
+import { errorMessage } from '@/shared/lib/api';
 import type { Namespace } from '@/shared/types';
 
 // Namespace Form Modal
@@ -296,19 +301,17 @@ function NamespaceFormModal({ isOpen, onClose, namespace, onSubmit }: NamespaceF
 
 // Main Page Component
 export function NamespacesPage() {
-  const dispatch = useAppDispatch();
-  const { items: namespaces, loading, error } = useAppSelector((state) => state.namespaces);
-  
+  const { data: namespacesData, isLoading: loading, error, refetch } = useListNamespacesQuery();
+  const namespaces = namespacesData ?? [];
+  const [createNamespace] = useCreateNamespaceMutation();
+  const [updateNamespace] = useUpdateNamespaceMutation();
+  const [deleteNamespace] = useDeleteNamespaceMutation();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTier, setSelectedTier] = useState<string>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingNamespace, setEditingNamespace] = useState<Namespace | null>(null);
   const [deletingNamespace, setDeletingNamespace] = useState<Namespace | null>(null);
-
-  // Fetch namespaces on mount
-  useEffect(() => {
-    dispatch(fetchNamespaces());
-  }, [dispatch]);
 
   // Filter namespaces
   const filteredNamespaces = useMemo(() => {
@@ -334,21 +337,21 @@ export function NamespacesPage() {
     return { total, active, totalDatabases, totalStorage };
   }, [namespaces]);
 
-  const handleCreateNamespace = async (data: any) => {
-    await dispatch(createNamespaceAction(data));
+  const handleCreateNamespace = async (data: Parameters<typeof createNamespace>[0]) => {
+    await createNamespace(data).unwrap().catch(() => undefined);
     setIsCreateModalOpen(false);
   };
 
-  const handleUpdateNamespace = async (data: any) => {
+  const handleUpdateNamespace = async (data: Partial<Namespace>) => {
     if (editingNamespace) {
-      await dispatch(updateNamespaceAction({ id: editingNamespace.id, data }));
+      await updateNamespace({ id: editingNamespace.id, data }).unwrap().catch(() => undefined);
       setEditingNamespace(null);
     }
   };
 
   const handleDeleteNamespace = async () => {
     if (deletingNamespace) {
-      await dispatch(deleteNamespaceAction(deletingNamespace.id));
+      await deleteNamespace(deletingNamespace.id).unwrap().catch(() => undefined);
       setDeletingNamespace(null);
     }
   };
@@ -397,8 +400,10 @@ export function NamespacesPage() {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
-          <p className="text-red-400 mb-4">Error loading namespaces: {error}</p>
-          <Button onClick={() => dispatch(fetchNamespaces())}>Retry</Button>
+          <p className="text-red-400 mb-4">
+            Error loading namespaces: {errorMessage(error) || 'unknown error'}
+          </p>
+          <Button onClick={refetch}>Retry</Button>
         </div>
       </div>
     );
