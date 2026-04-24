@@ -211,29 +211,23 @@ export function BusinessDomainsPage() {
     }));
   }, [reduxDomains]);
 
-  const loadDomains = useCallback(() => {
-    dispatch(fetchDomains());
-  }, [dispatch]);
-
-  useEffect(() => {
-    loadDomains();
-  }, [loadDomains]);
+  const loadDomains = () => {
+    refetch();
+  };
 
   const handleCreate = () => {
     setEditingDomain(null);
-    dispatch(clearSaveError());
     setIsFormOpen(true);
   };
 
   const handleEdit = (domain: BusinessDomain) => {
     setEditingDomain(domain);
-    dispatch(clearSaveError());
     setIsFormOpen(true);
   };
 
   const handleDelete = async () => {
     if (deletingDomain?.id) {
-      await dispatch(deleteDomain(deletingDomain.id));
+      await deleteDomain(deletingDomain.id).unwrap().catch(() => undefined);
       setDeletingDomain(null);
       if (selectedDomain?.id === deletingDomain.id) {
         setSelectedDomain(null);
@@ -287,7 +281,12 @@ export function BusinessDomainsPage() {
   }
 
   if (error) {
-    return <ErrorState message={error} onRetry={loadDomains} />;
+    return (
+      <ErrorState
+        message={errorMessage(error) || 'Failed to load domains'}
+        onRetry={loadDomains}
+      />
+    );
   }
 
   return (
