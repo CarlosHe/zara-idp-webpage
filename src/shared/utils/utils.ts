@@ -1,7 +1,10 @@
 import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
+// cn() dedupes conflicting Tailwind classes so callers can pass an
+// override `className` without worrying about which side "wins".
 export function cn(...inputs: ClassValue[]) {
-  return clsx(inputs);
+  return twMerge(clsx(inputs));
 }
 
 export function formatDate(date: string | Date | undefined | null): string {

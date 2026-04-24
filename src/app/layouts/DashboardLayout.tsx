@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/shared/utils';
 import { ROUTES } from '@/shared/config';
+import { ThemeToggle } from '@/features/theme';
 
 const navigation = [
   { name: 'Dashboard', href: ROUTES.DASHBOARD, icon: LayoutDashboard },
@@ -91,6 +92,7 @@ export function DashboardLayout() {
               {/* Breadcrumb or page title will go here */}
             </div>
             <div className="flex items-center gap-4">
+              <ThemeToggle />
               <span className="text-xs px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-400">
                 Demo Mode
               </span>

@@ -1,1 +1,2 @@
-export { PoliciesPage, PolicyDetailPage } from './components/PoliciesPage';
+export { PoliciesPage } from './components/PoliciesPage';
+export { PolicyDetailPage } from './components/PolicyDetailPage';

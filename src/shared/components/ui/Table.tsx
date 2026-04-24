@@ -1,84 +1,80 @@
+import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import { cn } from '@/shared/utils';
 
-interface TableProps {
-  children: React.ReactNode;
-  className?: string;
+interface TableProps extends ComponentPropsWithoutRef<'table'> {
+  wrapperClassName?: string;
 }
 
-export function Table({ children, className }: TableProps) {
-  return (
-    <div className="overflow-x-auto">
-      <table className={cn('w-full text-sm', className)}>{children}</table>
+const Table = forwardRef<HTMLTableElement, TableProps>(
+  ({ className, wrapperClassName, ...rest }, ref) => (
+    <div className={cn('overflow-x-auto', wrapperClassName)}>
+      <table ref={ref} className={cn('w-full text-sm', className)} {...rest} />
     </div>
-  );
-}
+  ),
+);
+Table.displayName = 'Table';
 
-interface TableHeaderProps {
-  children: React.ReactNode;
-  className?: string;
-}
+const TableHeader = forwardRef<HTMLTableSectionElement, ComponentPropsWithoutRef<'thead'>>(
+  ({ className, ...rest }, ref) => (
+    <thead
+      ref={ref}
+      className={cn('bg-slate-800/50 border-b border-slate-700', className)}
+      {...rest}
+    />
+  ),
+);
+TableHeader.displayName = 'TableHeader';
 
-export function TableHeader({ children, className }: TableHeaderProps) {
-  return (
-    <thead className={cn('bg-slate-800/50 border-b border-slate-700', className)}>
-      {children}
-    </thead>
-  );
-}
+const TableBody = forwardRef<HTMLTableSectionElement, ComponentPropsWithoutRef<'tbody'>>(
+  ({ className, ...rest }, ref) => (
+    <tbody
+      ref={ref}
+      className={cn('divide-y divide-slate-700/50', className)}
+      {...rest}
+    />
+  ),
+);
+TableBody.displayName = 'TableBody';
 
-interface TableBodyProps {
-  children: React.ReactNode;
-  className?: string;
-}
+interface TableRowProps extends ComponentPropsWithoutRef<'tr'> {}
 
-export function TableBody({ children, className }: TableBodyProps) {
-  return <tbody className={cn('divide-y divide-slate-700/50', className)}>{children}</tbody>;
-}
-
-interface TableRowProps {
-  children: React.ReactNode;
-  className?: string;
-  onClick?: () => void;
-}
-
-export function TableRow({ children, className, onClick }: TableRowProps) {
-  return (
+const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(
+  ({ className, onClick, ...rest }, ref) => (
     <tr
+      ref={ref}
       className={cn(
-        'hover:bg-slate-700/30 transition-colors',
-        onClick && 'cursor-pointer',
-        className
+        'transition-colors hover:bg-slate-700/30',
+        onClick ? 'cursor-pointer' : undefined,
+        className,
       )}
       onClick={onClick}
-    >
-      {children}
-    </tr>
-  );
-}
+      {...rest}
+    />
+  ),
+);
+TableRow.displayName = 'TableRow';
 
-interface TableHeadProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-export function TableHead({ children, className }: TableHeadProps) {
-  return (
+const TableHead = forwardRef<HTMLTableCellElement, ComponentPropsWithoutRef<'th'>>(
+  ({ className, ...rest }, ref) => (
     <th
+      ref={ref}
+      scope="col"
       className={cn(
-        'px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider',
-        className
+        'px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-400',
+        className,
       )}
-    >
-      {children}
-    </th>
-  );
-}
+      {...rest}
+    />
+  ),
+);
+TableHead.displayName = 'TableHead';
 
-interface TableCellProps {
-  children: React.ReactNode;
-  className?: string;
-}
+const TableCell = forwardRef<HTMLTableCellElement, ComponentPropsWithoutRef<'td'>>(
+  ({ className, ...rest }, ref) => (
+    <td ref={ref} className={cn('px-4 py-3 text-slate-300', className)} {...rest} />
+  ),
+);
+TableCell.displayName = 'TableCell';
 
-export function TableCell({ children, className }: TableCellProps) {
-  return <td className={cn('px-4 py-3 text-slate-300', className)}>{children}</td>;
-}
+export { Table, TableHeader, TableBody, TableRow, TableHead, TableCell };
+export type { TableProps, TableRowProps };

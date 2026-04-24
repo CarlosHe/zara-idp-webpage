@@ -1,1 +1,2 @@
-export { FreezesPage, FreezeDetailPage } from './components/FreezesPage';
+export { FreezesPage } from './components/FreezesPage';
+export { FreezeDetailPage } from './components/FreezeDetailPage';

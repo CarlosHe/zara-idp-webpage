@@ -32,7 +32,7 @@ export interface Resource {
     labels: Record<string, string>;
     annotations: Record<string, string>;
   };
-  spec: Record<string, any>;
+  spec: Record<string, unknown>;
   status: string;
   provider?: string;
   version: number;
@@ -145,7 +145,10 @@ export interface Team {
     members?: TeamMember[];
     onCall?: {
       primaryChannel: string;
-      escalation?: any[];
+      escalation?: Array<{
+        channel: string;
+        delayMinutes?: number;
+      }>;
       schedule?: {
         type: string;
         timezone: string;
@@ -388,10 +391,12 @@ export type DriftSeverity = 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
 export type ChangeType = 'ADDED' | 'REMOVED' | 'MODIFIED' | 'MISMATCH';
 
+export type DriftValue = string | number | boolean | null | DriftValue[] | { [key: string]: DriftValue };
+
 export interface DriftChange {
   field: string;
-  desired: any;
-  observed: any;
+  desired: DriftValue;
+  observed: DriftValue;
   changeType: ChangeType;
   impact: string;
   severity: DriftSeverity;

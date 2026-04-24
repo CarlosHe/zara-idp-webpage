@@ -1,1 +1,2 @@
-export { AuditPage, AuditDetailPage } from './components/AuditPage';
+export { AuditPage } from './components/AuditPage';
+export { AuditDetailPage } from './components/AuditDetailPage';

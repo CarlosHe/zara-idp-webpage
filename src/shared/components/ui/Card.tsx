@@ -1,64 +1,78 @@
+import { forwardRef, type ComponentPropsWithoutRef } from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/shared/utils';
 
-interface CardProps {
-  children: React.ReactNode;
-  className?: string;
-  padding?: 'none' | 'sm' | 'md' | 'lg';
-}
+const cardVariants = cva('rounded-lg border', {
+  variants: {
+    variant: {
+      default: 'bg-slate-800/50 border-slate-700/50',
+      elevated: 'bg-slate-800 border-slate-700 shadow-sm',
+      outline: 'bg-transparent border-slate-700/50',
+    },
+    padding: {
+      none: '',
+      sm: 'p-3',
+      md: 'p-4',
+      lg: 'p-6',
+    },
+  },
+  defaultVariants: {
+    variant: 'default',
+    padding: 'md',
+  },
+});
 
-export function Card({ children, className, padding = 'md' }: CardProps) {
-  const paddingClasses = {
-    none: '',
-    sm: 'p-3',
-    md: 'p-4',
-    lg: 'p-6',
-  };
+interface CardProps
+  extends ComponentPropsWithoutRef<'div'>,
+    VariantProps<typeof cardVariants> {}
 
-  return (
+const Card = forwardRef<HTMLDivElement, CardProps>(
+  ({ className, variant, padding, ...rest }, ref) => (
     <div
-      className={cn(
-        'bg-slate-800/50 border border-slate-700/50 rounded-lg',
-        paddingClasses[padding],
-        className
-      )}
-    >
-      {children}
-    </div>
-  );
-}
+      ref={ref}
+      className={cn(cardVariants({ variant, padding }), className)}
+      {...rest}
+    />
+  ),
+);
+Card.displayName = 'Card';
 
-interface CardHeaderProps {
-  children: React.ReactNode;
-  className?: string;
-}
+const CardHeader = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<'div'>>(
+  ({ className, ...rest }, ref) => (
+    <div ref={ref} className={cn('mb-4 flex flex-col gap-1', className)} {...rest} />
+  ),
+);
+CardHeader.displayName = 'CardHeader';
 
-export function CardHeader({ children, className }: CardHeaderProps) {
-  return <div className={cn('mb-4', className)}>{children}</div>;
-}
+const CardTitle = forwardRef<HTMLHeadingElement, ComponentPropsWithoutRef<'h3'>>(
+  ({ className, ...rest }, ref) => (
+    <h3
+      ref={ref}
+      className={cn('text-lg font-semibold text-slate-100', className)}
+      {...rest}
+    />
+  ),
+);
+CardTitle.displayName = 'CardTitle';
 
-interface CardTitleProps {
-  children: React.ReactNode;
-  className?: string;
-}
+const CardDescription = forwardRef<HTMLParagraphElement, ComponentPropsWithoutRef<'p'>>(
+  ({ className, ...rest }, ref) => (
+    <p ref={ref} className={cn('text-sm text-slate-400', className)} {...rest} />
+  ),
+);
+CardDescription.displayName = 'CardDescription';
 
-export function CardTitle({ children, className }: CardTitleProps) {
-  return <h3 className={cn('text-lg font-semibold text-slate-100', className)}>{children}</h3>;
-}
+const CardContent = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<'div'>>(
+  ({ className, ...rest }, ref) => <div ref={ref} className={cn(className)} {...rest} />,
+);
+CardContent.displayName = 'CardContent';
 
-interface CardDescriptionProps {
-  children: React.ReactNode;
-  className?: string;
-}
+const CardFooter = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<'div'>>(
+  ({ className, ...rest }, ref) => (
+    <div ref={ref} className={cn('mt-4 flex items-center gap-2', className)} {...rest} />
+  ),
+);
+CardFooter.displayName = 'CardFooter';
 
-export function CardDescription({ children, className }: CardDescriptionProps) {
-  return <p className={cn('text-sm text-slate-400 mt-1', className)}>{children}</p>;
-}
-
-interface CardContentProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-export function CardContent({ children, className }: CardContentProps) {
-  return <div className={cn(className)}>{children}</div>;
-}
+export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, cardVariants };
+export type { CardProps };
