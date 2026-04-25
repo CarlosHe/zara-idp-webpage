@@ -33,6 +33,7 @@ export const baseApi = createApi({
     'Catalog',
     'Search',
     'TechDocs',
+    'Plugin',
   ],
   endpoints: () => ({}),
   // 60 s default cache window: short enough that pages feel fresh,
