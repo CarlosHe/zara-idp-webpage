@@ -70,7 +70,7 @@ function CatalogEntityCard({ entity, reindexing, onReindex }: CatalogEntityCardP
             </CardTitle>
             <p className="mt-1 text-sm text-slate-400">{entity.key}</p>
           </div>
-          <Badge variant="secondary">{entity.kind}</Badge>
+          <Badge variant="info">{entity.kind}</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">

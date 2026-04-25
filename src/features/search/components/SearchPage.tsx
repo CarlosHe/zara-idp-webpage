@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Search } from 'lucide-react';
 import { PageHeader } from '@/shared/components/feedback';
 import { Badge, Button, Card, CardContent, Input } from '@/shared/components/ui';
