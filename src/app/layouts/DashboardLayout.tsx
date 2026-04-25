@@ -2,6 +2,8 @@ import { NavLink, Outlet } from 'react-router-dom';
 import {
   LayoutDashboard,
   Boxes,
+  Search,
+  BookOpen,
   Users,
   CheckSquare,
   History,
@@ -23,6 +25,9 @@ import { SkipLink } from '@/shared/components/feedback';
 const navigation = [
   { name: 'Dashboard', href: ROUTES.DASHBOARD, icon: LayoutDashboard },
   { name: 'Resources', href: ROUTES.RESOURCES.LIST, icon: Boxes },
+  { name: 'Catalog', href: ROUTES.CATALOG.LIST, icon: Boxes },
+  { name: 'Search', href: ROUTES.SEARCH, icon: Search },
+  { name: 'Docs', href: ROUTES.DOCS, icon: BookOpen },
   { name: 'Teams', href: ROUTES.TEAMS.LIST, icon: Users },
   { name: 'Approvals', href: ROUTES.APPROVALS.LIST, icon: CheckSquare },
   { name: 'Audit Log', href: ROUTES.AUDIT.LIST, icon: History },

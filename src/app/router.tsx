@@ -19,6 +19,18 @@ const DashboardPage = lazy(() =>
 const ResourcesPage = lazy(() =>
   import('@/features/resources').then((m) => ({ default: m.ResourcesPage })),
 );
+const CatalogPage = lazy(() =>
+  import('@/features/catalog').then((m) => ({ default: m.CatalogPage })),
+);
+const CatalogDetailPage = lazy(() =>
+  import('@/features/catalog').then((m) => ({ default: m.CatalogDetailPage })),
+);
+const SearchPage = lazy(() =>
+  import('@/features/search').then((m) => ({ default: m.SearchPage })),
+);
+const DocsPage = lazy(() =>
+  import('@/features/docs').then((m) => ({ default: m.DocsPage })),
+);
 const TeamsPage = lazy(() =>
   import('@/features/teams').then((m) => ({ default: m.TeamsPage })),
 );
@@ -100,6 +112,14 @@ export const router = createBrowserRouter([
             path: 'resources/:kind/:namespace/:name',
             element: withSuspense(ResourcesPage),
           },
+
+          { path: 'catalog', element: withSuspense(CatalogPage) },
+          {
+            path: 'catalog/:kind/:namespace/:name',
+            element: withSuspense(CatalogDetailPage),
+          },
+          { path: 'search', element: withSuspense(SearchPage) },
+          { path: 'docs', element: withSuspense(DocsPage) },
 
           { path: 'teams', element: withSuspense(TeamsPage) },
           { path: 'teams/:name', element: withSuspense(TeamDetailPage) },

@@ -12,6 +12,12 @@ export const ROUTES = {
       `/resources/${kind}/${namespace}/${name}` as const,
   },
 
+  CATALOG: {
+    LIST: '/catalog',
+    DETAIL: (kind: string, namespace: string, name: string) =>
+      `/catalog/${kind}/${namespace}/${name}` as const,
+  },
+
   TEAMS: {
     LIST: '/teams',
     DETAIL: (teamName: string) => `/teams/${teamName}` as const,
@@ -45,4 +51,6 @@ export const ROUTES = {
   NAMESPACES: '/namespaces',
   ANALYTICS: '/analytics',
   PLUGINS: '/plugins',
+  SEARCH: '/search',
+  DOCS: '/docs',
 } as const;
