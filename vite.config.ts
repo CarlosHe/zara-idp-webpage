@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { visualizer } from 'rollup-plugin-visualizer';
 import path from 'path';
+import { securityHeadersPlugin } from './scripts/security-headers';
 
 // Bundle visualizer output lives at dist/stats.html. CI uploads it as a
 // per-PR artifact so we can eyeball regressions. `ANALYZE=true npm run
@@ -53,6 +54,10 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    // Sprint 11 / L-1105: CSP + COOP/COEP + nosniff + referrer policy
+    // injected into the built index.html and applied to every
+    // dev/preview HTTP response. Source of truth: scripts/security-headers.ts.
+    securityHeadersPlugin(),
     visualizer({
       filename: 'dist/stats.html',
       gzipSize: true,

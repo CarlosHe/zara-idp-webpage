@@ -61,6 +61,15 @@ function redirectToLogin(): void {
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: API_BASE_URL,
+  // Sprint 11 / L-1107: explicit `credentials: 'omit'` documents that
+  // the app authenticates exclusively via Bearer tokens stored in
+  // localStorage. No session cookies are sent, so CSRF is N/A — the
+  // attacker can't forge an Authorization header from another origin.
+  // If a future feature switches to session cookies, this flag MUST
+  // change to `'include'` AND a CSRF-token header (X-CSRF-Token,
+  // double-submit) must be wired up. See
+  // `.claude/docs/front/15-CONTENT-SECURITY.md` §CSRF.
+  credentials: 'omit',
   prepareHeaders: (headers) => {
     headers.set('Content-Type', 'application/json');
     headers.set('X-Correlation-ID', newCorrelationId());

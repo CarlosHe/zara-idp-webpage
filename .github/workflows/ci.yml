@@ -34,6 +34,46 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+      # Sprint 11 / L-1109: ship a CycloneDX SBOM for every PR build.
+      # `npm sbom` lists every runtime + dev dep with version + license.
+      # Uploaded as an artifact; the deployment release pipeline picks
+      # it up to attach to GitHub releases.
+      - name: Generate CycloneDX SBOM
+        if: always()
+        run: |
+          npm sbom --sbom-format=cyclonedx --omit=dev > sbom-frontend-cyclonedx.json
+
+      - name: Upload SBOM
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-frontend-cyclonedx
+          path: sbom-frontend-cyclonedx.json
+          retention-days: 14
+
+  # Sprint 11 / L-1110: dependency-tree vuln scan as a job that fails
+  # closed on HIGH+CRITICAL. `npm audit --audit-level=high` already
+  # runs inside `npm run verify`; this job re-runs it explicitly so a
+  # newly-published advisory blocks merges as soon as GitHub picks
+  # it up (independent of cached node_modules).
+  audit:
+    name: npm audit (HIGH+CRITICAL fails the build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: npm audit --omit=dev --audit-level=high
+        run: npm audit --omit=dev --audit-level=high
+
   lighthouse:
     name: Lighthouse CI (perf ≥90 / a11y ≥95 / bp ≥95 / seo ≥90)
     runs-on: ubuntu-latest

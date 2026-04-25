@@ -83,6 +83,28 @@ export default defineConfig([
           message:
             '<img> needs a `loading` attribute (`lazy` below the fold, `eager` for LCP). See `.claude/docs/front/10-PERFORMANCE.md`.',
         },
+        // Sprint 11 (L-1106): never render server HTML directly. Audit
+        // entries, changeset diffs, and policy descriptions must flow
+        // through `@/shared/lib/security/sanitize.ts` (DOMPurify) and
+        // be rendered as escaped React text or via a vetted markdown
+        // renderer. This rule prevents stored-XSS regressions even if
+        // the server is ever compromised. See
+        // `.claude/docs/front/15-CONTENT-SECURITY.md`.
+        {
+          selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']",
+          message:
+            'Never use dangerouslySetInnerHTML. Sanitize via `@/shared/lib/security/sanitize.ts` (DOMPurify) or render escaped React text. See `.claude/docs/front/15-CONTENT-SECURITY.md`.',
+        },
+        // Sprint 11 (L-1106): inline DOM script tags bypass the CSP
+        // `script-src 'self'` directive and reintroduce the XSS surface
+        // we just removed. Module scripts injected by Vite at build
+        // time are placed by the bundler and aren't subject to this
+        // rule (they're file-imported, not inline JSX).
+        {
+          selector: "JSXElement > JSXOpeningElement[name.name='script']",
+          message:
+            'Inline <script> bypasses CSP. Move logic to a TS module imported via the bundler. See `.claude/docs/front/15-CONTENT-SECURITY.md`.',
+        },
       ],
     },
   },
