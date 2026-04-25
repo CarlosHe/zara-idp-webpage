@@ -63,9 +63,6 @@ export default defineConfig({
       name: 'zara-idp-webpage',
       filename: 'remoteEntry.js',
       remotes: {},
-      exposes: {
-        './PluginSlotHost': './src/features/plugins/components/PluginSlotHost.tsx',
-      },
       shared: ['react', 'react-dom', 'react-router-dom', '@reduxjs/toolkit', 'react-redux'],
     }),
     visualizer({
