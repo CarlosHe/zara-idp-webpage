@@ -6,6 +6,7 @@ import { DashboardLayout } from './layouts/DashboardLayout';
 import { ErrorPage } from './routes/ErrorPage';
 import { NotFoundPage } from './routes/NotFoundPage';
 import { ProtectedRoute } from './guards/ProtectedRoute';
+import { GuestRoute } from './guards/GuestRoute';
 import { LoadingState } from '@/shared/components/feedback';
 import { ROUTES } from '@/shared/config';
 import { VitalsDebugPanel } from '@/shared/lib/observability/VitalsDebugPanel';
@@ -15,6 +16,9 @@ import { VitalsDebugPanel } from '@/shared/lib/observability/VitalsDebugPanel';
 
 const DashboardPage = lazy(() =>
   import('@/features/dashboard').then((m) => ({ default: m.DashboardPage })),
+);
+const LoginPage = lazy(() =>
+  import('@/features/auth').then((m) => ({ default: m.LoginPage })),
 );
 const ResourcesPage = lazy(() =>
   import('@/features/resources').then((m) => ({ default: m.ResourcesPage })),
@@ -98,6 +102,10 @@ export const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { path: '_vitals', element: <VitalsDebugPanel /> },
+      {
+        path: 'login',
+        element: <GuestRoute>{withSuspense(LoginPage)}</GuestRoute>,
+      },
       {
         element: (
           <ProtectedRoute>

@@ -3,6 +3,7 @@
 
 export { useGetMeQuery } from './services/authApi';
 export type { Principal } from './services/authApi';
+export { LoginPage } from './components/LoginPage';
 export {
   principalHasScope,
   principalHasAllScopes,
