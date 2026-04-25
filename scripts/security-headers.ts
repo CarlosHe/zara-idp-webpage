@@ -59,6 +59,21 @@ export function relaxedDevCsp(env: Record<string, string | undefined> = {}): str
 }
 
 /**
+ * CSP directives such as `frame-ancestors` are only valid as HTTP
+ * response headers. Browsers intentionally ignore them when the policy
+ * is delivered through `<meta http-equiv="Content-Security-Policy">`,
+ * so strip them from the defence-in-depth meta fallback to avoid noisy
+ * console warnings while keeping the canonical header strict.
+ */
+export function metaCompatibleCsp(csp: string): string {
+  return csp
+    .split(';')
+    .map((directive) => directive.trim())
+    .filter((directive) => directive !== '' && !directive.startsWith('frame-ancestors '))
+    .join('; ');
+}
+
+/**
  * Common security headers — same shape for dev and prod. CSP is
  * passed in so the caller picks strict vs relaxed.
  */
@@ -78,9 +93,9 @@ export function securityHeaders(csp: string): Record<string, string> {
 
 /**
  * Vite plugin that:
- *   1. Injects the prod CSP as a `<meta http-equiv>` into index.html so
- *      the static build carries the policy even when the deploy
- *      surface forgets to add the header.
+ *   1. Injects the meta-compatible CSP as a `<meta http-equiv>` into
+ *      index.html so the static build carries a partial policy even
+ *      when the deploy surface forgets to add the header.
  *   2. Adds the same headers to the dev/preview HTTP response so
  *      pages built with `vite` + `vite preview` behave identically to
  *      production for local QA.
@@ -99,7 +114,7 @@ export function securityHeadersPlugin(): Plugin {
         string,
         string | undefined
       >;
-      const csp = isBuild ? buildCsp(env) : relaxedDevCsp(env);
+      const csp = metaCompatibleCsp(isBuild ? buildCsp(env) : relaxedDevCsp(env));
       const tags = [
         { tag: 'meta', attrs: { 'http-equiv': 'Content-Security-Policy', content: csp }, injectTo: 'head-prepend' as const },
         { tag: 'meta', attrs: { 'http-equiv': 'X-Content-Type-Options', content: 'nosniff' }, injectTo: 'head-prepend' as const },
