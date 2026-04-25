@@ -45,7 +45,7 @@ export function SearchPage() {
                 placeholder="Search services, docs, and audit entries"
                 aria-label="Search query"
               />
-              <Button type="submit" isLoading={searchState.isLoading} disabled={scopes.length === 0}>
+              <Button type="submit" loading={searchState.isLoading} disabled={scopes.length === 0}>
                 Search
               </Button>
             </div>

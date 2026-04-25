@@ -84,7 +84,7 @@ function CatalogEntityCard({ entity, reindexing, onReindex }: CatalogEntityCardP
             <GitBranch className="h-4 w-4" aria-hidden />
             {relationshipCount} typed relationship{relationshipCount === 1 ? '' : 's'}
           </span>
-          <Button type="button" size="sm" variant="secondary" isLoading={reindexing} onClick={onReindex}>
+          <Button type="button" size="sm" variant="secondary" loading={reindexing} onClick={onReindex}>
             Reindex
           </Button>
         </div>
