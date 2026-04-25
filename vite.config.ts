@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import federation from '@originjs/vite-plugin-federation';
 import { visualizer } from 'rollup-plugin-visualizer';
 import path from 'path';
 import { securityHeadersPlugin } from './scripts/security-headers';
@@ -58,6 +59,15 @@ export default defineConfig({
     // injected into the built index.html and applied to every
     // dev/preview HTTP response. Source of truth: scripts/security-headers.ts.
     securityHeadersPlugin(),
+    federation({
+      name: 'zara-idp-webpage',
+      filename: 'remoteEntry.js',
+      remotes: {},
+      exposes: {
+        './PluginSlotHost': './src/features/plugins/components/PluginSlotHost.tsx',
+      },
+      shared: ['react', 'react-dom', 'react-router-dom', '@reduxjs/toolkit', 'react-redux'],
+    }),
     visualizer({
       filename: 'dist/stats.html',
       gzipSize: true,

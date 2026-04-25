@@ -67,6 +67,9 @@ const NamespacesPage = lazy(() =>
 const AnalyticsPage = lazy(() =>
   import('@/features/analytics').then((m) => ({ default: m.AnalyticsPage })),
 );
+const PluginsPage = lazy(() =>
+  import('@/features/plugins').then((m) => ({ default: m.PluginsPage })),
+);
 
 function withSuspense(Component: ComponentType) {
   return (
@@ -122,6 +125,7 @@ export const router = createBrowserRouter([
           { path: 'clusters', element: withSuspense(ClustersPage) },
           { path: 'namespaces', element: withSuspense(NamespacesPage) },
           { path: 'analytics', element: withSuspense(AnalyticsPage) },
+          { path: 'plugins', element: withSuspense(PluginsPage) },
 
           { path: '*', element: <NotFoundPage /> },
         ],

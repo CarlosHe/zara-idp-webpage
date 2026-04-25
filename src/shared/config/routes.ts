@@ -44,4 +44,5 @@ export const ROUTES = {
   CLUSTERS: '/clusters',
   NAMESPACES: '/namespaces',
   ANALYTICS: '/analytics',
+  PLUGINS: '/plugins',
 } as const;
