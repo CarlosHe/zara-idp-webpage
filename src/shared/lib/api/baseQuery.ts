@@ -5,6 +5,7 @@ import {
   type FetchArgs,
   type FetchBaseQueryError,
 } from '@reduxjs/toolkit/query/react';
+import { addBreadcrumb } from '@/shared/lib/observability';
 import { publishToast } from '@/shared/lib/toasts';
 
 // Relative by default so Vite's dev proxy + the production Nginx
@@ -98,6 +99,18 @@ const baseQueryWithAuth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQuery
   const status = result.error.status;
   const correlationId = extractCorrelationId(result.error);
 
+  addBreadcrumb({
+    category: 'rtk-query',
+    level: 'error',
+    message: 'RTK Query request failed',
+    data: {
+      endpoint: api.endpoint,
+      method: methodFromArgs(args),
+      status,
+      correlationId,
+    },
+  });
+
   if (status === 401) {
     try {
       if (typeof window !== 'undefined') {
@@ -143,6 +156,11 @@ function extractCorrelationId(error: FetchBaseQueryError): string | undefined {
     }
   }
   return undefined;
+}
+
+function methodFromArgs(args: string | FetchArgs): string {
+  if (typeof args === 'string') return 'GET';
+  return args.method ?? 'GET';
 }
 
 // Retry only on 5xx / network errors. RTK Query's `retry` wrapper shorts

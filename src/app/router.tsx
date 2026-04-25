@@ -8,6 +8,7 @@ import { NotFoundPage } from './routes/NotFoundPage';
 import { ProtectedRoute } from './guards/ProtectedRoute';
 import { LoadingState } from '@/shared/components/feedback';
 import { ROUTES } from '@/shared/config';
+import { VitalsDebugPanel } from '@/shared/lib/observability/VitalsDebugPanel';
 
 // Each feature barrel exports its page component(s) as named exports.
 // React.lazy wants `{ default: Component }`, so we adapt with .then().
@@ -81,6 +82,7 @@ export const router = createBrowserRouter([
     element: <RootLayout />,
     errorElement: <ErrorPage />,
     children: [
+      { path: '_vitals', element: <VitalsDebugPanel /> },
       {
         element: (
           <ProtectedRoute>

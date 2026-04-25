@@ -19,7 +19,16 @@ type SentryModule = {
   init(options: Record<string, unknown>): void;
   withScope(cb: (scope: SentryScope) => void): void;
   captureException(error: unknown): void;
+  addBreadcrumb?(breadcrumb: SentryBreadcrumb): void;
 };
+
+interface SentryBreadcrumb {
+  category: string;
+  message?: string;
+  level?: 'debug' | 'info' | 'warning' | 'error';
+  data?: Record<string, unknown>;
+  timestamp?: number;
+}
 
 export type { SentryModule };
 
@@ -103,6 +112,18 @@ export function logErrorToService(
       if (app.correlationId) scope.setTag('app.correlationId', app.correlationId);
       if (context) scope.setContext('context', context);
       Sentry.captureException(app);
+    });
+  });
+}
+
+export function addBreadcrumb(breadcrumb: SentryBreadcrumb): void {
+  if (!initialized) return;
+
+  void loadSentry().then((Sentry) => {
+    if (!Sentry?.addBreadcrumb) return;
+    Sentry.addBreadcrumb({
+      ...breadcrumb,
+      timestamp: breadcrumb.timestamp ?? Date.now() / 1000,
     });
   });
 }

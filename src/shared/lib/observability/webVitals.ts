@@ -12,6 +12,10 @@ import { onCLS, onFCP, onINP, onLCP, onTTFB, type Metric } from 'web-vitals';
 
 export type VitalsReporter = (metric: Metric) => void;
 
+type VitalsSubscriber = (metric: Metric) => void;
+
+const subscribers = new Set<VitalsSubscriber>();
+
 interface ReportWebVitalsOptions {
   reporter?: VitalsReporter;
   endpoint?: string;
@@ -19,7 +23,11 @@ interface ReportWebVitalsOptions {
 
 export function reportWebVitals(options: ReportWebVitalsOptions = {}): void {
   const endpoint = options.endpoint ?? getViteEnv('VITE_ANALYTICS_ENDPOINT');
-  const reporter = options.reporter ?? defaultReporter(endpoint);
+  const configuredReporter = options.reporter ?? defaultReporter(endpoint);
+  const reporter: VitalsReporter = (metric) => {
+    configuredReporter(metric);
+    notifySubscribers(metric);
+  };
 
   onCLS(reporter);
   onINP(reporter);
@@ -66,6 +74,15 @@ export function serializeMetric(metric: Metric) {
 export function defaultReporter(endpoint: string | undefined): VitalsReporter {
   if (endpoint) return (metric) => sendToAnalytics(endpoint, metric);
   return devLogger;
+}
+
+export function subscribeToWebVitals(subscriber: VitalsSubscriber): () => void {
+  subscribers.add(subscriber);
+  return () => subscribers.delete(subscriber);
+}
+
+function notifySubscribers(metric: Metric): void {
+  subscribers.forEach((subscriber) => subscriber(metric));
 }
 
 const devLogger: VitalsReporter = (metric) => {
