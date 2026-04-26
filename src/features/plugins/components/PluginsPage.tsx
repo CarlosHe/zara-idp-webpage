@@ -11,6 +11,8 @@ import {
 } from '@/shared/components/ui';
 import { DataEmptyState, LoadingState } from '@/shared/components/feedback';
 import { errorMessage } from '@/shared/lib/api';
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
+import type { SerializedError } from '@reduxjs/toolkit';
 import {
   useListPluginsQuery,
   useListPluginSlotsQuery,
@@ -19,6 +21,11 @@ import {
 } from '../services/pluginsApi';
 import type { PluginHealthState, PluginRecord } from '../types/plugins';
 import { PluginSlotHost } from './PluginSlotHost';
+
+function toRtkError(err: unknown): FetchBaseQueryError | SerializedError | undefined {
+  if (!err || typeof err !== 'object') return undefined;
+  return err as FetchBaseQueryError | SerializedError;
+}
 
 const HEALTH_BADGE: Record<PluginHealthState, { label: string; variant: 'success' | 'warning' | 'danger' | 'outline' }> = {
   healthy: { label: 'Healthy', variant: 'success' },
@@ -46,7 +53,7 @@ export function PluginsPage() {
       const out = await uninstallPlugin(plugin.name).unwrap();
       setActionMessage(`Uninstall ChangeSet created (${out.changesetId})`);
     } catch (err) {
-      setActionMessage(`Uninstall failed: ${errorMessage(err)}`);
+      setActionMessage(`Uninstall failed: ${errorMessage(toRtkError(err))}`);
     }
   };
 
@@ -55,7 +62,7 @@ export function PluginsPage() {
       const snap = await probeHealth(plugin.name).unwrap();
       setActionMessage(`${plugin.name} is now ${snap.state}`);
     } catch (err) {
-      setActionMessage(`Health probe failed: ${errorMessage(err)}`);
+      setActionMessage(`Health probe failed: ${errorMessage(toRtkError(err))}`);
     }
   };
 
@@ -90,7 +97,7 @@ export function PluginsPage() {
             <DataEmptyState
               icon={<Puzzle className="h-12 w-12 text-slate-400" aria-hidden="true" />}
               title="Plugin registry unavailable"
-              description={errorMessage(pluginsErrObj)}
+              description={errorMessage(toRtkError(pluginsErrObj))}
             />
           ) : !plugins || plugins.length === 0 ? (
             <DataEmptyState
@@ -151,7 +158,7 @@ export function PluginsPage() {
                     </Button>
                     <Button
                       type="button"
-                      variant="destructive"
+                      variant="danger"
                       onClick={() => handleUninstall(plugin)}
                       disabled={uninstalling}
                     >
