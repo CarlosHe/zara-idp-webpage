@@ -772,6 +772,7 @@ export const categoryLabels: Record<GoldenPathCategory, string> = {
   observability: 'Observability & Monitoring',
   cicd: 'CI/CD & Automation',
   organization: 'Organization & Governance',
+  service: 'Services',
 };
 
 export const goldenPathCategoryOrder: GoldenPathCategory[] = [

@@ -36,6 +36,7 @@ export const baseApi = createApi({
     'SavedSearch',
     'TechDocs',
     'Plugin',
+    'GoldenPath',
   ],
   endpoints: () => ({}),
   // 60 s default cache window: short enough that pages feel fresh,

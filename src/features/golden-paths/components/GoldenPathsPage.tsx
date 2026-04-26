@@ -1,28 +1,10 @@
-import { useGoldenPathBuilder } from '../hooks/useGoldenPathBuilder';
-import { GoldenPathBuilder } from './GoldenPathBuilder';
-import { GoldenPathCatalog } from './GoldenPathCatalog';
+import { GoldenPathMarketplace } from './GoldenPathMarketplace';
 
+// Sprint-19 / L-1908 — the Golden Paths route now points at the
+// registry-driven marketplace. The legacy local-template builder
+// (`GoldenPathBuilder` + hardcoded fixtures) remains in this folder
+// as a development scaffold and is no longer wired to the page so
+// users always see the live registry contract.
 export function GoldenPathsPage() {
-  const builder = useGoldenPathBuilder();
-
-  if (!builder.selectedPath) {
-    return <GoldenPathCatalog onSelect={builder.selectPath} />;
-  }
-
-  return (
-    <GoldenPathBuilder
-      path={builder.selectedPath}
-      formValues={builder.formValues}
-      generatedYaml={builder.generatedYaml}
-      copied={builder.copied}
-      applying={builder.applying}
-      applyStatus={builder.applyStatus}
-      isFormValid={builder.isFormValid}
-      onBack={builder.clearPath}
-      onChange={builder.setFormValue}
-      onGenerate={builder.generate}
-      onCopy={builder.copy}
-      onApply={builder.apply}
-    />
-  );
+  return <GoldenPathMarketplace />;
 }
