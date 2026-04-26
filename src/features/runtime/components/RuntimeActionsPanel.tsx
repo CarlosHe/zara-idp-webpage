@@ -51,7 +51,7 @@ export function RuntimeActionsPanel({ workload }: Props) {
   }
 
   function handleError(action: string, err: unknown) {
-    const message = errorMessage(err) ?? `${action} action failed`;
+    const message = errorMessage(err as Parameters<typeof errorMessage>[0]) ?? `${action} action failed`;
     toast.error(message, `${action} failed`);
   }
 
