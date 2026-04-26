@@ -17,6 +17,8 @@ import {
   BarChart3,
   FolderTree,
   Plug,
+  ShieldCheck,
+  Server,
 } from 'lucide-react';
 import { cn } from '@/shared/utils';
 import { ROUTES } from '@/shared/config';
@@ -41,6 +43,8 @@ const navigation = [
   { name: 'Clusters', href: ROUTES.CLUSTERS, icon: Globe },
   { name: 'Namespaces', href: ROUTES.NAMESPACES, icon: FolderTree },
   { name: 'Analytics', href: ROUTES.ANALYTICS, icon: BarChart3 },
+  { name: 'Runtime', href: ROUTES.RUNTIME, icon: Server },
+  { name: 'Scorecards', href: ROUTES.SCORECARDS, icon: ShieldCheck },
 ];
 
 export function DashboardLayout() {

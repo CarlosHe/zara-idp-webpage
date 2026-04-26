@@ -56,4 +56,6 @@ export const ROUTES = {
   SEARCH: '/search',
   DOCS: '/docs',
   APIS: '/apis',
+  RUNTIME: '/runtime',
+  SCORECARDS: '/scorecards',
 } as const;
