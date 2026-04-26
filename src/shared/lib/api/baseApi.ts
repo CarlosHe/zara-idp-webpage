@@ -33,6 +33,7 @@ export const baseApi = createApi({
     'Catalog',
     'CatalogSource',
     'Search',
+    'SavedSearch',
     'TechDocs',
     'Plugin',
   ],

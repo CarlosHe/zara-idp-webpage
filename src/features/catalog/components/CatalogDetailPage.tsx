@@ -4,6 +4,7 @@ import { PageHeader, ErrorState, LoadingState } from '@/shared/components/feedba
 import { Badge, Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui';
 import { errorMessage } from '@/shared/lib/api';
 import { useGetCatalogEntityQuery } from '../services/catalogApi';
+import { CatalogEntityGraph } from './CatalogEntityGraph';
 
 export function CatalogDetailPage() {
   const params = useParams<{ kind: string; namespace: string; name: string }>();
@@ -69,6 +70,8 @@ export function CatalogDetailPage() {
           </CardContent>
         </Card>
       </div>
+
+      <CatalogEntityGraph kind={key.kind} namespace={key.namespace} name={key.name} />
     </div>
   );
 }

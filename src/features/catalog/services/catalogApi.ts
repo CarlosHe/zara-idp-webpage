@@ -1,5 +1,5 @@
 import { baseApi, unwrapItems } from '@/shared/lib/api';
-import type { CatalogEntity, CatalogListParams } from '../types';
+import type { CatalogEntity, CatalogGraphResponse, CatalogListParams } from '../types';
 
 export const catalogApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
@@ -36,6 +36,16 @@ export const catalogApi = baseApi.injectEndpoints({
         { type: 'Search', id: 'LIST' },
       ],
     }),
+    getCatalogEntityGraph: build.query<
+      CatalogGraphResponse,
+      { kind: string; namespace: string; name: string }
+    >({
+      query: ({ kind, namespace, name }) =>
+        `/catalog/${kind}/${namespace}/${name}/graph`,
+      providesTags: (_result, _err, arg) => [
+        { type: 'Catalog', id: `graph:${arg.kind}/${arg.namespace}/${arg.name}` },
+      ],
+    }),
   }),
   overrideExisting: false,
 });
@@ -44,4 +54,5 @@ export const {
   useListCatalogEntitiesQuery,
   useGetCatalogEntityQuery,
   useReindexCatalogEntityMutation,
+  useGetCatalogEntityGraphQuery,
 } = catalogApi;
