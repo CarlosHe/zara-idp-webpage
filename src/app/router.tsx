@@ -29,6 +29,9 @@ const CatalogPage = lazy(() =>
 const CatalogDetailPage = lazy(() =>
   import('@/features/catalog').then((m) => ({ default: m.CatalogDetailPage })),
 );
+const CatalogSourcesPage = lazy(() =>
+  import('@/features/catalog-sources').then((m) => ({ default: m.CatalogSourcesPage })),
+);
 const SearchPage = lazy(() =>
   import('@/features/search').then((m) => ({ default: m.SearchPage })),
 );
@@ -122,6 +125,7 @@ export const router = createBrowserRouter([
           },
 
           { path: 'catalog', element: withSuspense(CatalogPage) },
+          { path: 'catalog/sources', element: withSuspense(CatalogSourcesPage) },
           {
             path: 'catalog/:kind/:namespace/:name',
             element: withSuspense(CatalogDetailPage),

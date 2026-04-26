@@ -31,6 +31,7 @@ export const baseApi = createApi({
     'BusinessDomain',
     'Analytics',
     'Catalog',
+    'CatalogSource',
     'Search',
     'TechDocs',
     'Plugin',

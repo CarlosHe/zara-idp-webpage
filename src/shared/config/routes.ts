@@ -17,6 +17,7 @@ export const ROUTES = {
     LIST: '/catalog',
     DETAIL: (kind: string, namespace: string, name: string) =>
       `/catalog/${kind}/${namespace}/${name}` as const,
+    SOURCES: '/catalog/sources',
   },
 
   TEAMS: {
