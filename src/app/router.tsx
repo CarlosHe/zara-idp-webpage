@@ -89,6 +89,9 @@ const AnalyticsPage = lazy(() =>
 const PluginsPage = lazy(() =>
   import('@/features/plugins').then((m) => ({ default: m.PluginsPage })),
 );
+const APIIntelligencePage = lazy(() =>
+  import('@/features/apis').then((m) => ({ default: m.APIIntelligencePage })),
+);
 
 function withSuspense(Component: ComponentType) {
   return (
@@ -158,6 +161,7 @@ export const router = createBrowserRouter([
           { path: 'namespaces', element: withSuspense(NamespacesPage) },
           { path: 'analytics', element: withSuspense(AnalyticsPage) },
           { path: 'plugins', element: withSuspense(PluginsPage) },
+          { path: 'apis', element: withSuspense(APIIntelligencePage) },
 
           { path: '*', element: <NotFoundPage /> },
         ],

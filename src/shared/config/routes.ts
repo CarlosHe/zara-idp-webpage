@@ -55,4 +55,5 @@ export const ROUTES = {
   PLUGINS: '/plugins',
   SEARCH: '/search',
   DOCS: '/docs',
+  APIS: '/apis',
 } as const;

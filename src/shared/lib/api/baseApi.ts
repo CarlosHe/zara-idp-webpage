@@ -35,6 +35,8 @@ export const baseApi = createApi({
     'Search',
     'SavedSearch',
     'TechDocs',
+    'DocSet',
+    'APIEntry',
     'Plugin',
     'GoldenPath',
   ],

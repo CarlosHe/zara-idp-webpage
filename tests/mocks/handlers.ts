@@ -149,4 +149,8 @@ export const handlers = [
   http.get(`${API}/analytics/summary`, () => HttpResponse.json({ series: [] })),
   http.get(`${API}/plugins`, () => HttpResponse.json({ items: [] })),
   http.get(`${API}/catalog-sources`, () => HttpResponse.json({ items: [] })),
+  http.get(`${API}/docs`, () => HttpResponse.json({ items: [] })),
+  http.get(`${API}/docsets`, () => HttpResponse.json({ items: [] })),
+  http.get(`${API}/apis`, () => HttpResponse.json({ items: [] })),
+  http.get(`${API}/golden-paths`, () => HttpResponse.json({ items: [] })),
 ];

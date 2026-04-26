@@ -16,6 +16,7 @@ import {
   Globe,
   BarChart3,
   FolderTree,
+  Plug,
 } from 'lucide-react';
 import { cn } from '@/shared/utils';
 import { ROUTES } from '@/shared/config';
@@ -28,6 +29,7 @@ const navigation = [
   { name: 'Catalog', href: ROUTES.CATALOG.LIST, icon: Boxes },
   { name: 'Search', href: ROUTES.SEARCH, icon: Search },
   { name: 'Docs', href: ROUTES.DOCS, icon: BookOpen },
+  { name: 'APIs', href: ROUTES.APIS, icon: Plug },
   { name: 'Teams', href: ROUTES.TEAMS.LIST, icon: Users },
   { name: 'Approvals', href: ROUTES.APPROVALS.LIST, icon: CheckSquare },
   { name: 'Audit Log', href: ROUTES.AUDIT.LIST, icon: History },
