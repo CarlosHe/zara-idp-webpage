@@ -62,4 +62,8 @@ export const ROUTES = {
   APIS: '/apis',
   RUNTIME: '/runtime',
   SCORECARDS: '/scorecards',
+  // Sprint-25 / L-2504, L-2507 — notifications inbox + preferences,
+  // and the incident console.
+  NOTIFICATIONS: '/notifications',
+  INCIDENTS: '/incidents',
 } as const;

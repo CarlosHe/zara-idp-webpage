@@ -101,6 +101,14 @@ const ScorecardsPage = lazy(() =>
 const HomePage = lazy(() =>
   import('@/features/home').then((m) => ({ default: m.HomePage })),
 );
+const NotificationsPage = lazy(() =>
+  import('@/features/notifications').then((m) => ({
+    default: m.NotificationsPage,
+  })),
+);
+const IncidentsPage = lazy(() =>
+  import('@/features/incidents').then((m) => ({ default: m.IncidentsPage })),
+);
 
 function withSuspense(Component: ComponentType) {
   return (
@@ -175,6 +183,10 @@ export const router = createBrowserRouter([
           { path: 'apis', element: withSuspense(APIIntelligencePage) },
           { path: 'runtime', element: withSuspense(RuntimePage) },
           { path: 'scorecards', element: withSuspense(ScorecardsPage) },
+
+          // Sprint-25 / L-2504 + L-2507 — notifications inbox + incident console.
+          { path: 'notifications', element: withSuspense(NotificationsPage) },
+          { path: 'incidents', element: withSuspense(IncidentsPage) },
 
           { path: '*', element: <NotFoundPage /> },
         ],

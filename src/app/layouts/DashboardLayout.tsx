@@ -20,6 +20,8 @@ import {
   Plug,
   ShieldCheck,
   Server,
+  BellRing,
+  Siren,
 } from 'lucide-react';
 import { cn } from '@/shared/utils';
 import { ROUTES } from '@/shared/config';
@@ -47,6 +49,8 @@ const navigation = [
   { name: 'Analytics', href: ROUTES.ANALYTICS, icon: BarChart3 },
   { name: 'Runtime', href: ROUTES.RUNTIME, icon: Server },
   { name: 'Scorecards', href: ROUTES.SCORECARDS, icon: ShieldCheck },
+  { name: 'Notifications', href: ROUTES.NOTIFICATIONS, icon: BellRing },
+  { name: 'Incidents', href: ROUTES.INCIDENTS, icon: Siren },
 ];
 
 export function DashboardLayout() {
