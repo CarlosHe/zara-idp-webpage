@@ -55,6 +55,7 @@ export const baseApi = createApi({
     'CostDashboard',
     'CostBudget',
     'CostFinding',
+    'Environment',
   ],
   endpoints: () => ({}),
   // 60 s default cache window: short enough that pages feel fresh,

@@ -113,6 +113,12 @@ const CostPage = lazy(() =>
   import('@/features/cost').then((m) => ({ default: m.CostPage })),
 );
 
+const EnvironmentsPage = lazy(() =>
+  import('@/features/environments').then((m) => ({
+    default: m.EnvironmentsPage,
+  })),
+);
+
 function withSuspense(Component: ComponentType) {
   return (
     <Suspense fallback={<LoadingState message="Loading..." />}>
@@ -192,6 +198,8 @@ export const router = createBrowserRouter([
           { path: 'incidents', element: withSuspense(IncidentsPage) },
           // Sprint-26 / L-2605 — FinOps cost dashboard.
           { path: 'cost', element: withSuspense(CostPage) },
+          // Sprint-27 / L-2705 — governed dev environments dashboard.
+          { path: 'environments', element: withSuspense(EnvironmentsPage) },
 
           { path: '*', element: <NotFoundPage /> },
         ],

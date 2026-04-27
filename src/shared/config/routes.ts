@@ -68,4 +68,6 @@ export const ROUTES = {
   INCIDENTS: '/incidents',
   // Sprint-26 / L-2605 — FinOps dashboard.
   COST: '/cost',
+  // Sprint-27 / L-2705 — governed dev environments dashboard.
+  ENVIRONMENTS: '/environments',
 } as const;
