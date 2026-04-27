@@ -153,4 +153,32 @@ export const handlers = [
   http.get(`${API}/docsets`, () => HttpResponse.json({ items: [] })),
   http.get(`${API}/apis`, () => HttpResponse.json({ items: [] })),
   http.get(`${API}/golden-paths`, () => HttpResponse.json({ items: [] })),
+
+  // Sprint-24 / L-2403..L-2407 — personalised home endpoints.
+  // Tests override this default with a richer fixture via
+  // `server.use(...)` when they need to assert specific widgets.
+  http.get(`${API}/home`, () =>
+    HttpResponse.json({
+      persona: 'developer',
+      subject: 'alice',
+      generatedAt: '2026-04-26T12:00:00Z',
+      approvals: [],
+      alerts: [],
+      activity: [],
+      services: [],
+      quickLinks: [],
+      recommendations: [],
+      counts: {
+        approvals: 0,
+        alerts: 0,
+        criticalAlerts: 0,
+        activity: 0,
+        services: 0,
+        quickLinks: 0,
+        recommendations: 0,
+      },
+      degraded: [],
+    }),
+  ),
+  http.post(`${API}/home/actions`, () => new HttpResponse(null, { status: 204 })),
 ];

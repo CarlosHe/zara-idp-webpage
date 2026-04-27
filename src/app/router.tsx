@@ -98,6 +98,9 @@ const RuntimePage = lazy(() =>
 const ScorecardsPage = lazy(() =>
   import('@/features/scorecards').then((m) => ({ default: m.ScorecardsPage })),
 );
+const HomePage = lazy(() =>
+  import('@/features/home').then((m) => ({ default: m.HomePage })),
+);
 
 function withSuspense(Component: ComponentType) {
   return (
@@ -126,6 +129,8 @@ export const router = createBrowserRouter([
         ),
         children: [
           { index: true, element: withSuspense(DashboardPage) },
+          // Sprint-24 / L-2403 — personalised platform home.
+          { path: 'home', element: withSuspense(HomePage) },
 
           { path: 'resources', element: withSuspense(ResourcesPage) },
           {

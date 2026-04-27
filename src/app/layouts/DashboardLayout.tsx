@@ -10,6 +10,7 @@ import {
   Shield,
   Snowflake,
   Zap,
+  Home,
   Rocket,
   Calendar,
   Building2,
@@ -26,6 +27,7 @@ import { ThemeToggle } from '@/features/theme';
 import { SkipLink } from '@/shared/components/feedback';
 
 const navigation = [
+  { name: 'Home', href: ROUTES.PERSONAL_HOME, icon: Home },
   { name: 'Dashboard', href: ROUTES.DASHBOARD, icon: LayoutDashboard },
   { name: 'Resources', href: ROUTES.RESOURCES.LIST, icon: Boxes },
   { name: 'Catalog', href: ROUTES.CATALOG.LIST, icon: Boxes },

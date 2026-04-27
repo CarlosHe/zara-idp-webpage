@@ -5,6 +5,10 @@
 export const ROUTES = {
   HOME: '/',
   DASHBOARD: '/',
+  // Sprint-24 / L-2403 — the personalised platform home (role-aware
+  // landing page with approvals, alerts, recommendations, recent
+  // activity, services owned, and quick links).
+  PERSONAL_HOME: '/home',
   LOGIN: '/login',
 
   RESOURCES: {

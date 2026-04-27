@@ -48,6 +48,7 @@ export const baseApi = createApi({
     'Scorecard',
     'Waiver',
     'GovernanceKPI',
+    'Home',
   ],
   endpoints: () => ({}),
   // 60 s default cache window: short enough that pages feel fresh,
