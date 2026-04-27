@@ -66,4 +66,6 @@ export const ROUTES = {
   // and the incident console.
   NOTIFICATIONS: '/notifications',
   INCIDENTS: '/incidents',
+  // Sprint-26 / L-2605 — FinOps dashboard.
+  COST: '/cost',
 } as const;

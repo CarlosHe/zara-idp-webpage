@@ -22,6 +22,7 @@ import {
   Server,
   BellRing,
   Siren,
+  DollarSign,
 } from 'lucide-react';
 import { cn } from '@/shared/utils';
 import { ROUTES } from '@/shared/config';
@@ -51,6 +52,7 @@ const navigation = [
   { name: 'Scorecards', href: ROUTES.SCORECARDS, icon: ShieldCheck },
   { name: 'Notifications', href: ROUTES.NOTIFICATIONS, icon: BellRing },
   { name: 'Incidents', href: ROUTES.INCIDENTS, icon: Siren },
+  { name: 'Cost', href: ROUTES.COST, icon: DollarSign },
 ];
 
 export function DashboardLayout() {

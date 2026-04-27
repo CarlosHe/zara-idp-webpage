@@ -109,6 +109,9 @@ const NotificationsPage = lazy(() =>
 const IncidentsPage = lazy(() =>
   import('@/features/incidents').then((m) => ({ default: m.IncidentsPage })),
 );
+const CostPage = lazy(() =>
+  import('@/features/cost').then((m) => ({ default: m.CostPage })),
+);
 
 function withSuspense(Component: ComponentType) {
   return (
@@ -187,6 +190,8 @@ export const router = createBrowserRouter([
           // Sprint-25 / L-2504 + L-2507 — notifications inbox + incident console.
           { path: 'notifications', element: withSuspense(NotificationsPage) },
           { path: 'incidents', element: withSuspense(IncidentsPage) },
+          // Sprint-26 / L-2605 — FinOps cost dashboard.
+          { path: 'cost', element: withSuspense(CostPage) },
 
           { path: '*', element: <NotFoundPage /> },
         ],
