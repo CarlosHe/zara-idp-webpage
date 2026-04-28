@@ -133,6 +133,12 @@ const TenantsPage = lazy(() =>
   })),
 );
 
+const AssistantPage = lazy(() =>
+  import('@/features/assistant').then((m) => ({
+    default: m.AssistantPage,
+  })),
+);
+
 function withSuspense(Component: ComponentType) {
   return (
     <Suspense fallback={<LoadingState message="Loading..." />}>
@@ -220,6 +226,8 @@ export const router = createBrowserRouter([
           { path: 'environments', element: withSuspense(EnvironmentsPage) },
           // Sprint-29 / L-2904 — tenant administration console.
           { path: 'tenants', element: withSuspense(TenantsPage) },
+          // Sprint-30 / L-3005 — AI assistant console.
+          { path: 'assistant', element: withSuspense(AssistantPage) },
 
           { path: '*', element: <NotFoundPage /> },
         ],

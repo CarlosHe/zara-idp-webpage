@@ -75,4 +75,6 @@ export const ROUTES = {
   ENVIRONMENTS: '/environments',
   // Sprint-29 / L-2904 — tenant administration console.
   TENANTS: '/tenants',
+  // Sprint-30 / L-3005 — AI assistant console.
+  ASSISTANT: '/assistant',
 } as const;

@@ -64,6 +64,7 @@ export const baseApi = createApi({
     'Tenant',
     'TenantQuota',
     'TenantSLO',
+    'AssistantConversation',
   ],
   endpoints: () => ({}),
   // 60 s default cache window: short enough that pages feel fresh,

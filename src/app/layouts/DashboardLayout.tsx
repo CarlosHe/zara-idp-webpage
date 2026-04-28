@@ -25,6 +25,7 @@ import {
   DollarSign,
   Container,
   Activity,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '@/shared/utils';
 import { ROUTES } from '@/shared/config';
@@ -62,6 +63,7 @@ const navigation = [
   { name: 'Cost', href: ROUTES.COST, icon: DollarSign },
   { name: 'Environments', href: ROUTES.ENVIRONMENTS, icon: Container },
   { name: 'Tenants', href: ROUTES.TENANTS, icon: Building2 },
+  { name: 'Assistant', href: ROUTES.ASSISTANT, icon: Sparkles },
 ];
 
 export function DashboardLayout() {
