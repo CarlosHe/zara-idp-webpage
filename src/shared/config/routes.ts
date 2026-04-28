@@ -56,6 +56,9 @@ export const ROUTES = {
   CLUSTERS: '/clusters',
   NAMESPACES: '/namespaces',
   ANALYTICS: '/analytics',
+  // Sprint-28 / L-2805 — DORA + catalog quality + approval SLA +
+  // remediation effectiveness dashboard.
+  ANALYTICS_EXECUTIVE: '/analytics/executive',
   PLUGINS: '/plugins',
   SEARCH: '/search',
   DOCS: '/docs',

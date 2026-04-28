@@ -24,6 +24,7 @@ import {
   Siren,
   DollarSign,
   Container,
+  Activity,
 } from 'lucide-react';
 import { cn } from '@/shared/utils';
 import { ROUTES } from '@/shared/config';
@@ -49,6 +50,11 @@ const navigation = [
   { name: 'Clusters', href: ROUTES.CLUSTERS, icon: Globe },
   { name: 'Namespaces', href: ROUTES.NAMESPACES, icon: FolderTree },
   { name: 'Analytics', href: ROUTES.ANALYTICS, icon: BarChart3 },
+  {
+    name: 'DORA & Quality',
+    href: ROUTES.ANALYTICS_EXECUTIVE,
+    icon: Activity,
+  },
   { name: 'Runtime', href: ROUTES.RUNTIME, icon: Server },
   { name: 'Scorecards', href: ROUTES.SCORECARDS, icon: ShieldCheck },
   { name: 'Notifications', href: ROUTES.NOTIFICATIONS, icon: BellRing },

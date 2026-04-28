@@ -86,6 +86,14 @@ const NamespacesPage = lazy(() =>
 const AnalyticsPage = lazy(() =>
   import('@/features/analytics').then((m) => ({ default: m.AnalyticsPage })),
 );
+// Sprint 28 / L-2805 + L-2806 — executive analytics dashboard. Lazy
+// import keeps charts off the critical path (route chunk only loads
+// when /analytics/executive is visited).
+const ExecutiveAnalyticsPage = lazy(() =>
+  import('@/features/analytics/executive').then((m) => ({
+    default: m.ExecutiveAnalyticsPage,
+  })),
+);
 const PluginsPage = lazy(() =>
   import('@/features/plugins').then((m) => ({ default: m.PluginsPage })),
 );
@@ -188,6 +196,10 @@ export const router = createBrowserRouter([
           { path: 'clusters', element: withSuspense(ClustersPage) },
           { path: 'namespaces', element: withSuspense(NamespacesPage) },
           { path: 'analytics', element: withSuspense(AnalyticsPage) },
+          {
+            path: 'analytics/executive',
+            element: withSuspense(ExecutiveAnalyticsPage),
+          },
           { path: 'plugins', element: withSuspense(PluginsPage) },
           { path: 'apis', element: withSuspense(APIIntelligencePage) },
           { path: 'runtime', element: withSuspense(RuntimePage) },
