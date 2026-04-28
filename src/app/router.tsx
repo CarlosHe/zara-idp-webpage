@@ -127,6 +127,12 @@ const EnvironmentsPage = lazy(() =>
   })),
 );
 
+const TenantsPage = lazy(() =>
+  import('@/features/tenants').then((m) => ({
+    default: m.TenantsPage,
+  })),
+);
+
 function withSuspense(Component: ComponentType) {
   return (
     <Suspense fallback={<LoadingState message="Loading..." />}>
@@ -212,6 +218,8 @@ export const router = createBrowserRouter([
           { path: 'cost', element: withSuspense(CostPage) },
           // Sprint-27 / L-2705 — governed dev environments dashboard.
           { path: 'environments', element: withSuspense(EnvironmentsPage) },
+          // Sprint-29 / L-2904 — tenant administration console.
+          { path: 'tenants', element: withSuspense(TenantsPage) },
 
           { path: '*', element: <NotFoundPage /> },
         ],

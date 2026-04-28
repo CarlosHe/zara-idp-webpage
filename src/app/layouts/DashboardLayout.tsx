@@ -61,6 +61,7 @@ const navigation = [
   { name: 'Incidents', href: ROUTES.INCIDENTS, icon: Siren },
   { name: 'Cost', href: ROUTES.COST, icon: DollarSign },
   { name: 'Environments', href: ROUTES.ENVIRONMENTS, icon: Container },
+  { name: 'Tenants', href: ROUTES.TENANTS, icon: Building2 },
 ];
 
 export function DashboardLayout() {

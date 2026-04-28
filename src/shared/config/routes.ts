@@ -73,4 +73,6 @@ export const ROUTES = {
   COST: '/cost',
   // Sprint-27 / L-2705 — governed dev environments dashboard.
   ENVIRONMENTS: '/environments',
+  // Sprint-29 / L-2904 — tenant administration console.
+  TENANTS: '/tenants',
 } as const;
