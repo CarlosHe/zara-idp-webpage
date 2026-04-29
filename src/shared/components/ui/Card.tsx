@@ -44,9 +44,18 @@ const CardHeader = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<'div'>>(
 );
 CardHeader.displayName = 'CardHeader';
 
-const CardTitle = forwardRef<HTMLHeadingElement, ComponentPropsWithoutRef<'h3'>>(
-  ({ className, ...rest }, ref) => (
-    <h3
+// Sprint 32 / L-3204 — CardTitle is the section-level heading inside
+// a page's <main>. WCAG 2.2 §1.3.1 says headings must not skip levels;
+// every page in this app uses <PageHeader> (h1) and then dropped into
+// h3 on every CardTitle, which is a serious violation. The default
+// is now h2 so the hierarchy reads h1 → h2 cleanly. Pages that nest a
+// card inside another card can opt into h3 via the `as` prop.
+type CardTitleProps = ComponentPropsWithoutRef<'h2'> & {
+  as?: 'h2' | 'h3' | 'h4';
+};
+const CardTitle = forwardRef<HTMLHeadingElement, CardTitleProps>(
+  ({ className, as: Tag = 'h2', ...rest }, ref) => (
+    <Tag
       ref={ref}
       className={cn('text-lg font-semibold text-slate-100', className)}
       {...rest}

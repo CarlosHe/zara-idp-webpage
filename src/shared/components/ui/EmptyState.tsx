@@ -19,7 +19,12 @@ const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
       <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-800">
         {icon ?? <Package className="h-6 w-6 text-slate-400" aria-hidden />}
       </div>
-      <h3 className="text-sm font-medium text-slate-200">{title}</h3>
+      {/* WCAG: rendered as <p role="heading" aria-level="2"> so the empty
+          state advertises itself as a section heading without forcing
+          layouts that already use <h2> CardTitle to demote a level. */}
+      <p role="heading" aria-level={2} className="text-sm font-medium text-slate-200">
+        {title}
+      </p>
       {description ? (
         <p className="mt-1 text-sm text-slate-400">{description}</p>
       ) : null}

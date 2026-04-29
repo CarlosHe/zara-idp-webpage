@@ -1,0 +1,10 @@
+{
+  "criticalPathGz": 210485,
+  "routeChunkMaxGz": 6113,
+  "routeChunkMaxName": "index-Db37vman.js",
+  "updatedAt": "2026-04-29",
+  "targets": {
+    "criticalPathGz": 184320,
+    "routeChunkMaxGz": 61440
+  }
+}
