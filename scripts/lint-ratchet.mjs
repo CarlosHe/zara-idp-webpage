@@ -62,9 +62,24 @@ if (errorCount > baseline.errorCount) {
   process.exit(1);
 }
 
+if (warningCount > baseline.warningCount) {
+  console.error(
+    `[lint-ratchet] FAILED: warnings=${warningCount} exceeds baseline=${baseline.warningCount}. ` +
+      `Fix new warnings or document the rule exception. Do not raise the baseline.`,
+  );
+  process.exit(1);
+}
+
 if (errorCount < baseline.errorCount) {
   console.log(
     `[lint-ratchet] improvement: errors=${errorCount} < baseline=${baseline.errorCount}. ` +
+      `Tighten with: npm run lint:ratchet -- --update`,
+  );
+}
+
+if (warningCount < baseline.warningCount) {
+  console.log(
+    `[lint-ratchet] improvement: warnings=${warningCount} < baseline=${baseline.warningCount}. ` +
       `Tighten with: npm run lint:ratchet -- --update`,
   );
 }

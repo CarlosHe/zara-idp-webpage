@@ -24,7 +24,10 @@ const KIND_LABEL: Record<DocPage['kind'], string> = {
 // - When a docset has zero pages we surface the empty state with the
 //   right CTA so the user is never blocked.
 export function RichDocRenderer({ doc }: { doc: TechDoc }) {
-  const pages = doc.pages ?? [];
+  // Memoise the empty-fallback so `pages` keeps a stable reference between
+  // renders when `doc.pages` is undefined; otherwise the activePage memo
+  // would invalidate on every parent re-render.
+  const pages = useMemo(() => doc.pages ?? [], [doc.pages]);
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const activePage = useMemo(
     () => pages.find((p) => p.slug === activeSlug) ?? null,

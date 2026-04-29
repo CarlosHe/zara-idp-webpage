@@ -135,7 +135,6 @@ test.describe('a11y audit (axe-core, all major routes)', () => {
               `  - [${v.impact}] ${v.id}: ${v.help} (${v.nodes.length} node${v.nodes.length === 1 ? '' : 's'})`,
           )
           .join('\n');
-        // eslint-disable-next-line no-console
         console.error(`axe violations on ${path}:\n${summary}`);
       }
 
