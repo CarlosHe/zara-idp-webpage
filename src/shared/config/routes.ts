@@ -77,4 +77,6 @@ export const ROUTES = {
   TENANTS: '/tenants',
   // Sprint-30 / L-3005 — AI assistant console.
   ASSISTANT: '/assistant',
+  // Sprint-31 / L-3104 — automated remediation inbox.
+  REMEDIATION: '/remediation',
 } as const;

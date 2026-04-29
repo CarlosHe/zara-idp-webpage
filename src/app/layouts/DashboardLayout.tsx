@@ -26,6 +26,7 @@ import {
   Container,
   Activity,
   Sparkles,
+  Wrench,
 } from 'lucide-react';
 import { cn } from '@/shared/utils';
 import { ROUTES } from '@/shared/config';
@@ -64,6 +65,7 @@ const navigation = [
   { name: 'Environments', href: ROUTES.ENVIRONMENTS, icon: Container },
   { name: 'Tenants', href: ROUTES.TENANTS, icon: Building2 },
   { name: 'Assistant', href: ROUTES.ASSISTANT, icon: Sparkles },
+  { name: 'Remediation', href: ROUTES.REMEDIATION, icon: Wrench },
 ];
 
 export function DashboardLayout() {

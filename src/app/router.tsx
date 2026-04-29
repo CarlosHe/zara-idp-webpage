@@ -139,6 +139,12 @@ const AssistantPage = lazy(() =>
   })),
 );
 
+const RemediationInboxPage = lazy(() =>
+  import('@/features/remediation').then((m) => ({
+    default: m.RemediationInboxPage,
+  })),
+);
+
 function withSuspense(Component: ComponentType) {
   return (
     <Suspense fallback={<LoadingState message="Loading..." />}>
@@ -228,6 +234,8 @@ export const router = createBrowserRouter([
           { path: 'tenants', element: withSuspense(TenantsPage) },
           // Sprint-30 / L-3005 — AI assistant console.
           { path: 'assistant', element: withSuspense(AssistantPage) },
+          // Sprint-31 / L-3104 — automated remediation inbox.
+          { path: 'remediation', element: withSuspense(RemediationInboxPage) },
 
           { path: '*', element: <NotFoundPage /> },
         ],
