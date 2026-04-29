@@ -17,8 +17,11 @@ import { VitalsDebugPanel } from '@/shared/lib/observability/VitalsDebugPanel';
 const DashboardPage = lazy(() =>
   import('@/features/dashboard').then((m) => ({ default: m.DashboardPage })),
 );
+// Sub-path import on purpose — see `@/features/auth/index.ts` for the
+// rationale (keeps LoginPage out of the modulepreload graph reached
+// from `<ProtectedRoute>`'s barrel import).
 const LoginPage = lazy(() =>
-  import('@/features/auth').then((m) => ({ default: m.LoginPage })),
+  import('@/features/auth/components/LoginPage').then((m) => ({ default: m.LoginPage })),
 );
 const ResourcesPage = lazy(() =>
   import('@/features/resources').then((m) => ({ default: m.ResourcesPage })),

@@ -11,12 +11,12 @@ import { securityHeadersPlugin } from './scripts/security-headers';
 // build` also pops it open locally.
 const analyze = process.env.ANALYZE === 'true';
 
-// Group vendor chunks by purpose so the initial-JS budget (≤150 KB
-// gzipped per REFACTOR-PLAN §Sprint 10) stays honest. Feature routes
-// already code-split via React.lazy (see src/app/router.tsx). React +
-// Redux + Router are co-located in a single `vendor-core` chunk on
-// purpose: they form a dependency cycle at the module level and
-// splitting them causes rollup "circular chunk" warnings.
+// Group vendor chunks by purpose so the initial-JS budget (<180 KB
+// gzipped per `scripts/bundle-budget.json#targets.criticalPathGz`)
+// stays honest. Feature routes already code-split via React.lazy
+// (see src/app/router.tsx). React + Redux + Router are co-located in
+// a single `vendor-core` chunk because react-router re-exports react
+// and splitting them produces rollup "circular chunk" warnings.
 function manualChunks(id: string): string | undefined {
   if (!id.includes('node_modules')) return undefined;
   if (
@@ -88,13 +88,23 @@ export default defineConfig({
     },
   },
   build: {
-    // Keep observability chunks (Sentry SDK, Web Vitals) out of the
-    // initial modulepreload fan — they're loaded deliberately after
-    // first paint via requestIdleCallback. Preloading them negates
-    // the whole reason they're dynamic-imported.
+    // Keep deliberately deferred chunks out of the initial modulepreload
+    // fan so the bundle-budget metric measures *actual* first-paint cost:
+    //   - vendor-sentry / vendor-webvitals → loaded after first paint via
+    //     requestIdleCallback (see `src/main.tsx`).
+    //   - sentry-*.js                       → the dynamic-import wrapper
+    //     for `@/shared/lib/observability` (same idleCallback path).
+    //   - LoginPage-*.js                    → route chunk hydrated by
+    //     React.lazy via the GuestRoute boundary; never first paint.
+    // Preloading any of these negates the whole reason they're
+    // dynamic-imported.
     modulePreload: {
       resolveDependencies: (_file, deps) =>
-        deps.filter((dep) => !/vendor-(sentry|webvitals)/.test(dep)),
+        deps.filter(
+          (dep) =>
+            !/vendor-(sentry|webvitals)/.test(dep) &&
+            !/(^|\/)(sentry-|LoginPage-)/.test(dep),
+        ),
     },
     rollupOptions: {
       output: {
