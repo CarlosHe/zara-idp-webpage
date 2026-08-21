@@ -1,6 +1,9 @@
 import { baseApi, unwrapItems } from '@/shared/lib/api';
 import type { RuntimePolicy } from '@/shared/types';
 
+// Backend routes:
+//   GET /policies/runtime
+//   GET /policies/runtime/:id
 export const policiesApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     listRuntimePolicies: build.query<RuntimePolicy[], void>({
@@ -15,11 +18,9 @@ export const policiesApi = baseApi.injectEndpoints({
           : [{ type: 'RuntimePolicy' as const, id: 'LIST' }],
     }),
 
-    getRuntimePolicy: build.query<RuntimePolicy, { namespace: string; name: string }>({
-      query: ({ namespace, name }) => `/policies/runtime/${namespace}/${name}`,
-      providesTags: (_result, _err, arg) => [
-        { type: 'RuntimePolicy', id: `${arg.namespace}-${arg.name}` },
-      ],
+    getRuntimePolicy: build.query<RuntimePolicy, string>({
+      query: (id) => `/policies/runtime/${id}`,
+      providesTags: (_result, _err, id) => [{ type: 'RuntimePolicy', id }],
     }),
   }),
   overrideExisting: false,
