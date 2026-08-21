@@ -10,11 +10,18 @@ import type {
   ReconcileJobResponse,
 } from '@/shared/types';
 
-interface ResourceKey {
-  kind: ResourceKind;
-  namespace: string;
-  name: string;
-}
+// Backend resource routes (control-plane REST):
+//   GET    /resources                 ?kind=&namespace=
+//   GET    /resources/by-kind/:kind
+//   GET    /resources/:id
+//   PUT    /resources/:id
+//   DELETE /resources/:id
+//   GET    /resources/:id/events
+//   GET    /resources/:id/dependencies
+//   POST   /resources/:id/reconcile
+//   GET    /resources/:id/drift
+//   POST   /resources
+//   POST   /apply
 
 interface CreateResourceBody {
   kind: string;
@@ -59,9 +66,10 @@ export const resourcesApi = baseApi.injectEndpoints({
     >({
       query: (arg) => {
         const kind = arg?.kind ?? null;
-        const params = arg?.pagination ?? {};
+        const params: Record<string, unknown> = { ...(arg?.pagination ?? {}) };
+        if (kind) params.kind = kind;
         return {
-          url: kind ? `/resources/${kind}` : '/resources',
+          url: '/resources',
           params,
         };
       },
@@ -75,51 +83,46 @@ export const resourcesApi = baseApi.injectEndpoints({
           : [{ type: 'Resource' as const, id: 'LIST' }],
     }),
 
-    getResource: build.query<Resource, ResourceKey>({
-      query: ({ kind, namespace, name }) => `/resources/${kind}/${namespace}/${name}`,
-      transformResponse: (raw: unknown) => normalizeResource(raw as Parameters<typeof normalizeResource>[0]),
-      providesTags: (_result, _err, arg) => [
-        { type: 'Resource', id: `${arg.kind}-${arg.namespace}-${arg.name}` },
-      ],
+    getResource: build.query<Resource, string>({
+      query: (id) => `/resources/${id}`,
+      transformResponse: (raw: unknown) =>
+        normalizeResource(raw as Parameters<typeof normalizeResource>[0]),
+      providesTags: (_result, _err, id) => [{ type: 'Resource', id }],
     }),
 
-    getResourceEvents: build.query<ResourceEvent[], ResourceKey>({
-      query: ({ kind, namespace, name }) =>
-        `/resources/${kind}/${namespace}/${name}/events`,
+    getResourceEvents: build.query<ResourceEvent[], string>({
+      query: (id) => `/resources/${id}/events`,
       transformResponse: (raw: unknown) => unwrapItems<ResourceEvent>(raw),
-      providesTags: (_result, _err, arg) => [
-        { type: 'ResourceEvents', id: `${arg.kind}-${arg.namespace}-${arg.name}` },
-      ],
+      providesTags: (_result, _err, id) => [{ type: 'ResourceEvents', id }],
     }),
 
-    getResourceDependencies: build.query<ResourceDependency[], ResourceKey>({
-      query: ({ kind, namespace, name }) =>
-        `/resources/${kind}/${namespace}/${name}/dependencies`,
+    getResourceDependencies: build.query<ResourceDependency[], string>({
+      query: (id) => `/resources/${id}/dependencies`,
       transformResponse: (raw: unknown) => unwrapItems<ResourceDependency>(raw),
-      providesTags: (_result, _err, arg) => [
-        { type: 'ResourceDependencies', id: `${arg.kind}-${arg.namespace}-${arg.name}` },
-      ],
+      providesTags: (_result, _err, id) => [{ type: 'ResourceDependencies', id }],
     }),
 
     createResource: build.mutation<Resource, CreateResourceBody>({
       query: (body) => ({ url: '/resources', method: 'POST', body }),
-      transformResponse: (raw: unknown) => normalizeResource(raw as Parameters<typeof normalizeResource>[0]),
+      transformResponse: (raw: unknown) =>
+        normalizeResource(raw as Parameters<typeof normalizeResource>[0]),
       invalidatesTags: [
         { type: 'Resource', id: 'LIST' },
         { type: 'DashboardSummary', id: 'SINGLETON' },
       ],
     }),
 
-    updateResource: build.mutation<Resource, { key: ResourceKey; body: UpdateResourceBody }>({
-      query: ({ key, body }) => ({
-        url: `/resources/${key.kind}/${key.namespace}/${key.name}`,
+    updateResource: build.mutation<Resource, { id: string; body: UpdateResourceBody }>({
+      query: ({ id, body }) => ({
+        url: `/resources/${id}`,
         method: 'PUT',
         body,
       }),
-      transformResponse: (raw: unknown) => normalizeResource(raw as Parameters<typeof normalizeResource>[0]),
+      transformResponse: (raw: unknown) =>
+        normalizeResource(raw as Parameters<typeof normalizeResource>[0]),
       invalidatesTags: (_result, _err, arg) => [
         { type: 'Resource', id: 'LIST' },
-        { type: 'Resource', id: `${arg.key.kind}-${arg.key.namespace}-${arg.key.name}` },
+        { type: 'Resource', id: arg.id },
         { type: 'DashboardSummary', id: 'SINGLETON' },
       ],
     }),

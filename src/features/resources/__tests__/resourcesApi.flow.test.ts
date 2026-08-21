@@ -67,11 +67,11 @@ describe('resources feature — list → create → update → delete', () => {
     expect(afterCreate).toHaveLength(2);
     expect(afterCreate.map((r) => r.name).sort()).toEqual(['api', 'web']);
 
-    // Update
+    // Update by id (backend contract)
     const updated = await store
       .dispatch(
         resourcesApi.endpoints.updateResource.initiate({
-          key: { kind: 'Service', namespace: 'platform', name: 'web' },
+          id: created.id,
           body: { spec: { type: 'LoadBalancer' } },
         }),
       )
@@ -95,15 +95,33 @@ describe('resources feature — list → create → update → delete', () => {
   it('maps a 404 on getResource into a FetchBaseQuery error with the status', async () => {
     const store = createIntegrationStore();
     const result = await store.dispatch(
-      resourcesApi.endpoints.getResource.initiate({
-        kind: 'Service',
-        namespace: 'platform',
-        name: 'nope',
-      }),
+      resourcesApi.endpoints.getResource.initiate('missing-id'),
     );
     expect(result.isError).toBe(true);
     if ('status' in (result.error ?? {})) {
       expect((result.error as { status: number }).status).toBe(404);
     }
+  });
+
+  it('filters list by kind via query param', async () => {
+    seedResource({
+      kind: 'Application',
+      metadata: { name: 'api', namespace: 'platform' },
+      version: 1,
+    });
+    seedResource({
+      kind: 'Database',
+      metadata: { name: 'db', namespace: 'platform' },
+      version: 1,
+    });
+
+    const store = createIntegrationStore();
+    const apps = await store
+      .dispatch(
+        resourcesApi.endpoints.listResources.initiate({ kind: 'Application' }),
+      )
+      .unwrap();
+    expect(apps).toHaveLength(1);
+    expect(apps[0].kind).toBe('Application');
   });
 });

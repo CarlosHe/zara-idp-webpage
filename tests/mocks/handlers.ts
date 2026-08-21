@@ -27,6 +27,7 @@ export interface ResourceFixture {
   };
   spec?: Record<string, unknown>;
   status?: string;
+  provider?: string;
   version: number;
 }
 
@@ -47,27 +48,25 @@ export function seedResource(resource: Omit<ResourceFixture, 'id'> & { id?: stri
   return next;
 }
 
-function resourceKey(kind: string, namespace: string, name: string) {
-  return `${kind}-${namespace}-${name}`;
-}
-
 export const handlers = [
-  http.get(`${API}/resources`, () => {
-    return HttpResponse.json({
-      items: Array.from(fixtures.resources.values()),
-    });
+  http.get(`${API}/resources`, ({ request }) => {
+    const url = new URL(request.url);
+    const kind = url.searchParams.get('kind');
+    let items = Array.from(fixtures.resources.values());
+    if (kind) {
+      items = items.filter((r) => r.kind === kind);
+    }
+    return HttpResponse.json({ items, total: items.length });
   }),
 
-  http.get(`${API}/resources/:kind`, ({ params }) => {
+  http.get(`${API}/resources/by-kind/:kind`, ({ params }) => {
     const { kind } = params;
-    return HttpResponse.json({
-      items: Array.from(fixtures.resources.values()).filter((r) => r.kind === kind),
-    });
+    const items = Array.from(fixtures.resources.values()).filter((r) => r.kind === kind);
+    return HttpResponse.json({ kind, items, total: items.length });
   }),
 
-  http.get(`${API}/resources/:kind/:namespace/:name`, ({ params }) => {
-    const id = resourceKey(String(params.kind), String(params.namespace), String(params.name));
-    const found = fixtures.resources.get(id);
+  http.get(`${API}/resources/:id`, ({ params }) => {
+    const found = fixtures.resources.get(String(params.id));
     if (!found) {
       return HttpResponse.json(
         { message: 'not found', correlationId: 'test-corr-404' },
@@ -99,8 +98,8 @@ export const handlers = [
     return HttpResponse.json(resource, { status: 201 });
   }),
 
-  http.put(`${API}/resources/:kind/:namespace/:name`, async ({ params, request }) => {
-    const id = resourceKey(String(params.kind), String(params.namespace), String(params.name));
+  http.put(`${API}/resources/:id`, async ({ params, request }) => {
+    const id = String(params.id);
     const found = fixtures.resources.get(id);
     if (!found) {
       return HttpResponse.json(
@@ -119,12 +118,6 @@ export const handlers = [
     return HttpResponse.json(updated);
   }),
 
-  http.delete(`${API}/resources/:kind/:namespace/:name`, ({ params }) => {
-    const id = resourceKey(String(params.kind), String(params.namespace), String(params.name));
-    fixtures.resources.delete(id);
-    return new HttpResponse(null, { status: 204 });
-  }),
-
   http.delete(`${API}/resources/:id`, ({ params }) => {
     fixtures.resources.delete(String(params.id));
     return new HttpResponse(null, { status: 204 });
@@ -141,10 +134,12 @@ export const handlers = [
   http.get(`${API}/audit-log`, () => HttpResponse.json({ items: [] })),
   http.get(`${API}/approvals`, () => HttpResponse.json({ items: [] })),
   http.get(`${API}/freezes`, () => HttpResponse.json({ items: [] })),
+  http.get(`${API}/policies/runtime`, () => HttpResponse.json({ items: [] })),
   http.get(`${API}/policies`, () => HttpResponse.json({ items: [] })),
   http.get(`${API}/namespaces`, () => HttpResponse.json({ items: [] })),
   http.get(`${API}/teams`, () => HttpResponse.json({ items: [] })),
   http.get(`${API}/clusters`, () => HttpResponse.json({ items: [] })),
+  http.get(`${API}/domains`, () => HttpResponse.json({ items: [] })),
   http.get(`${API}/business-domains`, () => HttpResponse.json({ items: [] })),
   http.get(`${API}/analytics/summary`, () => HttpResponse.json({ series: [] })),
   http.get(`${API}/plugins`, () => HttpResponse.json({ items: [] })),
@@ -153,6 +148,16 @@ export const handlers = [
   http.get(`${API}/docsets`, () => HttpResponse.json({ items: [] })),
   http.get(`${API}/apis`, () => HttpResponse.json({ items: [] })),
   http.get(`${API}/golden-paths`, () => HttpResponse.json({ items: [] })),
+  http.get(`${API}/scorecards`, () => HttpResponse.json({ items: [] })),
+  http.get(`${API}/waivers`, () => HttpResponse.json({ items: [] })),
+  http.get(`${API}/governance/kpis`, () =>
+    HttpResponse.json({
+      scorecardsActive: 0,
+      entitiesEvaluated: 0,
+      passRate: 0,
+      openWaivers: 0,
+    }),
+  ),
 
   // Sprint-24 / L-2403..L-2407 — personalised home endpoints.
   // Tests override this default with a richer fixture via
