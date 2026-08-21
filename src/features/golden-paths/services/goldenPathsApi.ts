@@ -8,11 +8,11 @@ import type {
 
 // Sprint-19 / L-1908 — RTK Query slice for the Golden Path marketplace.
 //
-// The control plane exposes:
+// baseQuery already prefixes `/api/v1`, so paths below are relative:
 //
-//   GET    /api/v1/golden-paths        → list of summaries
-//   GET    /api/v1/golden-paths/:id    → one summary
-//   POST   /api/v1/golden-paths/:id/execute (dryRun supported)
+//   GET    /golden-paths        → list of summaries
+//   GET    /golden-paths/:id    → one summary
+//   POST   /golden-paths/:id/execute (dryRun supported)
 //
 // Cache tag `GoldenPath` is invalidated on every execute so the UI
 // can refresh marketplace badges (last execution, average risk) when
@@ -20,7 +20,7 @@ import type {
 export const goldenPathsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     listGoldenPaths: builder.query<GoldenPathSummary[], void>({
-      query: () => ({ url: '/api/v1/golden-paths' }),
+      query: () => ({ url: '/golden-paths' }),
       transformResponse: (response: unknown) => unwrapItems<GoldenPathSummary>(response),
       providesTags: (paths = []) => [
         { type: 'GoldenPath' as const, id: 'LIST' },
@@ -28,12 +28,12 @@ export const goldenPathsApi = baseApi.injectEndpoints({
       ],
     }),
     getGoldenPath: builder.query<GoldenPathSummary, string>({
-      query: (id) => ({ url: `/api/v1/golden-paths/${id}` }),
+      query: (id) => ({ url: `/golden-paths/${id}` }),
       providesTags: (_summary, _err, id) => [{ type: 'GoldenPath' as const, id }],
     }),
     executeGoldenPath: builder.mutation<GoldenPathExecuteResponse, GoldenPathExecuteRequest>({
       query: ({ id, parameters, dryRun, requestedBy }) => ({
-        url: `/api/v1/golden-paths/${id}/execute`,
+        url: `/golden-paths/${id}/execute`,
         method: 'POST',
         body: { parameters, dryRun, requestedBy },
       }),
