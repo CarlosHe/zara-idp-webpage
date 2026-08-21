@@ -13,8 +13,21 @@ export const ROUTES = {
 
   RESOURCES: {
     LIST: '/resources',
-    DETAIL: (kind: string, namespace: string, name: string) =>
+    /** Canonical detail route — always by resource id (matches REST). */
+    DETAIL: (id: string) => `/resources/${id}` as const,
+    /** @deprecated Prefer DETAIL(id). Kept for old deep links. */
+    DETAIL_LEGACY: (kind: string, namespace: string, name: string) =>
       `/resources/${kind}/${namespace}/${name}` as const,
+  },
+
+  CHANGESETS: {
+    LIST: '/changesets',
+    DETAIL: (id: string) => `/changesets/${id}` as const,
+  },
+
+  STACKS: {
+    LIST: '/stacks',
+    DETAIL: (id: string) => `/stacks/${id}` as const,
   },
 
   CATALOG: {

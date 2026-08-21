@@ -27,6 +27,10 @@ import {
   Activity,
   Sparkles,
   Wrench,
+  Database,
+  Puzzle,
+  GitBranch,
+  Layers,
 } from 'lucide-react';
 import { cn } from '@/shared/utils';
 import { ROUTES } from '@/shared/config';
@@ -37,7 +41,10 @@ const navigation = [
   { name: 'Home', href: ROUTES.PERSONAL_HOME, icon: Home },
   { name: 'Dashboard', href: ROUTES.DASHBOARD, icon: LayoutDashboard },
   { name: 'Resources', href: ROUTES.RESOURCES.LIST, icon: Boxes },
+  { name: 'ChangeSets', href: ROUTES.CHANGESETS.LIST, icon: GitBranch },
+  { name: 'Stacks', href: ROUTES.STACKS.LIST, icon: Layers },
   { name: 'Catalog', href: ROUTES.CATALOG.LIST, icon: Boxes },
+  { name: 'Catalog Sources', href: ROUTES.CATALOG.SOURCES, icon: Database },
   { name: 'Search', href: ROUTES.SEARCH, icon: Search },
   { name: 'Docs', href: ROUTES.DOCS, icon: BookOpen },
   { name: 'APIs', href: ROUTES.APIS, icon: Plug },
@@ -59,6 +66,7 @@ const navigation = [
   },
   { name: 'Runtime', href: ROUTES.RUNTIME, icon: Server },
   { name: 'Scorecards', href: ROUTES.SCORECARDS, icon: ShieldCheck },
+  { name: 'Plugins', href: ROUTES.PLUGINS, icon: Puzzle },
   { name: 'Notifications', href: ROUTES.NOTIFICATIONS, icon: BellRing },
   { name: 'Incidents', href: ROUTES.INCIDENTS, icon: Siren },
   { name: 'Cost', href: ROUTES.COST, icon: DollarSign },
@@ -92,7 +100,7 @@ export function DashboardLayout() {
           </div>
         </header>
 
-        <nav aria-label="Main navigation" className="p-4 space-y-1">
+        <nav aria-label="Main navigation" className="p-4 space-y-1 overflow-y-auto max-h-[calc(100vh-8rem)]">
           <ul className="space-y-1">
             {navigation.map((item) => (
               <li key={item.name}>

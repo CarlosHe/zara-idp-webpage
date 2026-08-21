@@ -26,6 +26,21 @@ const LoginPage = lazy(() =>
 const ResourcesPage = lazy(() =>
   import('@/features/resources').then((m) => ({ default: m.ResourcesPage })),
 );
+const ResourceDetailPage = lazy(() =>
+  import('@/features/resources').then((m) => ({ default: m.ResourceDetailPage })),
+);
+const ChangeSetsPage = lazy(() =>
+  import('@/features/changesets').then((m) => ({ default: m.ChangeSetsPage })),
+);
+const ChangeSetDetailPage = lazy(() =>
+  import('@/features/changesets').then((m) => ({ default: m.ChangeSetDetailPage })),
+);
+const StacksPage = lazy(() =>
+  import('@/features/stacks').then((m) => ({ default: m.StacksPage })),
+);
+const StackDetailPage = lazy(() =>
+  import('@/features/stacks').then((m) => ({ default: m.StackDetailPage })),
+);
 const CatalogPage = lazy(() =>
   import('@/features/catalog').then((m) => ({ default: m.CatalogPage })),
 );
@@ -180,8 +195,26 @@ export const router = createBrowserRouter([
 
           { path: 'resources', element: withSuspense(ResourcesPage) },
           {
+            // Canonical detail by resource id (matches REST GET /resources/:id).
+            path: 'resources/:id',
+            element: withSuspense(ResourceDetailPage),
+          },
+          {
+            // Legacy deep-link shape — still opens list (compat).
             path: 'resources/:kind/:namespace/:name',
             element: withSuspense(ResourcesPage),
+          },
+
+          { path: 'changesets', element: withSuspense(ChangeSetsPage) },
+          {
+            path: 'changesets/:id',
+            element: withSuspense(ChangeSetDetailPage),
+          },
+
+          { path: 'stacks', element: withSuspense(StacksPage) },
+          {
+            path: 'stacks/:id',
+            element: withSuspense(StackDetailPage),
           },
 
           { path: 'catalog', element: withSuspense(CatalogPage) },
