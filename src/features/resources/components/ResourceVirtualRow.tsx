@@ -44,7 +44,7 @@ export function ResourceVirtualRow({
       </div>
       <div role="cell" className="min-w-0">
         <Link
-          to={ROUTES.RESOURCES.DETAIL(resource.kind, namespace, name)}
+          to={ROUTES.RESOURCES.DETAIL(resource.id)}
           className="text-blue-300 hover:text-blue-200 font-medium truncate inline-block max-w-full"
         >
           {name}

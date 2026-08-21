@@ -8,9 +8,11 @@ import {
   Button,
   Modal,
   Alert,
+  Badge,
 } from '@/shared/components/ui';
 import type { ResourceKind, Resource } from '@/shared/types';
 import { kindOptions } from './constants';
+import { asApplicationSpec, resolvePlatformLabel } from '../types/applicationSpec';
 
 interface ResourceFormModalProps {
   isOpen: boolean;
@@ -28,7 +30,10 @@ export function ResourceFormModal({ isOpen, onClose, resource }: ResourceFormMod
     name: resource.metadata?.name || '',
     namespace: resource.metadata?.namespace || 'default',
     spec: JSON.stringify(resource.spec || {}, null, 2),
-    labels: Object.entries(resource.metadata?.labels || {}).map(([key, value]) => ({ key, value: String(value) })),
+    labels: Object.entries(resource.metadata?.labels || {}).map(([key, value]) => ({
+      key,
+      value: String(value),
+    })),
   };
 
   const [formData, setFormData] = useState(initialFormData);
@@ -39,6 +44,9 @@ export function ResourceFormModal({ isOpen, onClose, resource }: ResourceFormMod
     setFormData(initialFormData);
     setError(null);
   }
+
+  const appSpec = asApplicationSpec(resource.spec);
+  const platformLabel = resolvePlatformLabel(appSpec, resource.provider);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,11 +67,7 @@ export function ResourceFormModal({ isOpen, onClose, resource }: ResourceFormMod
 
     try {
       await updateResource({
-        key: {
-          kind: resource.kind,
-          namespace: resource.metadata?.namespace || resource.namespace || '',
-          name: resource.metadata?.name || resource.name || '',
-        },
+        id: resource.id,
         body: {
           spec,
           metadata: { labels },
@@ -82,6 +86,26 @@ export function ResourceFormModal({ isOpen, onClose, resource }: ResourceFormMod
           <Alert type="error" title="Error">
             {error}
           </Alert>
+        )}
+
+        {(resource.provider || platformLabel) && (
+          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-300">
+            {platformLabel ? (
+              <Badge variant="info" aria-label={`Platform ${platformLabel}`}>
+                {platformLabel}
+              </Badge>
+            ) : null}
+            {resource.provider ? (
+              <Badge variant="outline" aria-label={`Provider ${resource.provider}`}>
+                provider: {resource.provider}
+              </Badge>
+            ) : null}
+            {resource.kind === 'Application' && appSpec.image ? (
+              <span className="font-mono text-xs text-slate-400 truncate max-w-full">
+                {appSpec.image}
+              </span>
+            ) : null}
+          </div>
         )}
 
         <Select
@@ -103,6 +127,29 @@ export function ResourceFormModal({ isOpen, onClose, resource }: ResourceFormMod
         <Input id="name" label="Name" value={formData.name} disabled />
 
         <Input id="namespace" label="Namespace" value={formData.namespace} disabled />
+
+        {resource.kind === 'Application' && (
+          <div className="grid grid-cols-2 gap-3 text-sm text-slate-300">
+            {typeof appSpec.replicas === 'number' ? (
+              <div>
+                <span className="text-slate-500">Replicas</span>
+                <p className="font-mono">{appSpec.replicas}</p>
+              </div>
+            ) : null}
+            {typeof appSpec.port === 'number' ? (
+              <div>
+                <span className="text-slate-500">Port</span>
+                <p className="font-mono">{appSpec.port}</p>
+              </div>
+            ) : null}
+            {appSpec.cluster ? (
+              <div className="col-span-2">
+                <span className="text-slate-500">Cluster</span>
+                <p className="font-mono truncate">{appSpec.cluster}</p>
+              </div>
+            ) : null}
+          </div>
+        )}
 
         <div>
           <label htmlFor="spec" className="block text-sm font-medium text-gray-300 mb-2">
@@ -150,8 +197,9 @@ export function ResourceFormModal({ isOpen, onClose, resource }: ResourceFormMod
                     labels: formData.labels.filter((_, i) => i !== index),
                   });
                 }}
+                aria-label={`Remove label ${label.key || index}`}
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-4 w-4" aria-hidden />
               </Button>
             </div>
           ))}
@@ -159,24 +207,24 @@ export function ResourceFormModal({ isOpen, onClose, resource }: ResourceFormMod
             type="button"
             variant="secondary"
             size="sm"
-            onClick={() => {
+            onClick={() =>
               setFormData({
                 ...formData,
                 labels: [...formData.labels, { key: '', value: '' }],
-              });
-            }}
+              })
+            }
           >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Label
+            <Plus className="h-4 w-4 mr-1" aria-hidden />
+            Add label
           </Button>
         </div>
 
-        <div className="flex justify-end gap-3 pt-4">
-          <Button type="button" variant="secondary" onClick={onClose}>
+        <div className="flex justify-end gap-2 pt-2">
+          <Button type="button" variant="secondary" onClick={onClose} disabled={loading}>
             Cancel
           </Button>
-          <Button type="submit" loading={loading}>
-            Update
+          <Button type="submit" disabled={loading}>
+            {loading ? 'Saving…' : 'Save'}
           </Button>
         </div>
       </form>

@@ -12,10 +12,12 @@ import {
   TableRow,
   TableCell,
   Button,
+  Badge,
 } from '@/shared/components/ui';
 import { formatRelativeTime } from '@/shared/utils';
 import type { Resource, HealthStatus } from '@/shared/types';
 import { kindIcons } from './constants';
+import { resolvePlatformLabel } from '../types/applicationSpec';
 
 interface ResourceRowProps {
   resource: Resource;
@@ -35,18 +37,24 @@ export function ResourceRow({
   const KindIcon = kindIcons[resource.kind] || Box;
   const namespace = resource.metadata?.namespace || resource.namespace || '';
   const name = resource.metadata?.name || resource.name || '';
+  const platformLabel = resolvePlatformLabel(resource.spec, resource.provider);
 
   return (
     <TableRow>
       <TableCell>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <KindIcon className="h-4 w-4 text-gray-400" aria-hidden />
           <span className="font-mono text-sm">{resource.kind}</span>
+          {platformLabel ? (
+            <Badge variant="outline" className="text-[10px]">
+              {platformLabel}
+            </Badge>
+          ) : null}
         </div>
       </TableCell>
       <TableCell>
         <Link
-          to={ROUTES.RESOURCES.DETAIL(resource.kind, namespace, name)}
+          to={ROUTES.RESOURCES.DETAIL(resource.id)}
           className="text-blue-400 hover:text-blue-300 font-medium"
         >
           {name}
