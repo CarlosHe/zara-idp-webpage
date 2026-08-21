@@ -19,11 +19,15 @@ type RawResource = {
   annotations?: Record<string, string>;
   spec?: Record<string, unknown>;
   status?: string | { status?: string; [k: string]: unknown };
+  provider?: string | { string?: string; String?: string } | { String: string };
   version?: number | string;
+  generation?: number;
   createdAt?: string;
   updatedAt?: string;
   syncStatus?: SyncStatus;
   ownership?: Resource['ownership'];
+  conditions?: Resource['conditions'];
+  health?: Resource['health'];
 };
 
 // Backend enum → UI enum. Kept here because it's a display concern, not
@@ -44,6 +48,19 @@ function mapHealth(status: unknown): HealthStatus {
   return 'Unknown';
 }
 
+// ProviderName value object may serialize as a plain string or a small
+// struct depending on the adapter version. Always coerce to string.
+function mapProvider(raw: RawResource['provider']): string | undefined {
+  if (raw == null) return undefined;
+  if (typeof raw === 'string') return raw;
+  if (typeof raw === 'object') {
+    const obj = raw as Record<string, unknown>;
+    if (typeof obj.string === 'string') return obj.string;
+    if (typeof obj.String === 'string') return obj.String;
+  }
+  return String(raw);
+}
+
 export function normalizeResource(raw: RawResource): Resource {
   const namespace = raw.metadata?.namespace || raw.namespace || 'default';
   const name = raw.metadata?.name || raw.name || 'unknown';
@@ -55,6 +72,7 @@ export function normalizeResource(raw: RawResource): Resource {
       : raw.status?.status ?? 'Unknown';
   const version =
     typeof raw.version === 'number' ? raw.version : Number(raw.version) || 1;
+  const provider = mapProvider(raw.provider);
 
   return {
     id: raw.id || `${raw.kind}-${namespace}-${name}`,
@@ -62,9 +80,13 @@ export function normalizeResource(raw: RawResource): Resource {
     metadata: { name, namespace, labels, annotations },
     spec: raw.spec || {},
     status: statusValue,
+    provider,
     version,
+    generation: raw.generation,
     createdAt: raw.createdAt || raw.metadata?.creationTimestamp || new Date().toISOString(),
     updatedAt: raw.updatedAt || raw.metadata?.creationTimestamp || new Date().toISOString(),
+    conditions: raw.conditions,
+    health: raw.health,
     namespace,
     name,
     healthStatus: mapHealth(statusValue),

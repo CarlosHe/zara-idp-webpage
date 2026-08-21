@@ -30,12 +30,14 @@ describe('normalizeResource', () => {
       spec: { replicas: 3 },
       status: 'Ready',
       version: 7,
+      provider: 'kubernetes',
     });
     expect(normalized.kind).toBe('Deployment');
     expect(normalized.name).toBe('api');
     expect(normalized.namespace).toBe('platform');
     expect(normalized.labels).toEqual({ team: 'core' });
     expect(normalized.version).toBe(7);
+    expect(normalized.provider).toBe('kubernetes');
   });
 
   it('defaults namespace to "default" when absent', () => {
