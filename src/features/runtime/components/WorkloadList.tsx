@@ -23,7 +23,12 @@ interface Props {
 
 export function WorkloadList({ workloads, selected, onSelect }: Props) {
   if (workloads.length === 0) {
-    return <EmptyState title="No workloads" description="No runtime workloads visible in this cluster yet." />;
+    return (
+      <EmptyState
+        title="No workloads"
+        description="No runtime workloads visible in this cluster/platform yet."
+      />
+    );
   }
   return (
     <Card>
@@ -35,9 +40,9 @@ export function WorkloadList({ workloads, selected, onSelect }: Props) {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Namespace</TableHead>
+              <TableHead>Namespace / scope</TableHead>
               <TableHead>Kind</TableHead>
-              <TableHead>Replicas</TableHead>
+              <TableHead>Replicas / tasks</TableHead>
               <TableHead>Health</TableHead>
               <TableHead>Owner</TableHead>
             </TableRow>

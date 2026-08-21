@@ -15,11 +15,11 @@ import { EventList } from './EventList';
 import { RuntimeActionsPanel } from './RuntimeActionsPanel';
 import { DeployHistory } from './DeployHistory';
 
-// `RuntimePage` is the cluster/workload/pod operational view. It binds
-// L-2102's read model (inventory, deploys, logs/events) to L-2104..2106
-// governed actions through the RuntimeActionsPanel. The page is aware
-// that every mutating action is a proposed ChangeSet — never a direct
-// cluster mutation.
+// `RuntimePage` is the cluster/workload/instance operational view. It
+// binds L-2102's read model (inventory, deploys, logs/events) to
+// L-2104..2106 governed actions through the RuntimeActionsPanel.
+// Labels stay provider-agnostic (Kubernetes or ECS). Mutating actions
+// are always proposed ChangeSets — never direct runtime mutations.
 export function RuntimePage() {
   const clusters = useListRuntimeClustersQuery();
   const [clusterId, setClusterId] = useState<string>('');
@@ -86,11 +86,11 @@ export function RuntimePage() {
           icon={<Server className="h-6 w-6" />}
           iconClassName="text-cyan-400"
           title="Runtime"
-          description="Live cluster state and governed runtime actions"
+          description="Live runtime state (Kubernetes or ECS) and governed actions"
         />
         <EmptyState
           title="No runtime clusters wired"
-          description="The control plane is not configured with a runtime adapter yet. Wire one in bootstrap to populate this view."
+          description="The control plane is not configured with a runtime adapter yet. Wire a Kubernetes or ECS adapter in bootstrap to populate this view."
         />
       </div>
     );
@@ -102,13 +102,13 @@ export function RuntimePage() {
         icon={<Server className="h-6 w-6" />}
         iconClassName="text-cyan-400"
         title="Runtime"
-        description="Live cluster state and governed runtime actions"
+        description="Live runtime state (Kubernetes or ECS) and governed actions"
       />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label htmlFor="cluster" className="text-xs uppercase tracking-wide text-slate-400 block">
-            Cluster
+            Cluster / platform
           </label>
           <Select
             id="cluster"
@@ -128,7 +128,7 @@ export function RuntimePage() {
         </div>
         <div>
           <label htmlFor="namespace" className="text-xs uppercase tracking-wide text-slate-400 block">
-            Namespace
+            Namespace / scope
           </label>
           <Select
             id="namespace"
@@ -138,7 +138,7 @@ export function RuntimePage() {
               setSelectedWorkload(null);
             }}
           >
-            <option value="">All namespaces</option>
+            <option value="">All scopes</option>
             {(inventory.data?.namespaces ?? []).map((ns) => (
               <option key={ns} value={ns}>
                 {ns}
@@ -182,7 +182,7 @@ export function RuntimePage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-slate-400">
-                    Select a workload to view pods, events, deploy history, and propose
+                    Select a workload to view instances, events, deploy history, and propose
                     governed actions.
                   </p>
                 </CardContent>

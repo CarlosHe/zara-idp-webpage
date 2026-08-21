@@ -2,13 +2,21 @@
 // L-2102). These are public types: the page, the panels, and the
 // hooks all share them, so any backend tweak surfaces through this
 // file instead of getting redefined per file.
+//
+// Workload kinds are intentionally provider-agnostic: Kubernetes
+// (Deployment, StatefulSet, …) and ECS (Service, Task, …) both map
+// into the same inventory DTO.
 
 export type RuntimeWorkloadKind =
   | 'Deployment'
   | 'StatefulSet'
   | 'DaemonSet'
   | 'CronJob'
-  | 'Job';
+  | 'Job'
+  | 'Service'
+  | 'Task'
+  | 'ReplicaSet'
+  | (string & {});
 
 export type RuntimeWorkloadHealth =
   | 'Healthy'
@@ -50,7 +58,8 @@ export type RuntimePodPhase =
   | 'Running'
   | 'Succeeded'
   | 'Failed'
-  | 'Unknown';
+  | 'Unknown'
+  | (string & {});
 
 export interface RuntimePod {
   clusterId: string;

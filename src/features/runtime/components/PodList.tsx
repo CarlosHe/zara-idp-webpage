@@ -18,14 +18,20 @@ interface Props {
   pods: RuntimePod[];
 }
 
+// Provider-agnostic: Kubernetes pods and ECS tasks share this list.
 export function PodList({ pods }: Props) {
   if (pods.length === 0) {
-    return <EmptyState title="No pods" description="No pods reported for this workload." />;
+    return (
+      <EmptyState
+        title="No instances"
+        description="No pods/tasks reported for this workload."
+      />
+    );
   }
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Pods ({pods.length})</CardTitle>
+        <CardTitle>Instances / pods ({pods.length})</CardTitle>
       </CardHeader>
       <CardContent className="overflow-x-auto">
         <Table>
@@ -35,7 +41,7 @@ export function PodList({ pods }: Props) {
               <TableHead>Phase</TableHead>
               <TableHead>Ready</TableHead>
               <TableHead>Restarts</TableHead>
-              <TableHead>Node</TableHead>
+              <TableHead>Node / host</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -43,7 +49,15 @@ export function PodList({ pods }: Props) {
               <TableRow key={`${p.namespace}/${p.name}`}>
                 <TableCell className="font-medium">{p.name}</TableCell>
                 <TableCell>
-                  <Badge variant={p.phase === 'Running' ? 'success' : p.phase === 'Failed' ? 'danger' : 'default'}>
+                  <Badge
+                    variant={
+                      p.phase === 'Running'
+                        ? 'success'
+                        : p.phase === 'Failed'
+                          ? 'danger'
+                          : 'default'
+                    }
+                  >
                     {p.phase}
                   </Badge>
                 </TableCell>
