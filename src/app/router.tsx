@@ -9,7 +9,9 @@ import { ProtectedRoute } from './guards/ProtectedRoute';
 import { GuestRoute } from './guards/GuestRoute';
 import { LoadingState } from '@/shared/components/feedback';
 import { ROUTES } from '@/shared/config';
-import { VitalsDebugPanel } from '@/shared/lib/observability/VitalsDebugPanel';
+const VitalsDebugPanel = lazy(() =>
+  import('@/shared/lib/observability/VitalsDebugPanel').then((m) => ({ default: m.VitalsDebugPanel })),
+);
 
 // Each feature barrel exports its page component(s) as named exports.
 // React.lazy wants `{ default: Component }`, so we adapt with .then().
@@ -24,28 +26,28 @@ const LoginPage = lazy(() =>
   import('@/features/auth/components/LoginPage').then((m) => ({ default: m.LoginPage })),
 );
 const ResourcesPage = lazy(() =>
-  import('@/features/resources').then((m) => ({ default: m.ResourcesPage })),
+  import('@/features/resources/components/ResourcesPage').then((m) => ({ default: m.ResourcesPage })),
 );
 const ResourceDetailPage = lazy(() =>
-  import('@/features/resources').then((m) => ({ default: m.ResourceDetailPage })),
+  import('@/features/resources/components/ResourceDetailPage').then((m) => ({ default: m.ResourceDetailPage })),
 );
 const ChangeSetsPage = lazy(() =>
-  import('@/features/changesets').then((m) => ({ default: m.ChangeSetsPage })),
+  import('@/features/changesets/components/ChangeSetsPage').then((m) => ({ default: m.ChangeSetsPage })),
 );
 const ChangeSetDetailPage = lazy(() =>
-  import('@/features/changesets').then((m) => ({ default: m.ChangeSetDetailPage })),
+  import('@/features/changesets/components/ChangeSetDetailPage').then((m) => ({ default: m.ChangeSetDetailPage })),
 );
 const StacksPage = lazy(() =>
-  import('@/features/stacks').then((m) => ({ default: m.StacksPage })),
+  import('@/features/stacks/components/StacksPage').then((m) => ({ default: m.StacksPage })),
 );
 const StackDetailPage = lazy(() =>
-  import('@/features/stacks').then((m) => ({ default: m.StackDetailPage })),
+  import('@/features/stacks/components/StackDetailPage').then((m) => ({ default: m.StackDetailPage })),
 );
 const CatalogPage = lazy(() =>
-  import('@/features/catalog').then((m) => ({ default: m.CatalogPage })),
+  import('@/features/catalog/components/CatalogPage').then((m) => ({ default: m.CatalogPage })),
 );
 const CatalogDetailPage = lazy(() =>
-  import('@/features/catalog').then((m) => ({ default: m.CatalogDetailPage })),
+  import('@/features/catalog/components/CatalogDetailPage').then((m) => ({ default: m.CatalogDetailPage })),
 );
 const CatalogSourcesPage = lazy(() =>
   import('@/features/catalog-sources').then((m) => ({ default: m.CatalogSourcesPage })),
@@ -57,34 +59,34 @@ const DocsPage = lazy(() =>
   import('@/features/docs').then((m) => ({ default: m.DocsPage })),
 );
 const TeamsPage = lazy(() =>
-  import('@/features/teams').then((m) => ({ default: m.TeamsPage })),
+  import('@/features/teams/components/TeamsPage').then((m) => ({ default: m.TeamsPage })),
 );
 const TeamDetailPage = lazy(() =>
-  import('@/features/teams').then((m) => ({ default: m.TeamDetailPage })),
+  import('@/features/teams/components/TeamsPage').then((m) => ({ default: m.TeamDetailPage })),
 );
 const ApprovalsPage = lazy(() =>
-  import('@/features/approvals').then((m) => ({ default: m.ApprovalsPage })),
+  import('@/features/approvals/components/ApprovalsPage').then((m) => ({ default: m.ApprovalsPage })),
 );
 const ApprovalDetailPage = lazy(() =>
-  import('@/features/approvals').then((m) => ({ default: m.ApprovalDetailPage })),
+  import('@/features/approvals/components/ApprovalDetailPage').then((m) => ({ default: m.ApprovalDetailPage })),
 );
 const AuditPage = lazy(() =>
-  import('@/features/audit').then((m) => ({ default: m.AuditPage })),
+  import('@/features/audit/components/AuditPage').then((m) => ({ default: m.AuditPage })),
 );
 const AuditDetailPage = lazy(() =>
-  import('@/features/audit').then((m) => ({ default: m.AuditDetailPage })),
+  import('@/features/audit/components/AuditDetailPage').then((m) => ({ default: m.AuditDetailPage })),
 );
 const FreezesPage = lazy(() =>
-  import('@/features/freezes').then((m) => ({ default: m.FreezesPage })),
+  import('@/features/freezes/components/FreezesPage').then((m) => ({ default: m.FreezesPage })),
 );
 const FreezeDetailPage = lazy(() =>
-  import('@/features/freezes').then((m) => ({ default: m.FreezeDetailPage })),
+  import('@/features/freezes/components/FreezeDetailPage').then((m) => ({ default: m.FreezeDetailPage })),
 );
 const PoliciesPage = lazy(() =>
-  import('@/features/policies').then((m) => ({ default: m.PoliciesPage })),
+  import('@/features/policies/components/PoliciesPage').then((m) => ({ default: m.PoliciesPage })),
 );
 const PolicyDetailPage = lazy(() =>
-  import('@/features/policies').then((m) => ({ default: m.PolicyDetailPage })),
+  import('@/features/policies/components/PolicyDetailPage').then((m) => ({ default: m.PolicyDetailPage })),
 );
 const GoldenPathsPage = lazy(() =>
   import('@/features/golden-paths').then((m) => ({ default: m.GoldenPathsPage })),
@@ -177,7 +179,7 @@ export const router = createBrowserRouter([
     element: <RootLayout />,
     errorElement: <ErrorPage />,
     children: [
-      { path: '_vitals', element: <VitalsDebugPanel /> },
+      { path: '_vitals', element: withSuspense(VitalsDebugPanel) },
       {
         path: 'login',
         element: <GuestRoute>{withSuspense(LoginPage)}</GuestRoute>,

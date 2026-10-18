@@ -53,7 +53,7 @@ export function NotificationsPage() {
   }
 
   return (
-    <div
+    <div role="region"
       className="space-y-6 animate-fade-in"
       aria-label="Notification center"
       data-testid="notifications-page"

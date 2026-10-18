@@ -1,23 +1,19 @@
-import { test, expect } from '@playwright/test';
-
-// Login journey — the dashboard is guarded; an unauthenticated user is
-// bounced to /login with a `redirect=` parameter preserving their
-// original intent.
+import { test, expect } from '../fixtures';
 
 test.describe('login journey', () => {
-  test('unauthenticated visit to /resources redirects to /login with the right redirect param', async ({
-    page,
-  }) => {
+  test('unauthenticated visit preserves the requested URL', async ({ page }) => {
     await page.goto('/resources');
     await expect(page).toHaveURL(/\/login\?redirect=/);
-    await expect(page.getByRole('heading', { name: /sign in|login/i })).toBeVisible();
+    await expect(page.getByText('Entrar no Zara IDP')).toBeVisible();
   });
 
-  test('successful login lands the user on the dashboard', async ({ page }) => {
-    await page.goto('/login');
-    await page.getByLabel(/email|user/i).fill(process.env.E2E_USER ?? 'admin@zara.local');
-    await page.getByLabel(/password/i).fill(process.env.E2E_PASS ?? 'correct-horse-battery');
-    await page.getByRole('button', { name: /sign in|log in/i }).click();
-    await expect(page).toHaveURL(/\/(dashboard)?$/);
+  test('a bearer token opens the requested resource screen', async ({ page }) => {
+    await page.route('**/api/v1/resources*', (route) => route.fulfill({ json: { items: [], total: 0 } }));
+    await page.route('**/api/v1/namespaces*', (route) => route.fulfill({ json: { items: [], total: 0 } }));
+    await page.goto('/login?redirect=/resources');
+    await page.getByLabel('Access token').fill('e2e-token');
+    await page.getByRole('button', { name: 'Continuar' }).click();
+    await expect(page).toHaveURL(/\/resources$/);
+    await expect(page.getByRole('heading', { name: 'Resources', exact: true })).toBeVisible();
   });
 });

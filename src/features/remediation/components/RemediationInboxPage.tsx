@@ -148,7 +148,7 @@ export function RemediationInboxPage() {
   }
 
   return (
-    <div
+    <div role="region"
       className="space-y-6 animate-fade-in"
       aria-label="Remediation inbox"
       data-testid="remediation-page"

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures';
 
 // Sprint-32 / L-3203 — remediation inbox journey. Asserts the inbox
 // renders proposals and surfaces the no-direct-mutation guard
@@ -22,7 +22,7 @@ test.describe('remediation journey', () => {
               id: 'rem-1',
               tenant: 't-1',
               source: 'scorecard',
-              code: 'svc.has-owner',
+              finding: { source: 'scorecard', code: 'svc.has-owner', entityKey: 'Service/default/billing-service' }, history: [],
               title: 'Set owner for billing-service',
               risk: 'medium',
               status: 'pending',

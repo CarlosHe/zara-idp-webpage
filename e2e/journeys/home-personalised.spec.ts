@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures';
 
 // Sprint-24 / L-2407 — personalised home E2E matrix.
 //

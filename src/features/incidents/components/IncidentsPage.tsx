@@ -53,7 +53,7 @@ export function IncidentsPage() {
   }
 
   return (
-    <div
+    <div role="region"
       className="space-y-6 animate-fade-in"
       aria-label="Incident console"
       data-testid="incidents-page"

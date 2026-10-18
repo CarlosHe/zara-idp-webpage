@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures';
 
 // Sprint-32 / L-3203 — cost dashboard journey.
 

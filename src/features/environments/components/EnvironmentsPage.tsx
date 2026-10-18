@@ -91,7 +91,7 @@ export function EnvironmentsPage() {
   };
 
   return (
-    <div
+    <div role="region"
       className="space-y-6 animate-fade-in"
       aria-label="Dev environments"
       data-testid="environments-page"

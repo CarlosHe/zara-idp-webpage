@@ -28,10 +28,10 @@ function readBaseUrl(): string {
 const AUTH_TOKEN_KEY = 'zara.authToken';
 const LOGIN_ROUTE = '/login';
 
-function readAuthToken(): string | null {
+function readStoredValue(key: string): string | null {
   try {
     if (typeof window === 'undefined') return null;
-    return window.localStorage.getItem(AUTH_TOKEN_KEY);
+    return window.localStorage.getItem(key);
   } catch {
     return null;
   }
@@ -74,8 +74,10 @@ const rawBaseQuery = fetchBaseQuery({
   prepareHeaders: (headers) => {
     headers.set('Content-Type', 'application/json');
     headers.set('X-Correlation-ID', newCorrelationId());
-    const token = readAuthToken();
+    const token = readStoredValue(AUTH_TOKEN_KEY);
     if (token) headers.set('Authorization', `Bearer ${token}`);
+    const tenant = readStoredValue('zara.tenant');
+    if (tenant) headers.set('X-Zara-Tenant', tenant);
     return headers;
   },
   // RTK Query passes the request signal through to fetch, so every

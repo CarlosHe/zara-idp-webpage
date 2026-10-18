@@ -76,13 +76,26 @@ function PathsPanel({ path }: { path: string }) {
   );
 }
 
+async function fetchSpec(path: string): Promise<string> {
+  const url = new URL(path, window.location.href);
+  const headers = new Headers({ Accept: 'application/json,application/yaml;q=0.5' });
+  if (url.origin === window.location.origin) {
+    const token = window.localStorage.getItem('zara.authToken');
+    const tenant = window.localStorage.getItem('zara.tenant');
+    if (token) headers.set('Authorization', `Bearer ${token}`);
+    if (tenant) headers.set('X-Zara-Tenant', tenant);
+  }
+  const response = await fetch(url, { headers, credentials: 'omit' });
+  if (!response.ok) throw new Error(`Unable to load OpenAPI spec (${response.status})`);
+  return response.text();
+}
+
 function RawPanel({ path }: { path: string }) {
   const [body, setBody] = useState<string | null>(() => (path ? null : ''));
   useEffect(() => {
     if (!path) return undefined;
     let mounted = true;
-    fetch(path)
-      .then((r) => r.text())
+    fetchSpec(path)
       .then((text) => {
         if (mounted) setBody(text);
       })
@@ -112,8 +125,7 @@ function useSpecOperations(path: string): SpecOperation[] | null {
   useEffect(() => {
     if (!path) return undefined;
     let mounted = true;
-    fetch(path, { headers: { Accept: 'application/json,application/yaml;q=0.5' } })
-      .then((r) => r.text())
+    fetchSpec(path)
       .then((text) => {
         if (!mounted) return;
         const parsed = tryParseSpec(text);

@@ -100,7 +100,7 @@ export function TenantsPage() {
   };
 
   return (
-    <div
+    <div role="region"
       className="space-y-6 animate-fade-in"
       aria-label="Tenant administration"
       data-testid="tenants-page"
@@ -112,7 +112,8 @@ export function TenantsPage() {
         description="Multi-tenant administration: lifecycle, admins, quotas, and SLO snapshots."
         onRefresh={refetch}
         actions={
-          <div className="flex flex-wrap items-center gap-2" role="tablist">
+          <div className="flex flex-wrap items-center gap-2">
+            <div role="tablist" aria-label="Tenant lifecycle" className="flex gap-2">
             {LIFECYCLE_FILTERS.map((filter) => (
               <button
                 type="button"
@@ -130,6 +131,7 @@ export function TenantsPage() {
                 {LIFECYCLE_LABEL[filter]}
               </button>
             ))}
+            </div>
             <input
               type="search"
               value={search}
@@ -222,7 +224,7 @@ export function TenantsPage() {
               <button
                 type="submit"
                 disabled={createState.isLoading}
-                className="w-full rounded-md bg-indigo-500 px-3 py-1.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-600"
+                className="w-full rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-600"
                 data-testid="tenants-create-submit"
               >
                 {createState.isLoading ? 'Creating…' : 'Create tenant'}

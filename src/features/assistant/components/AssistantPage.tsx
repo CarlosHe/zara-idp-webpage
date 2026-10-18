@@ -124,7 +124,7 @@ export function AssistantPage() {
   }
 
   return (
-    <div
+    <div role="region"
       className="space-y-4 animate-fade-in"
       aria-label="AI assistant"
       data-testid="assistant-page"

@@ -70,7 +70,7 @@ export function FreezeListView({
         <Card padding="none">
           <CardHeader className="px-4 pt-4">
             <CardTitle className="text-slate-400">
-              Past Freezes ({inactiveFreezes.length})
+              Scheduled and Past Freezes ({inactiveFreezes.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -80,11 +80,12 @@ export function FreezeListView({
                   <TableHead>Name</TableHead>
                   <TableHead>Reason</TableHead>
                   <TableHead>Created By</TableHead>
-                  <TableHead>Duration</TableHead>
+                  <TableHead>Scope</TableHead>
+                  <TableHead>Expires</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {inactiveFreezes.slice(0, 10).map((freeze) => (
+                {inactiveFreezes.map((freeze) => (
                   <FreezeRow key={freeze.id} freeze={freeze} inactive />
                 ))}
               </TableBody>

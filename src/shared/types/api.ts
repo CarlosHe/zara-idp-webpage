@@ -203,6 +203,7 @@ export interface Approval {
   reason: string;
   expiresAt: string;
   diff?: string;
+  approvals?: unknown[];
 }
 
 export interface AuditEntry {
@@ -229,6 +230,20 @@ export interface Freeze {
   scope: FreezeScope;
   allowedOperations: string[];
   active: boolean;
+  description?: string;
+  startTime?: string;
+  endTime?: string;
+  version?: number;
+}
+
+export interface FreezeInput {
+  name: string;
+  reason: string;
+  description: string;
+  scope: FreezeScope;
+  startTime: string;
+  endTime: string;
+  version?: number;
 }
 
 export interface FreezeScope {

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures';
 
 // Sprint-32 / L-3203 — docs viewer journey. Asserts the docs page
 // surfaces a TechDocs entry and its freshness indicator.
@@ -11,7 +11,7 @@ test.describe('docs view journey', () => {
   });
 
   test('docs page renders a docset returned by the API', async ({ page }) => {
-    await page.route('**/api/v1/docs/sets*', (route) =>
+    await page.route('**/api/v1/docs', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -19,7 +19,7 @@ test.describe('docs view journey', () => {
           items: [
             {
               id: 'docs-1',
-              slug: 'checkout-api',
+              slug: 'checkout-api', title: 'checkout-api', description: 'Checkout documentation', format: 'mdx',
               owner: 'team-payments',
               version: '2026.04.26',
               freshness: 'fresh',

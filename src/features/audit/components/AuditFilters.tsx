@@ -1,7 +1,12 @@
 import { Filter, Search } from 'lucide-react';
 import { Card, CardContent, Input } from '@/shared/components/ui';
 
-export function AuditFilters() {
+interface AuditFiltersProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+export function AuditFilters({ value, onChange }: AuditFiltersProps) {
   return (
     <Card>
       <CardContent className="flex flex-wrap items-end gap-4">
@@ -18,6 +23,8 @@ export function AuditFilters() {
             />
             <Input
               type="search"
+              value={value}
+              onChange={(event) => onChange(event.target.value)}
               placeholder="Search audit logs..."
               aria-label="Search audit logs"
               className="pl-9"

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures';
 
 // Sprint-32 / L-3203 — plugin marketplace journey.
 
@@ -21,7 +21,7 @@ test.describe('plugins journey', () => {
               name: 'github-source',
               version: '1.4.0',
               lifecycle: 'installed',
-              health: 'healthy',
+              health: { state: 'healthy', consecutiveFailures: 0 }, displayName: 'github-source', status: 'installed', runtime: 'wasm', resources: { cpuMilli: 100, memoryMiB: 64 }, permissions: {}, signing: { digest: 'sha256:test', signatureRef: 'sig', sbomRef: 'sbom' }, installedBy: 'platform', installedAt: '2026-10-18T00:00:00Z', updatedAt: '2026-10-18T00:00:00Z',
               signed: true,
               sbom: 'cyclonedx-1.5',
             },

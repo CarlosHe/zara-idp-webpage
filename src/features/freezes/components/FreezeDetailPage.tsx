@@ -1,4 +1,6 @@
-import { Link, useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useGetMeQuery } from '@/features/auth/services/authApi';
 import {
   Snowflake,
   ArrowLeft,
@@ -6,7 +8,8 @@ import {
   User,
   AlertTriangle,
 } from 'lucide-react';
-import { useGetFreezeQuery } from '@/features/freezes/services/freezesApi';
+import { useGetFreezeQuery, useDeleteFreezeMutation } from '@/features/freezes/services/freezesApi';
+import { FreezeEditor } from './FreezeEditor';
 import { errorMessage } from '@/shared/lib/api';
 import { ROUTES } from '@/shared/config';
 import {
@@ -17,11 +20,19 @@ import {
   Badge,
   Alert,
   EmptyState,
+  Button,
+  ConfirmModal,
 } from '@/shared/components/ui';
 import { LoadingState } from '@/shared/components/feedback';
 import { cn, formatDateTime } from '@/shared/utils';
 
 export function FreezeDetailPage() {
+  const [editing, setEditing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+  const [remove, removal] = useDeleteFreezeMutation();
+  const { data: principal } = useGetMeQuery();
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { data: selectedFreeze, isLoading: loading, error } = useGetFreezeQuery(id ?? '', {
     skip: !id,
@@ -51,11 +62,23 @@ export function FreezeDetailPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {deleteError && <Alert type="error" title="Unable to delete freeze">{deleteError}</Alert>}
+      {editing && <FreezeEditor freeze={selectedFreeze} onClose={() => setEditing(false)} />}
+      <ConfirmModal isOpen={deleting} onClose={() => { if (!removal.isLoading) setDeleting(false); }}
+        title="Delete freeze" message={`Remove ${selectedFreeze.name}? Its deployment restrictions will end immediately.`}
+        confirmText="Delete freeze" loading={removal.isLoading} onConfirm={async () => {
+          try { await remove(selectedFreeze.id).unwrap(); navigate(ROUTES.FREEZES.LIST); }
+          catch (error) { setDeleting(false); setDeleteError(errorMessage(error) || 'Unable to delete freeze.'); }
+        }} />
       {/* Back link */}
       <Link to={ROUTES.FREEZES.LIST} className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200">
         <ArrowLeft className="h-4 w-4" />
         Back to freezes
       </Link>
+      {principal?.isAdmin && <div className="flex gap-3">
+        <Button variant="secondary" onClick={() => setEditing(true)}>Edit freeze</Button>
+        <Button variant="danger" onClick={() => setDeleting(true)}>Delete freeze</Button>
+      </div>}
 
       {/* Header */}
       <div className="flex items-start gap-4">

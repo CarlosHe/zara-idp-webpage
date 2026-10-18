@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { History } from 'lucide-react';
 import { useListAuditLogsQuery } from '@/features/audit/services/auditApi';
 import { errorMessage } from '@/shared/lib/api';
@@ -28,6 +29,7 @@ const COLUMNS = [
 ];
 
 export function AuditPage() {
+  const [search, setSearch] = useState('');
   const { data: auditLogs, isLoading: loading, error, refetch } = useListAuditLogsQuery();
 
   if (error) {
@@ -35,7 +37,11 @@ export function AuditPage() {
     return <ErrorState message={message} onRetry={refetch} />;
   }
 
-  const entries = auditLogs ?? [];
+  const query = search.trim().toLocaleLowerCase();
+  const entries = (auditLogs ?? []).filter((entry) =>
+    !query || [entry.actor, entry.action, entry.resourceKind, entry.resourceNamespace, entry.resourceName, entry.result, entry.message]
+      .some((value) => value?.toLocaleLowerCase().includes(query)),
+  );
   const isVirtualized = entries.length >= VIRTUALIZATION_THRESHOLD;
 
   return (
@@ -48,7 +54,7 @@ export function AuditPage() {
         onRefresh={refetch}
       />
 
-      <AuditFilters />
+      <AuditFilters value={search} onChange={setSearch} />
 
       <Card padding="none">
         <CardHeader className="px-4 pt-4">

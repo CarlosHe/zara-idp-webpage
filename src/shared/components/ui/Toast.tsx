@@ -164,6 +164,7 @@ export function Toaster() {
 
   const node = (
     <div
+      role="region"
       aria-live="polite"
       aria-label="Notifications"
       className="pointer-events-none fixed right-4 top-4 z-[60] flex flex-col gap-2"

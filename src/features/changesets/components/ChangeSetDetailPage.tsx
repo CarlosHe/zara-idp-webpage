@@ -19,16 +19,20 @@ import {
   useGetChangeSetDiffQuery,
   useGetChangeSetQuery,
   useRejectChangeSetMutation,
+  useApplyChangeSetMutation,
 } from '../services/changesetsApi';
 
 export function ChangeSetDetailPage() {
   const { id = '' } = useParams<{ id: string }>();
   const { data: cs, isLoading, isError, error, refetch } = useGetChangeSetQuery(id, {
     skip: !id,
+    pollingInterval: 5000,
+    skipPollingIfUnfocused: true,
   });
   const { data: diff } = useGetChangeSetDiffQuery(id, { skip: !id });
   const [approve, approveState] = useApproveChangeSetMutation();
   const [reject, rejectState] = useRejectChangeSetMutation();
+  const [apply, applyState] = useApplyChangeSetMutation();
   const [reason, setReason] = useState('');
   const [showReject, setShowReject] = useState(false);
 
@@ -61,8 +65,9 @@ export function ChangeSetDetailPage() {
   }
 
   const pending =
-    (cs.approvalStatus || '').toLowerCase() === 'pending' || cs.requiresApproval === true;
-  const actionError = errorMessage(approveState.error) || errorMessage(rejectState.error);
+    (cs.approvalStatus || '').toLowerCase() === 'pending';
+  const actionError = errorMessage(approveState.error) || errorMessage(rejectState.error) || errorMessage(applyState.error);
+  const yaml = cs.resourcesYaml ?? cs.resourcesYAML;
 
   return (
     <div className="space-y-6 animate-fade-in" data-testid="changeset-detail-page">
@@ -82,7 +87,7 @@ export function ChangeSetDetailPage() {
             {cs.updatedAt ? ` · ${formatRelativeTime(String(cs.updatedAt))}` : null}
           </p>
           <div className="flex flex-wrap gap-2 mt-2">
-            <Badge variant="outline">{cs.approvalStatus ?? 'unknown'}</Badge>
+            <Badge variant="outline">{cs.appliedAt ? 'applied' : cs.approvalStatus ?? 'unknown'}</Badge>
             {cs.totalRisk ? <Badge variant="warning">risk:{cs.totalRisk}</Badge> : null}
             {cs.environment ? <Badge variant="outline">{cs.environment}</Badge> : null}
           </div>
@@ -104,7 +109,7 @@ export function ChangeSetDetailPage() {
               Reject
             </Button>
           </div>
-        ) : null}
+        ) : cs.approvalStatus === 'approved' && !cs.appliedAt ? <Button loading={applyState.isLoading} onClick={() => void apply(cs.id)}>Apply / Retry execution</Button> : null}
       </header>
 
       {actionError ? (
@@ -120,6 +125,7 @@ export function ChangeSetDetailPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <textarea
+              aria-label="Rejection reason"
               className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
               rows={3}
               value={reason}
@@ -163,14 +169,14 @@ export function ChangeSetDetailPage() {
         </CardContent>
       </Card>
 
-      {cs.resourcesYAML ? (
+      {yaml ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">YAML</CardTitle>
           </CardHeader>
           <CardContent>
             <pre className="text-xs bg-slate-950/50 border border-slate-800 rounded-md p-3 overflow-auto max-h-96 whitespace-pre-wrap">
-              {cs.resourcesYAML}
+              {yaml}
             </pre>
           </CardContent>
         </Card>

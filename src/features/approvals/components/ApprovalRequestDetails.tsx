@@ -12,6 +12,7 @@ export function ApprovalRequestDetails({ approval }: ApprovalRequestDetailsProps
         <CardTitle>Request Details</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {!!approval.approvals?.length && <p className="text-slate-300">Approvals recorded: {approval.approvals.length}</p>}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-slate-400">Resource Kind</p>

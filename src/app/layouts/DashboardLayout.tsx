@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import {
   LayoutDashboard,
   Boxes,
@@ -34,8 +35,9 @@ import {
 } from 'lucide-react';
 import { cn } from '@/shared/utils';
 import { ROUTES } from '@/shared/config';
-import { ThemeToggle } from '@/features/theme';
 import { SkipLink } from '@/shared/components/feedback';
+
+const WorkspaceControls = lazy(() => import('./WorkspaceControls').then((module) => ({ default: module.WorkspaceControls })));
 
 const navigation = [
   { name: 'Home', href: ROUTES.PERSONAL_HOME, icon: Home },
@@ -132,7 +134,7 @@ export function DashboardLayout() {
 
         <footer className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700/50">
           <p className="text-xs text-slate-400">Zara IDP Core v0.1.0</p>
-          <p className="mt-1 text-xs text-slate-400">Read-Only Portal</p>
+          <p className="mt-1 text-xs text-slate-400">Developer Platform</p>
         </footer>
       </aside>
 
@@ -144,14 +146,7 @@ export function DashboardLayout() {
           <div className="h-full px-6 flex items-center justify-between">
             <div className="flex items-center gap-4" />
             <div className="flex items-center gap-4">
-              <ThemeToggle />
-              <span
-                role="status"
-                aria-label="Running in demo mode"
-                className="text-xs px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-300"
-              >
-                Demo Mode
-              </span>
+              <Suspense fallback={null}><WorkspaceControls /></Suspense>
             </div>
           </div>
         </header>

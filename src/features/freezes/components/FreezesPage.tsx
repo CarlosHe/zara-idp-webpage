@@ -1,11 +1,16 @@
 import { Snowflake } from 'lucide-react';
+import { useState } from 'react';
+import { useGetMeQuery } from '@/features/auth/services/authApi';
 import { useListFreezesQuery } from '@/features/freezes/services/freezesApi';
 import { errorMessage } from '@/shared/lib/api';
-import { Alert } from '@/shared/components/ui';
+import { Alert, Button } from '@/shared/components/ui';
 import { PageHeader, ErrorState } from '@/shared/components/feedback';
 import { FreezeListView } from './FreezeListView';
+import { FreezeEditor } from './FreezeEditor';
 
 export function FreezesPage() {
+  const [editing, setEditing] = useState(false);
+  const { data: principal } = useGetMeQuery();
   const { data: freezes, isLoading: loading, error, refetch } = useListFreezesQuery();
 
   const safeFreezes = Array.isArray(freezes) ? freezes : [];
@@ -26,7 +31,9 @@ export function FreezesPage() {
         title="Freezes"
         description="View active deployment freezes and change restrictions"
         onRefresh={refetch}
+        actions={principal?.isAdmin && <Button onClick={() => setEditing(true)}>Create freeze</Button>}
       />
+      {editing && <FreezeEditor onClose={() => setEditing(false)} />}
 
       {/* Active Freezes Warning */}
       {activeFreezes.length > 0 && (

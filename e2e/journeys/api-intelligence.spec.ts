@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures';
 
 // Sprint-32 / L-3203 — API intelligence journey.
 
@@ -19,7 +19,7 @@ test.describe('api intelligence journey', () => {
             {
               id: 'api-1',
               slug: 'checkout-rest-v1',
-              title: 'Checkout REST',
+              name: 'Checkout REST', namespace: 'payments', type: 'rest', latestSemver: '1.4.0', versionsCount: 1, consumersCount: 2, deprecation: {},
               owner: 'team-payments',
               version: '1.4.0',
               lifecycle: 'production',

@@ -9,6 +9,7 @@ interface AnalyticsFiltersProps {
 export function AnalyticsFilters({ value, onChange }: AnalyticsFiltersProps) {
   return (
     <Select
+      aria-label="Analytics time range"
       value={value}
       onChange={(e) => onChange(e.target.value as AnalyticsTimeRange)}
       className="w-32"

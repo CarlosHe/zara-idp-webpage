@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures';
 
 // Sprint-32 / L-3203 — global search journey. Search returns a single
 // hit and renders it with the catalog kind/namespace/name triple.
@@ -16,9 +16,9 @@ test.describe('search journey', () => {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          hits: [
+          items: [
             {
-              id: 'cat-1',
+              id: 'cat-1', scope: 'catalog', entityKey: 'Application/payments/checkout-api', body: 'Checkout service', tags: [], attributes: {}, correlationId: '', version: 1, indexedAt: '2026-10-18T00:00:00Z',
               kind: 'Application',
               namespace: 'payments',
               name: 'checkout-api',
@@ -32,7 +32,10 @@ test.describe('search journey', () => {
         }),
       }),
     );
-    await page.goto('/search?q=checkout');
+    await page.route('**/api/v1/search/saved', (route) => route.fulfill({ json: { items: [] } }));
+    await page.goto('/search');
+    await page.getByLabel('Search query').fill('checkout');
+    await page.getByRole('button', { name: 'Search', exact: true }).click();
     await expect(page.getByText(/checkout-api/i).first()).toBeVisible();
   });
 });

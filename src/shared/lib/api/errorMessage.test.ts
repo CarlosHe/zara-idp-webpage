@@ -2,6 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { errorMessage } from './errorMessage';
 
 describe('errorMessage', () => {
+  it('reads the REST error envelope and accepts unknown thrown values', () => {
+    expect(errorMessage({ status: 409, data: { error: { code: 409, message: 'Refresh before editing' } } })).toBe('Refresh before editing');
+    expect(errorMessage('failure')).toBe('failure');
+    expect(errorMessage(42)).toBe('Unexpected error.');
+  });
   it('returns empty string for null / undefined', () => {
     expect(errorMessage(null)).toBe('');
     expect(errorMessage(undefined)).toBe('');

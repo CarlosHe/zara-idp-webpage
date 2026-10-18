@@ -58,7 +58,7 @@ export function CostPage() {
   const dashboard = data;
 
   return (
-    <div
+    <div role="region"
       className="space-y-6 animate-fade-in"
       aria-label="Cost dashboard"
       data-testid="cost-page"

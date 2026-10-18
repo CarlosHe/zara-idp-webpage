@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures';
 
 // Sprint-32 / L-3203 — catalog browse journey. Asserts the catalog
 // page renders an entity list returned by the API.
@@ -11,7 +11,7 @@ test.describe('catalog browse journey', () => {
   });
 
   test('catalog page renders entities returned by the API', async ({ page }) => {
-    await page.route('**/api/v1/catalog/entities*', (route) =>
+    await page.route('**/api/v1/catalog*', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',

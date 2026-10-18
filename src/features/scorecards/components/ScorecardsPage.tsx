@@ -44,7 +44,7 @@ export function ScorecardsPage() {
 
       <GovernanceKPIs />
 
-      <nav className="flex gap-2 border-b border-slate-700" aria-label="scorecard tabs">
+      <nav role="tablist" className="flex gap-2 border-b border-slate-700" aria-label="scorecard tabs">
         <TabButton current={tab} value="overview" onClick={setTab}>
           Inventory
         </TabButton>

@@ -92,7 +92,7 @@ export function ChangeSetsPage() {
                       </Link>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">{cs.approvalStatus ?? 'unknown'}</Badge>
+                      <Badge variant="outline">{cs.appliedAt ? 'applied' : cs.approvalStatus ?? 'unknown'}</Badge>
                     </TableCell>
                     <TableCell className="font-mono text-xs">{cs.totalRisk ?? '—'}</TableCell>
                     <TableCell className="text-sm text-slate-400">{cs.source ?? '—'}</TableCell>

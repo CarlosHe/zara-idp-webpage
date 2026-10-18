@@ -1,19 +1,12 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures';
 
-test.describe('audit-view journey', () => {
-  test.beforeEach(async ({ context }) => {
-    await context.addInitScript(() => {
-      window.localStorage.setItem('zara.authToken', 'e2e-token');
-    });
-  });
-
-  test('audit page lists events and filters by actor', async ({ page }) => {
-    await page.goto('/audit');
-    await expect(page.getByRole('heading', { name: /audit/i })).toBeVisible();
-    const search = page.getByPlaceholder(/search|filter/i);
-    if (await search.count()) {
-      await search.first().fill('admin');
-    }
-    await expect(page.getByRole('table')).toBeVisible();
-  });
+test('audit search filters events by actor', async ({ context, page }) => {
+  await context.addInitScript(() => localStorage.setItem('zara.authToken', 'e2e-token'));
+  await page.route('**/api/v1/audit*', (route) => route.fulfill({ json: { items: ['admin', 'developer'].map((actor, index) => ({ id: String(index), timestamp: new Date().toISOString(), action: 'APPLY', resourceKind: 'Application', resourceNamespace: 'platform', resourceName: `service-${index}`, actor, actorType: 'user', result: 'success', message: '', metadata: {} })), total: 2 } }));
+  await page.goto('/audit');
+  await expect(page.getByRole('table')).toBeVisible();
+  await expect(page.getByText('developer', { exact: true })).toBeVisible();
+  await page.getByRole('searchbox', { name: 'Search audit logs' }).fill('admin');
+  await expect(page.getByText('developer', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('admin', { exact: true })).toBeVisible();
 });

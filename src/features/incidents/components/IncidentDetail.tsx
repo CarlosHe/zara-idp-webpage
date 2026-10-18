@@ -49,7 +49,7 @@ export function IncidentDetail({ id }: IncidentDetailProps) {
   const inc: Incident = data;
 
   return (
-    <div className="space-y-4" aria-label="Incident detail" data-testid={`incident-detail-${inc.id}`}>
+    <div role="region" className="space-y-4" aria-label="Incident detail" data-testid={`incident-detail-${inc.id}`}>
       <Card role="region" aria-label={`Incident ${inc.title}`}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

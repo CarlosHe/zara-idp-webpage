@@ -10,7 +10,7 @@ export const approvalsApi = baseApi.injectEndpoints({
       query: (arg) => {
         const status = arg?.status;
         const params: Record<string, unknown> = { ...(arg?.pagination ?? {}) };
-        if (status && status !== 'all') params.status = status;
+        if (status) params.status = status;
         return { url: '/approvals', params };
       },
       transformResponse: (raw: unknown) => unwrapItems<Approval>(raw),
@@ -29,6 +29,7 @@ export const approvalsApi = baseApi.injectEndpoints({
     }),
 
     approveRequest: build.mutation<Approval, { id: string; comment?: string }>({
+      extraOptions: { maxRetries: 0 },
       query: ({ id, comment }) => ({
         url: `/approvals/${id}/approve`,
         method: 'POST',
@@ -42,6 +43,7 @@ export const approvalsApi = baseApi.injectEndpoints({
     }),
 
     rejectRequest: build.mutation<Approval, { id: string; reason: string }>({
+      extraOptions: { maxRetries: 0 },
       query: ({ id, reason }) => ({
         url: `/approvals/${id}/reject`,
         method: 'POST',

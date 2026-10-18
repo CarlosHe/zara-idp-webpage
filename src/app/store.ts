@@ -3,7 +3,7 @@ import { setupListeners } from '@reduxjs/toolkit/query';
 import { baseApi } from '@/shared/lib/api';
 import resourcesReducer from '@/features/resources/store/resourcesSlice';
 import approvalsReducer from '@/features/approvals/store/approvalsSlice';
-import { themeReducer } from '@/features/theme';
+import { default as themeReducer } from '@/features/theme/store/themeSlice';
 
 // Single RTK Query slice + the feature slices that still own UI state
 // (filters, table selection, user preferences). Every other "slice" from

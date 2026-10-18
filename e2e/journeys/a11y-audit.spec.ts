@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures';
 import AxeBuilder from '@axe-core/playwright';
 
 // Sprint-33 / L-3304 — axe-core wiring inside Playwright.
@@ -43,7 +43,7 @@ const PRINCIPAL = {
 // rendered (otherwise an axe pass against a still-loading skeleton is
 // meaningless).
 const ROUTES: ReadonlyArray<readonly [string, RegExp]> = [
-  ['/login', /sign in|login|access token/i],
+  ['/login', /entrar|sign in|login|access token/i],
   ['/home', /home|welcome|dashboard/i],
   ['/catalog', /catalog/i],
   ['/plugins', /plugin/i],
@@ -88,14 +88,24 @@ test.describe('a11y audit (axe-core, all major routes)', () => {
       const url = route.request().url();
       // /me already handled above
       if (/\/api\/v1\/me(\?|$)/.test(url)) {
-        return;
+        return route.fallback();
       }
-      const body =
-        /(list|search|history|approvals|notifications|incidents|tenants|environments|alerts|recommendations)/i.test(
-          url,
-        )
-          ? '[]'
-          : '{}';
+      const path = new URL(url).pathname;
+      let payload: unknown = { items: [], total: 0 };
+      if (path === '/api/v1/incidents') payload = { incidents: [] };
+      if (path === '/api/v1/notifications') payload = { notifications: [], unreadCount: 0 };
+      if (path === '/api/v1/home') payload = {
+        persona: 'developer', subject: 'a11y-bot', generatedAt: new Date().toISOString(),
+        approvals: [], alerts: [], activity: [], services: [], quickLinks: [], recommendations: [], degraded: [],
+        counts: { approvals: 0, alerts: 0, criticalAlerts: 0, activity: 0, services: 0, quickLinks: 0, recommendations: 0 },
+      };
+      if (path === '/api/v1/governance/kpis') payload = { scorecards: { active: 0, draft: 0, archived: 0 }, waivers: { active: 0, expired: 0 } };
+      if (path === '/api/v1/environments') payload = { environments: [], inventory: { totalEnvironments: 0, byState: {}, byKind: {}, bySource: {}, staleCount: 0, expiringSoonCount: 0, projectedDailySpendMinorUnits: 0 } };
+      if (path === '/api/v1/cost/dashboard') payload = {
+        window: { since: '2026-10-01T00:00:00Z', until: '2026-10-18T00:00:00Z' }, currency: 'USD', totalSpend: { value: 0, minorUnits: 0, currency: 'USD' }, allocationsCount: 0,
+        showback: [], chargeback: [], topServices: [], idleResources: [], budgets: [], anomalies: [], findings: [], costImpacts: [],
+      };
+      const body = JSON.stringify(payload);
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -106,18 +116,12 @@ test.describe('a11y audit (axe-core, all major routes)', () => {
 
   for (const [path, headingRegex] of ROUTES) {
     test(`route ${path} has zero critical/serious axe violations`, async ({ page }) => {
+      if (path === '/login') {
+        await page.route('**/api/v1/me', (route) => route.fulfill({ status: 401, contentType: 'application/json', body: '{}' }));
+      }
       await page.goto(path);
 
-      // Wait for either the heading we expect, or any landmark — both
-      // tell us the shell is rendered. axe needs *some* DOM.
-      await Promise.race([
-        page.getByRole('heading', { name: headingRegex }).first().waitFor({ timeout: 15_000 }),
-        page.locator('main, [role="main"]').first().waitFor({ timeout: 15_000 }),
-      ]).catch(() => {
-        // If neither rendered we still run axe: a totally empty body
-        // will at minimum surface document-title / html-has-lang
-        // findings, which we want to know about.
-      });
+      await expect(page.getByRole('heading', { name: headingRegex }).first()).toBeVisible();
 
       const results = await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])

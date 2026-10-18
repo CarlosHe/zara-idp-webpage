@@ -19,8 +19,10 @@ export interface ChangeSet {
   environment?: string;
   changes?: ChangeSetChange[];
   resourcesYAML?: string;
+  resourcesYaml?: string;
   createdAt?: string;
   updatedAt?: string;
+  appliedAt?: string;
   [key: string]: unknown;
 }
 
@@ -66,10 +68,11 @@ export const changesetsApi = baseApi.injectEndpoints({
     }),
 
     approveChangeSet: build.mutation<unknown, { id: string; comment?: string }>({
+      extraOptions: { maxRetries: 0 },
       query: ({ id, comment }) => ({
         url: `/changesets/${id}/approve`,
         method: 'POST',
-        body: { comment: comment ?? '' },
+        body: { comment: comment ?? '', auto_apply: true },
       }),
       invalidatesTags: (_r, _e, arg) => [
         { type: 'ChangeSet', id: arg.id },
@@ -79,6 +82,7 @@ export const changesetsApi = baseApi.injectEndpoints({
     }),
 
     rejectChangeSet: build.mutation<unknown, { id: string; reason: string }>({
+      extraOptions: { maxRetries: 0 },
       query: ({ id, reason }) => ({
         url: `/changesets/${id}/reject`,
         method: 'POST',
@@ -90,6 +94,11 @@ export const changesetsApi = baseApi.injectEndpoints({
         { type: 'Approval', id: 'LIST' },
       ],
     }),
+    applyChangeSet: build.mutation<unknown, string>({
+      extraOptions: { maxRetries: 0 },
+      query: (id) => ({ url: `/changesets/${id}/apply`, method: 'POST', body: {} }),
+      invalidatesTags: (_result, _error, id) => [{ type: 'ChangeSet', id }, { type: 'Resource', id: 'LIST' }],
+    }),
   }),
   overrideExisting: false,
 });
@@ -100,4 +109,5 @@ export const {
   useGetChangeSetDiffQuery,
   useApproveChangeSetMutation,
   useRejectChangeSetMutation,
+  useApplyChangeSetMutation,
 } = changesetsApi;

@@ -28,6 +28,8 @@ function manualChunks(id: string): string | undefined {
     id.includes('/@reduxjs/') ||
     id.includes('/react-redux/') ||
     id.includes('/redux/') ||
+    id.includes('/redux-thunk/') ||
+    id.includes('/use-sync-external-store/') ||
     id.includes('/reselect/') ||
     id.includes('/immer/')
   ) {
@@ -40,6 +42,8 @@ function manualChunks(id: string): string | undefined {
   if (id.includes('/lucide-react/')) return 'vendor-icons';
   if (id.includes('/msw/')) return 'vendor-msw';
   if (id.includes('/web-vitals/')) return 'vendor-webvitals';
+  if (id.includes('/react-window/')) return 'vendor-window';
+  if (id.includes('/dompurify/')) return 'vendor-dompurify';
   if (
     id.includes('/clsx/') ||
     id.includes('/tailwind-merge/') ||
@@ -47,7 +51,7 @@ function manualChunks(id: string): string | undefined {
   ) {
     return 'vendor-style';
   }
-  return 'vendor-misc';
+  return undefined;
 }
 
 // https://vite.dev/config/
@@ -63,7 +67,9 @@ export default defineConfig({
       name: 'zara-idp-webpage',
       filename: 'remoteEntry.js',
       remotes: {},
-      shared: ['react', 'react-dom', 'react-router-dom', '@reduxjs/toolkit', 'react-redux'],
+      // No remotes are configured in the host yet. Rewriting its own React
+      // imports as shared modules creates a cycle through the vendor bundle.
+      shared: [],
     }),
     visualizer({
       filename: 'dist/stats.html',
@@ -81,7 +87,7 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/api': {
+      '/api/': {
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
