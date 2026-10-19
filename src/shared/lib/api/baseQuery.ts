@@ -168,7 +168,15 @@ function methodFromArgs(args: string | FetchArgs): string {
 // Retry only on 5xx / network errors. RTK Query's `retry` wrapper shorts
 // out on 4xx by default when we return its standard bail condition.
 export const baseQueryWithRetry = retry(baseQueryWithAuth, {
-  maxRetries: 2,
+  retryCondition: (error, args, { attempt, baseQueryApi }) => {
+    const method = methodFromArgs(args).toUpperCase();
+    if (!error || typeof error !== 'object' || !('status' in error)) return false;
+    // Never repeat writes automatically: a lost response may already have
+    // committed the action. Validation/auth/tenant failures need user input.
+    return baseQueryApi.type === 'query' && method === 'GET' && attempt <= 2 &&
+      (error.status === 'FETCH_ERROR' || error.status === 'TIMEOUT_ERROR' ||
+        (typeof error.status === 'number' && error.status >= 500));
+  },
 });
 
 export { API_BASE_URL, AUTH_TOKEN_KEY };

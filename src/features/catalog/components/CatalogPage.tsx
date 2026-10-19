@@ -1,3 +1,4 @@
+import { lazy, Suspense, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Boxes, GitBranch } from 'lucide-react';
 import { PageHeader, ErrorState, LoadingState } from '@/shared/components/feedback';
@@ -7,8 +8,11 @@ import { errorMessage } from '@/shared/lib/api';
 import { useListCatalogEntitiesQuery, useReindexCatalogEntityMutation } from '../services/catalogApi';
 import type { CatalogEntity } from '../types';
 
+const CatalogEntityForm = lazy(() => import('./CatalogEntityForm').then((m) => ({ default: m.CatalogEntityForm })));
+
 export function CatalogPage() {
   const { data: entities = [], isLoading, error, refetch } = useListCatalogEntitiesQuery();
+  const [registering, setRegistering] = useState(false);
   const [reindex, reindexState] = useReindexCatalogEntityMutation();
 
   if (isLoading) return <LoadingState message="Loading catalog..." />;
@@ -24,8 +28,12 @@ export function CatalogPage() {
         title="Catalog"
         description="Control-plane backed catalog entities with versions, generations, and relationships"
         onRefresh={refetch}
+        actions={<Button onClick={() => setRegistering(true)}>Register entity</Button>}
       />
 
+      {reindexState.error && <p role="alert" className="text-red-400">{errorMessage(reindexState.error)}</p>}
+      {registering && <Suspense fallback={null}><CatalogEntityForm onClose={() => setRegistering(false)} /></Suspense>}
+      {entities.length === 0 && <p className="text-slate-300">No catalog entities yet. Register a service, API, or resource to enable search and scorecard evaluation.</p>}
       <section aria-label="Catalog entities" className="grid gap-4 xl:grid-cols-2">
         {entities.map((entity) => (
           <CatalogEntityCard

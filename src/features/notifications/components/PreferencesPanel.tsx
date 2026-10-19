@@ -1,3 +1,4 @@
+import { errorMessage } from '@/shared/lib/api';
 import { useState } from 'react';
 import {
   Badge,
@@ -27,8 +28,8 @@ import {
 // (source, minSeverity) channel rules. The save mutation invalidates
 // the inbox so the next fan-out picks up the new rules.
 export function PreferencesPanel() {
-  const { data, isFetching } = useGetNotificationPreferencesQuery();
-  const [save, { isLoading: saving }] =
+  const { data, isFetching, error, refetch } = useGetNotificationPreferencesQuery();
+  const [save, { isLoading: saving, error: saveError, isSuccess }] =
     useSaveNotificationPreferencesMutation();
   // Mirror the server-side `updatedAt` into a tracker so we re-derive
   // local state whenever the backend ships a fresh snapshot — matches
@@ -83,6 +84,9 @@ export function PreferencesPanel() {
           Each rule selects channels for a (source, minimum severity) pair. The
           inbox is always on so the home alert feed stays useful.
         </p>
+        {error && <p role="alert" className="text-red-400">{errorMessage(error)} <Button onClick={() => void refetch()}>Retry</Button></p>}
+        {saveError && <p role="alert" className="text-red-400">{errorMessage(saveError)}</p>}
+        {isSuccess && <p role="status" className="text-emerald-300">Preferences saved</p>}
         <ul className="space-y-3" data-testid="preferences-rules">
           {rules.map((rule, idx) => (
             <li

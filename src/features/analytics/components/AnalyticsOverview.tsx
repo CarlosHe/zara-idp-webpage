@@ -21,7 +21,7 @@ export function AnalyticsOverview({ summary }: AnalyticsOverviewProps) {
         icon={<Activity className="h-5 w-5 text-emerald-400" />}
         iconBgColor="bg-emerald-500/20"
         label="Deployments Today"
-        value={summary?.deploymentsToday || 0}
+        value={summary?.deploymentsToday ?? '—'}
         trend={summary?.deploymentsChange}
         trendLabel="vs yesterday"
       />
@@ -37,7 +37,7 @@ export function AnalyticsOverview({ summary }: AnalyticsOverviewProps) {
         icon={<Clock className="h-5 w-5 text-amber-400" />}
         iconBgColor="bg-amber-500/20"
         label="Avg Deploy Time"
-        value={summary?.avgDeployTime || '0m'}
+        value={summary?.avgDeployTime ?? '—'}
         trend={summary?.deployTimeChange}
         trendLabel="improvement"
       />

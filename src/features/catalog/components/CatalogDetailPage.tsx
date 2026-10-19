@@ -1,12 +1,20 @@
-import { useParams } from 'react-router-dom';
+import { lazy, Suspense, useState } from 'react';
+import { ROUTES } from '@/shared/config';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Network } from 'lucide-react';
 import { PageHeader, ErrorState, LoadingState } from '@/shared/components/feedback';
-import { Badge, Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui';
+import { Badge, Button, ConfirmModal, Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui';
 import { errorMessage } from '@/shared/lib/api';
-import { useGetCatalogEntityQuery } from '../services/catalogApi';
+import { useGetCatalogEntityQuery, useDeleteCatalogEntityMutation } from '../services/catalogApi';
 import { CatalogEntityGraph } from './CatalogEntityGraph';
 
+const CatalogEntityForm = lazy(() => import('./CatalogEntityForm').then((m) => ({ default: m.CatalogEntityForm })));
+
 export function CatalogDetailPage() {
+  const navigate = useNavigate();
+  const [editing, setEditing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [remove, removeState] = useDeleteCatalogEntityMutation();
   const params = useParams<{ kind: string; namespace: string; name: string }>();
   const key = {
     kind: params.kind ?? '',
@@ -30,8 +38,14 @@ export function CatalogDetailPage() {
         title={`${entity.metadata.namespace}/${entity.metadata.name}`}
         description={`${entity.kind} catalog entity backed by the control plane`}
         onRefresh={refetch}
+        actions={<><Button onClick={() => setEditing(true)}>Edit entity</Button><Button variant="danger" onClick={() => setDeleting(true)}>Delete entity</Button></>}
       />
 
+      {editing && <Suspense fallback={null}><CatalogEntityForm entity={entity} onClose={() => setEditing(false)} /></Suspense>}
+      {removeState.error && <p role="alert" className="text-red-400">{errorMessage(removeState.error)}</p>}
+      <ConfirmModal isOpen={deleting} onClose={() => setDeleting(false)} title="Delete catalog entity" message="Remove this catalog registration? Provisioned infrastructure is managed from Resources." confirmText="Delete registration" loading={removeState.isLoading} onConfirm={async () => {
+        try { await remove(key).unwrap(); navigate(ROUTES.CATALOG.LIST); } catch { /* Error remains visible and dialog stays open. */ }
+      }} />
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <Card>
           <CardHeader>

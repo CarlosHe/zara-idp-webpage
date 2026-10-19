@@ -1,3 +1,5 @@
+import { useGetDORAQuery } from '@/features/analytics/executive/services/executiveApi';
+import { useListAuditLogsQuery } from '@/features/audit/services/auditApi';
 import { useMemo, useState } from 'react';
 import {
   useGetAnalyticsSummaryQuery,
@@ -44,16 +46,16 @@ export interface ResourceByKind {
 
 export interface AnalyticsSummary {
   totalResources: number;
-  deploymentsToday: number;
+  deploymentsToday: number | undefined;
   activeTeams: number;
   avgDeployTime: string;
-  resourcesChange: number;
-  deploymentsChange: number;
-  teamsChange: number;
-  deployTimeChange: number;
-  successRate: number;
+  resourcesChange: number | undefined;
+  deploymentsChange: number | undefined;
+  teamsChange: number | undefined;
+  deployTimeChange: number | undefined;
+  successRate: number | undefined;
   mttr: string;
-  changeFrequency: number;
+  changeFrequency: number | undefined;
 }
 
 interface UseAnalyticsDashboardResult {
@@ -73,18 +75,26 @@ interface UseAnalyticsDashboardResult {
 export function useAnalyticsDashboard(): UseAnalyticsDashboardResult {
   const [timeRange, setTimeRange] = useState<AnalyticsTimeRange>('7d');
   const summaryQuery = useGetAnalyticsSummaryQuery();
+  const auditQuery = useListAuditLogsQuery();
+  const window = useMemo(() => {
+    const to = new Date();
+    return { from: new Date(to.getTime() - Number.parseInt(timeRange, 10) * 86400000).toISOString(), to: to.toISOString() };
+  }, [timeRange]);
+  const doraQuery = useGetDORAQuery(window);
   const trendsQuery = useGetAnalyticsTrendsQuery(timeRange);
   const resourcesQuery = useGetAnalyticsResourcesQuery();
 
   const loading =
-    summaryQuery.isLoading || trendsQuery.isLoading || resourcesQuery.isLoading;
-  const rtkError = summaryQuery.error || trendsQuery.error || resourcesQuery.error;
+    summaryQuery.isLoading || trendsQuery.isLoading || resourcesQuery.isLoading || doraQuery.isLoading;
+  const rtkError = summaryQuery.error || trendsQuery.error || resourcesQuery.error || doraQuery.error;
   const error = rtkError ? errorMessage(rtkError) || 'Failed to load analytics' : null;
 
   const refetch = () => {
     summaryQuery.refetch();
     trendsQuery.refetch();
     resourcesQuery.refetch();
+    doraQuery.refetch();
+    auditQuery.refetch();
   };
 
   const summary = useMemo<AnalyticsSummary | null>(() => {
@@ -99,29 +109,31 @@ export function useAnalyticsDashboard(): UseAnalyticsDashboardResult {
         }
       | undefined;
     if (!raw) return null;
+    const dora = doraQuery.data;
+    const sampled = !!dora && dora.sampleSize > 0;
     return {
       totalResources: raw.resources?.total || 0,
-      deploymentsToday: 0,
+      deploymentsToday: undefined,
       activeTeams: raw.teams?.total || 0,
-      avgDeployTime: '0m',
-      resourcesChange: raw.resources?.growth?.daily || 0,
-      deploymentsChange: 0,
-      teamsChange: 0,
-      deployTimeChange: 0,
-      successRate: 0,
-      mttr: '0m',
-      changeFrequency: 0,
+      avgDeployTime: '—',
+      resourcesChange: undefined,
+      deploymentsChange: undefined,
+      teamsChange: undefined,
+      deployTimeChange: undefined,
+      successRate: sampled && dora.changeFailureRate >= 0 ? (1 - dora.changeFailureRate) * 100 : undefined,
+      mttr: sampled && dora.mttrMs >= 0 ? `${Math.round(dora.mttrMs / 60000)}m` : '—',
+      changeFrequency: sampled ? dora.deployFrequencyPerDay : undefined,
     };
-  }, [summaryQuery.data]);
+  }, [summaryQuery.data, doraQuery.data]);
 
   const healthDistribution = useMemo<HealthDistribution>(() => {
     const byStatus =
       (summaryQuery.data as { resources?: { byStatus?: Record<string, number> } } | undefined)
         ?.resources?.byStatus || {};
     return {
-      healthy: byStatus.Healthy || 0,
-      degraded: byStatus.Degraded || 0,
-      unhealthy: byStatus.Unhealthy || 0,
+      healthy: (byStatus.READY ?? byStatus.Healthy) || 0,
+      degraded: (byStatus.DRIFTED ?? byStatus.Degraded ?? 0) + (byStatus.BLOCKED ?? 0),
+      unhealthy: (byStatus.ERROR ?? byStatus.Unhealthy ?? 0) + (byStatus.FAILED ?? 0),
     };
   }, [summaryQuery.data]);
 
@@ -129,9 +141,9 @@ export function useAnalyticsDashboard(): UseAnalyticsDashboardResult {
     const raw = trendsQuery.data as
       | { deployments?: Array<{ date: string; value?: number; count?: number }> }
       | undefined;
-    const deployments = raw?.deployments ?? [];
+    const deployments = (trendsQuery.data as { resources?: Array<{ timestamp: string; value: number }> } | undefined)?.resources?.map((point) => ({ date: point.timestamp, value: point.value })) ?? raw?.deployments ?? [];
     if (!Array.isArray(deployments)) return [];
-    return deployments.map((d) => ({ date: d.date, value: d.value ?? d.count ?? 0 }));
+    return deployments.map((d) => ({ date: d.date, value: d.value ?? ('count' in d ? d.count : 0) ?? 0 }));
   }, [trendsQuery.data]);
 
   const resourcesByKind = useMemo<ResourceByKind[]>(() => {
@@ -149,7 +161,11 @@ export function useAnalyticsDashboard(): UseAnalyticsDashboardResult {
 
   // Top resources and recent activity are not yet exposed by the backend.
   const topResources: TopResource[] = [];
-  const recentActivity: ActivityItem[] = [];
+  const recentActivity: ActivityItem[] = (auditQuery.data ?? []).slice(0, 5).map((entry) => ({
+    id: entry.id, action: entry.action, resource: `${entry.resourceKind}/${entry.resourceName}`,
+    actor: entry.actor, timestamp: entry.timestamp,
+    status: entry.result === 'failure' ? 'failure' : entry.result === 'blocked' ? 'blocked' : 'success',
+  }));
 
   return {
     timeRange,

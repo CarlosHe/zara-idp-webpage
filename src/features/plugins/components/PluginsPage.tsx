@@ -67,7 +67,7 @@ export function PluginsPage() {
   };
 
   return (
-    <main className="space-y-6 p-6">
+    <div className="space-y-6">
       <section>
         <p className="text-sm font-medium uppercase tracking-wide text-primary-600">Extensibility</p>
         <h1 className="text-3xl font-bold text-slate-950 dark:text-white">Plugin Marketplace</h1>
@@ -214,6 +214,6 @@ export function PluginsPage() {
           )}
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

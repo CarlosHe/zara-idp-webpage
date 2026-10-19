@@ -27,7 +27,8 @@ export function useDashboard(): UseDashboardResult {
   const refresh = useCallback(() => {
     summaryQuery.refetch();
     healthQuery.refetch();
-  }, [summaryQuery, healthQuery]);
+    auditQuery.refetch();
+  }, [summaryQuery, healthQuery, auditQuery]);
 
   return {
     summary: summaryQuery.data,

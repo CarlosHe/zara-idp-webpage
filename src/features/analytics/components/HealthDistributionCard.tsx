@@ -8,7 +8,7 @@ interface HealthDistributionCardProps {
 
 export function HealthDistributionCard({ distribution }: HealthDistributionCardProps) {
   const total = distribution.healthy + distribution.degraded + distribution.unhealthy;
-  const healthPercentage = total > 0 ? Math.round((distribution.healthy / total) * 100) : 100;
+  const healthPercentage = total > 0 ? Math.round((distribution.healthy / total) * 100) : 0;
 
   return (
     <Card>
@@ -44,7 +44,7 @@ export function HealthDistributionCard({ distribution }: HealthDistributionCardP
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
-                <p className="text-2xl font-bold text-white">{healthPercentage}%</p>
+                <p className="text-2xl font-bold text-white">{total > 0 ? `${healthPercentage}%` : '—'}</p>
                 <p className="text-xs text-slate-400">Healthy</p>
               </div>
             </div>

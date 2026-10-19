@@ -10,6 +10,8 @@ export const ROUTES = {
   // activity, services owned, and quick links).
   PERSONAL_HOME: '/home',
   LOGIN: '/login',
+  ACCESS: '/access',
+  SETTINGS: '/settings',
 
   RESOURCES: {
     LIST: '/resources',

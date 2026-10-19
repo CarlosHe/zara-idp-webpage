@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/shared/config';
 import type { FormEvent } from 'react';
 import { Search } from 'lucide-react';
 import { PageHeader } from '@/shared/components/feedback';
@@ -8,6 +10,7 @@ import { AdvancedFilters } from './AdvancedFilters';
 import { SavedSearches } from './SavedSearches';
 
 export function SearchPage() {
+  const navigate = useNavigate();
   const {
     state,
     setText,
@@ -21,6 +24,7 @@ export function SearchPage() {
     trackClick,
     searchState,
     savedQuery,
+    savedError,
   } = useSearchPage();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -70,6 +74,7 @@ export function SearchPage() {
         </CardContent>
       </Card>
 
+      {savedError && <p role="alert" className="text-red-400">{errorMessage(savedError)}</p>}
       <SavedSearches
         items={savedQuery.data}
         isLoading={savedQuery.isLoading}
@@ -99,7 +104,13 @@ export function SearchPage() {
               <CardContent className="pt-5">
                 <button
                   type="button"
-                  onClick={() => trackClick(result.scope, index + 1)}
+                  onClick={() => {
+                    trackClick(result.scope, index + 1);
+                    const parts = result.entityKey.split('/');
+                    if (result.scope === 'catalog' && parts.length === 3) navigate(ROUTES.CATALOG.DETAIL(...parts.map(encodeURIComponent) as [string, string, string]));
+                    else if (result.scope === 'docs') navigate(`${ROUTES.DOCS}?slug=${encodeURIComponent(result.attributes.slug || result.entityKey)}`);
+                    else if (result.scope === 'audit') navigate(ROUTES.AUDIT.DETAIL(encodeURIComponent(result.attributes.auditId || result.id)));
+                  }}
                   className="flex w-full items-start justify-between gap-4 text-left"
                   aria-label={`Open search result ${result.title}`}
                 >

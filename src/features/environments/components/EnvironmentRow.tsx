@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+import { ROUTES } from '@/shared/config';
 import { Badge } from '@/shared/components/ui';
 import type { Environment } from '../types/environments';
 import {
@@ -105,6 +107,7 @@ export function EnvironmentRow({ env, now, onDestroy, onExtend }: EnvironmentRow
         <p className="text-xs text-amber-200">{env.healthMessage}</p>
       ) : null}
 
+      {(env.annotations?.['zara.io/destroy-changeset'] || env.annotations?.['zara.io/provision-changeset']) && <Link className="inline-block text-sm text-blue-300 underline" to={ROUTES.CHANGESETS.DETAIL((env.annotations?.['zara.io/destroy-changeset'] || env.annotations?.['zara.io/provision-changeset'])!)}>Open ChangeSet</Link>}
       <div className="flex gap-2 pt-1">
         <button
           type="button"

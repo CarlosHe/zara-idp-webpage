@@ -1,3 +1,5 @@
+import { useToast } from '@/shared/components/ui';
+import { errorMessage } from '@/shared/lib/api';
 import { useMemo, useState } from 'react';
 import {
   useDeleteBusinessDomainMutation,
@@ -115,13 +117,16 @@ export function useBusinessDomainsDashboard(): BusinessDomainsDashboard {
     setIsFormOpen(true);
   };
 
+  const toast = useToast();
   const handleDelete = async () => {
-    if (deletingDomain?.id) {
-      await deleteDomain(deletingDomain.id).unwrap().catch(() => undefined);
+    if (!deletingDomain?.id) return;
+    try {
+      await deleteDomain(deletingDomain.id).unwrap();
       setDeletingDomain(null);
-      if (selectedDomain?.id === deletingDomain.id) {
-        setSelectedDomain(null);
-      }
+      if (selectedDomain?.id === deletingDomain.id) setSelectedDomain(null);
+      toast.success('Domain deleted');
+    } catch (error) {
+      toast.error(errorMessage(error as Parameters<typeof errorMessage>[0]) || 'Failed to delete domain');
     }
   };
 

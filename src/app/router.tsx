@@ -3,8 +3,8 @@ import type { ComponentType } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import { RootLayout } from './layouts/RootLayout';
 import { DashboardLayout } from './layouts/DashboardLayout';
-import { ErrorPage } from './routes/ErrorPage';
-import { NotFoundPage } from './routes/NotFoundPage';
+const ErrorPage = lazy(() => import('./routes/ErrorPage').then((m) => ({ default: m.ErrorPage })));
+const NotFoundPage = lazy(() => import('./routes/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 import { ProtectedRoute } from './guards/ProtectedRoute';
 import { GuestRoute } from './guards/GuestRoute';
 import { LoadingState } from '@/shared/components/feedback';
@@ -159,11 +159,18 @@ const AssistantPage = lazy(() =>
   })),
 );
 
+const RequireTenant = lazy(() =>
+  import('@/features/tenants/components/RequireTenant').then((m) => ({ default: m.RequireTenant })),
+);
+
 const RemediationInboxPage = lazy(() =>
   import('@/features/remediation').then((m) => ({
     default: m.RemediationInboxPage,
   })),
 );
+
+const AccessPage = lazy(() => import('@/features/access/components/AccessPage').then((m) => ({ default: m.AccessPage })));
+const SettingsPage = lazy(() => import('@/features/settings/components/SettingsPage').then((m) => ({ default: m.SettingsPage })));
 
 function withSuspense(Component: ComponentType) {
   return (
@@ -177,7 +184,7 @@ export const router = createBrowserRouter([
   {
     path: ROUTES.HOME,
     element: <RootLayout />,
-    errorElement: <ErrorPage />,
+    errorElement: withSuspense(ErrorPage),
     children: [
       { path: '_vitals', element: withSuspense(VitalsDebugPanel) },
       {
@@ -270,12 +277,14 @@ export const router = createBrowserRouter([
           { path: 'environments', element: withSuspense(EnvironmentsPage) },
           // Sprint-29 / L-2904 — tenant administration console.
           { path: 'tenants', element: withSuspense(TenantsPage) },
+          { path: 'access', element: withSuspense(AccessPage) },
+          { path: 'settings', element: withSuspense(SettingsPage) },
           // Sprint-30 / L-3005 — AI assistant console.
-          { path: 'assistant', element: withSuspense(AssistantPage) },
+          { path: 'assistant', element: <Suspense fallback={<LoadingState message="Loading..." />}><RequireTenant><AssistantPage /></RequireTenant></Suspense> },
           // Sprint-31 / L-3104 — automated remediation inbox.
-          { path: 'remediation', element: withSuspense(RemediationInboxPage) },
+          { path: 'remediation', element: <Suspense fallback={<LoadingState message="Loading..." />}><RequireTenant><RemediationInboxPage /></RequireTenant></Suspense> },
 
-          { path: '*', element: <NotFoundPage /> },
+          { path: '*', element: withSuspense(NotFoundPage) },
         ],
       },
     ],

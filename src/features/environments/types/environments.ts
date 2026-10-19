@@ -97,6 +97,7 @@ export interface EnvironmentListResponse {
 }
 
 export interface ProvisionRequest {
+  resourcesYaml: string;
   slug: string;
   kind: EnvironmentKind;
   owner: string;

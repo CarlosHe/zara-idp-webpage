@@ -11,7 +11,7 @@
 import type { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { LoadingState } from '@/shared/components/feedback';
+import { ErrorState, LoadingState } from '@/shared/components/feedback';
 import { useGetMeQuery } from '@/features/auth';
 
 interface ProtectedRouteProps {
@@ -31,7 +31,7 @@ function redirectToLogin(currentPath: string): null {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const location = useLocation();
-  const { data: principal, isLoading, isError, error } = useGetMeQuery();
+  const { data: principal, isLoading, isError, error, refetch } = useGetMeQuery();
 
   if (isLoading) {
     return <LoadingState message="Authenticating..." />;
@@ -49,7 +49,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
       const path = `${location.pathname}${location.search}${location.hash}`;
       return redirectToLogin(path);
     }
-    return <LoadingState message="Authenticating..." />;
+    return <ErrorState message="Unable to verify your session. Check the API connection and retry." onRetry={refetch} />;
   }
 
   if (!principal || !principal.authenticated) {

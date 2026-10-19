@@ -17,7 +17,7 @@ import {
 import type { ScorecardEvaluation } from '../types';
 import { severityVariant } from './severityBadge';
 
-const KIND_OPTIONS = ['Application', 'API', 'Resource', 'BusinessDomain', 'Group'];
+const KIND_OPTIONS = ['Application', 'Service', 'API', 'System', 'Domain', 'Resource', 'BusinessDomain', 'Group', 'User', 'DocSet', 'Environment', 'Location'];
 
 // `MaturityDashboard` is the L-2206 dashboards UI. It evaluates every
 // active scorecard against a single (kind, namespace, name) selection

@@ -8,6 +8,7 @@ test.describe('remediation journey', () => {
   test.beforeEach(async ({ context }) => {
     await context.addInitScript(() => {
       window.localStorage.setItem('zara.authToken', 'e2e-token');
+      window.localStorage.setItem('zara.tenant', 'acme');
     });
   });
 

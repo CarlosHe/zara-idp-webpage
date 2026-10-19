@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { Server } from 'lucide-react';
 import {
   Card,
@@ -37,17 +37,21 @@ const STATE_FILTERS: { label: string; value: string }[] = [
 // destroy / extend actions. Every mutating action submits a typed
 // ChangeSet on the backend (the UI never bypasses the apply
 // pipeline).
+const EnvironmentCreateModal = lazy(() => import('./EnvironmentCreateModal').then((m) => ({ default: m.EnvironmentCreateModal })));
+
 export function EnvironmentsPage() {
+  const [creating, setCreating] = useState(false);
   const [stateFilter, setStateFilter] = useState<string>('');
   const { data, isLoading, error, refetch } = useListEnvironmentsQuery(
     stateFilter ? { state: stateFilter } : undefined,
+    { pollingInterval: 5000 },
   );
   const [destroy, destroyState] = useDestroyEnvironmentMutation();
   const [extend, extendState] = useExtendEnvironmentMutation();
 
   const inventory = data?.inventory;
   const environments = data?.environments ?? [];
-  const now = useMemo(() => new Date(), []);
+  const now = new Date();
 
   if (error && !data) {
     return (
@@ -76,8 +80,8 @@ export function EnvironmentsPage() {
       '24',
     );
     if (!hoursStr) return;
-    const hours = Number.parseInt(hoursStr, 10);
-    if (Number.isNaN(hours) || hours <= 0) {
+    const hours = Number(hoursStr);
+    if (!Number.isSafeInteger(hours) || hours <= 0) {
       window.alert('Hours must be a positive integer.');
       return;
     }
@@ -104,6 +108,7 @@ export function EnvironmentsPage() {
         onRefresh={refetch}
         actions={
           <div className="flex flex-wrap items-center gap-2" role="tablist">
+            <button type="button" onClick={() => setCreating(true)} className="rounded bg-blue-600 px-3 py-2 text-sm text-white">Create environment</button>
             {STATE_FILTERS.map((filter) => (
               <button
                 type="button"
@@ -125,6 +130,7 @@ export function EnvironmentsPage() {
         }
       />
 
+      {creating && <Suspense fallback={null}><EnvironmentCreateModal onClose={() => setCreating(false)} /></Suspense>}
       <div
         className="grid gap-6 md:grid-cols-2 xl:grid-cols-4"
         data-testid="env-inventory"
@@ -203,8 +209,7 @@ export function EnvironmentsPage() {
         <CardContent>
           {environments.length === 0 ? (
             <p className="text-sm text-slate-400" data-testid="env-empty">
-              No environments yet. Open a PR or click "Create" in a Golden Path
-              to provision one — preview environments come and go automatically.
+              No environments yet. Use Create environment to request infrastructure through a ChangeSet.
             </p>
           ) : (
             <ul className="space-y-3" data-testid="env-list">

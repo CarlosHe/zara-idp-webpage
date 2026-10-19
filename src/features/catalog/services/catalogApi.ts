@@ -3,6 +3,18 @@ import type { CatalogEntity, CatalogGraphResponse, CatalogListParams } from '../
 
 export const catalogApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
+    createCatalogEntity: build.mutation<CatalogEntity, { kind: string; name: string; namespace: string; spec: Record<string, unknown> }>({
+      query: (body) => ({ url: '/catalog', method: 'POST', body }),
+      invalidatesTags: [{ type: 'Catalog', id: 'LIST' }, { type: 'Search', id: 'LIST' }],
+    }),
+    updateCatalogEntity: build.mutation<CatalogEntity, { kind: string; name: string; namespace: string; spec: Record<string, unknown> }>({
+      query: ({ kind, name, namespace, spec }) => ({ url: `/catalog/${kind}/${namespace}/${name}`, method: 'PUT', body: { spec } }),
+      invalidatesTags: (_r, _e, a) => [{ type: 'Catalog', id: 'LIST' }, { type: 'Catalog', id: `${a.kind}/${a.namespace}/${a.name}` }, { type: 'Search', id: 'LIST' }],
+    }),
+    deleteCatalogEntity: build.mutation<void, { kind: string; name: string; namespace: string }>({
+      query: ({ kind, name, namespace }) => ({ url: `/catalog/${kind}/${namespace}/${name}`, method: 'DELETE' }),
+      invalidatesTags: [{ type: 'Catalog', id: 'LIST' }, { type: 'Search', id: 'LIST' }],
+    }),
     listCatalogEntities: build.query<CatalogEntity[], CatalogListParams | void>({
       query: (params) => ({ url: '/catalog', params: params ?? {} }),
       transformResponse: (raw: unknown) => unwrapItems<CatalogEntity>(raw),
@@ -51,6 +63,9 @@ export const catalogApi = baseApi.injectEndpoints({
 });
 
 export const {
+  useCreateCatalogEntityMutation,
+  useUpdateCatalogEntityMutation,
+  useDeleteCatalogEntityMutation,
   useListCatalogEntitiesQuery,
   useGetCatalogEntityQuery,
   useReindexCatalogEntityMutation,

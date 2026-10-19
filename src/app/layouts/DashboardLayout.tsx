@@ -74,6 +74,8 @@ const navigation = [
   { name: 'Cost', href: ROUTES.COST, icon: DollarSign },
   { name: 'Environments', href: ROUTES.ENVIRONMENTS, icon: Container },
   { name: 'Tenants', href: ROUTES.TENANTS, icon: Building2 },
+  { name: 'Access control', href: ROUTES.ACCESS, icon: ShieldCheck },
+  { name: 'Settings', href: ROUTES.SETTINGS, icon: Users },
   { name: 'Assistant', href: ROUTES.ASSISTANT, icon: Sparkles },
   { name: 'Remediation', href: ROUTES.REMEDIATION, icon: Wrench },
 ];

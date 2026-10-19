@@ -70,6 +70,7 @@ test.describe('a11y audit (axe-core, all major routes)', () => {
     // every navigation to /login.
     await context.addInitScript(() => {
       window.localStorage.setItem('zara.authToken', 'a11y-token');
+      window.localStorage.setItem('zara.tenant', 'acme');
     });
 
     // Principal stub.
@@ -101,6 +102,7 @@ test.describe('a11y audit (axe-core, all major routes)', () => {
       };
       if (path === '/api/v1/governance/kpis') payload = { scorecards: { active: 0, draft: 0, archived: 0 }, waivers: { active: 0, expired: 0 } };
       if (path === '/api/v1/environments') payload = { environments: [], inventory: { totalEnvironments: 0, byState: {}, byKind: {}, bySource: {}, staleCount: 0, expiringSoonCount: 0, projectedDailySpendMinorUnits: 0 } };
+      if (path === '/api/v1/tenants') payload = { items: [{ id: 'acme', displayName: 'Acme', lifecycle: 'active', owner: 'a11y@zara.local', admins: [] }] };
       if (path === '/api/v1/cost/dashboard') payload = {
         window: { since: '2026-10-01T00:00:00Z', until: '2026-10-18T00:00:00Z' }, currency: 'USD', totalSpend: { value: 0, minorUnits: 0, currency: 'USD' }, allocationsCount: 0,
         showback: [], chargeback: [], topServices: [], idleResources: [], budgets: [], anomalies: [], findings: [], costImpacts: [],

@@ -15,7 +15,6 @@ export function DashboardStats({ summary, health }: DashboardStatsProps) {
         value={health?.resources?.total ?? summary?.totalResources ?? 0}
         icon={<Box className="h-5 w-5 text-blue-400" />}
         iconBgColor="bg-blue-500/20"
-        trend={5}
       />
       <StatCard
         label="Healthy Resources"

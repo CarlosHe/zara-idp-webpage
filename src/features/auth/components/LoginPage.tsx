@@ -1,4 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react';
+import { useDispatch } from 'react-redux';
+import { baseApi } from '@/shared/lib/api';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ShieldCheck } from 'lucide-react';
 
@@ -13,6 +15,7 @@ function safeRedirect(value: string | null): string {
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
   const redirect = useMemo(() => safeRedirect(searchParams.get('redirect')), [searchParams]);
   const [token, setToken] = useState('');
@@ -26,6 +29,7 @@ export function LoginPage() {
       return;
     }
     window.localStorage.setItem(AUTH_TOKEN_KEY, nextToken);
+    dispatch(baseApi.util.resetApiState());
     navigate(redirect, { replace: true });
   }
 

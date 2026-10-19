@@ -39,8 +39,8 @@ export function useSearchPage() {
   const [name, setName] = useState('');
   const [runSearch, searchState] = useSearchMutation();
   const savedQuery = useListSavedSearchesQuery();
-  const [createSaved] = useCreateSavedSearchMutation();
-  const [deleteSaved] = useDeleteSavedSearchMutation();
+  const [createSaved, createSavedState] = useCreateSavedSearchMutation();
+  const [deleteSaved, deleteSavedState] = useDeleteSavedSearchMutation();
   const [recordClick] = useRecordSearchClickMutation();
 
   const submit = useCallback(() => {
@@ -60,16 +60,17 @@ export function useSearchPage() {
     setAdvanced((current) => ({ ...current, ...partial }));
   }, []);
 
-  const saveCurrent = useCallback(() => {
+  const saveCurrent = useCallback(async () => {
     const trimmed = name.trim();
     if (!trimmed) return;
-    void createSaved({
+    try { await createSaved({
       name: trimmed,
       text,
       scopes,
       filters: buildFilters(advanced),
-    });
+    }).unwrap();
     setName('');
+    } catch { /* Preserve the draft; the page displays the mutation error. */ }
   }, [advanced, createSaved, name, scopes, text]);
 
   const applySaved = useCallback((saved: SavedSearch) => {
@@ -110,5 +111,6 @@ export function useSearchPage() {
     trackClick,
     searchState,
     savedQuery,
+    savedError: createSavedState.error || deleteSavedState.error || savedQuery.error,
   };
 }

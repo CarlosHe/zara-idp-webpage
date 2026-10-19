@@ -1,3 +1,4 @@
+import { useSearchParams } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import { BookOpen, FileText, AlertTriangle } from 'lucide-react';
 import { PageHeader, ErrorState, LoadingState } from '@/shared/components/feedback';
@@ -9,8 +10,9 @@ import { OpenAPIViewer } from './OpenAPIViewer';
 import { RichDocRenderer } from './RichDocRenderer';
 
 export function DocsPage() {
+  const [searchParams] = useSearchParams();
   const { data: docs = [], isLoading, error, refetch } = useListTechDocsQuery();
-  const [selectedSlug, setSelectedSlug] = useState<string>('catalog-v2');
+  const [selectedSlug, setSelectedSlug] = useState<string>(searchParams.get('slug') || 'catalog-v2');
   const activeSlug = useMemo(
     () => (docs.some((doc) => doc.slug === selectedSlug) ? selectedSlug : docs[0]?.slug ?? selectedSlug),
     [docs, selectedSlug],

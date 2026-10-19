@@ -9,14 +9,14 @@ interface ActivityBarChartProps {
 
 export function ActivityBarChart({ data }: ActivityBarChartProps) {
   const maxDeployments = Math.max(...data.map((d) => d.value), 1);
-  const totalDeployments = data.reduce((sum, d) => sum + d.value, 0);
+  const totalDeployments = data.at(-1)?.value ?? 0;
 
   return (
     <Card className="lg:col-span-2">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-blue-400" />
-          Deployment Activity
+          Resource Inventory
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -29,7 +29,7 @@ export function ActivityBarChart({ data }: ActivityBarChartProps) {
                   <div
                     key={index}
                     className="flex-1 flex flex-col items-center gap-1"
-                    title={`${point.date}: ${point.value} deployments`}
+                    title={`${point.date}: ${point.value} resources`}
                   >
                     <div
                       className={cn(
@@ -66,13 +66,13 @@ export function ActivityBarChart({ data }: ActivityBarChartProps) {
                 </div>
               </div>
               <span className="text-xs text-slate-400">
-                Total: {totalDeployments} deployments
+                Total: {totalDeployments} resources
               </span>
             </div>
           </>
         ) : (
           <div className="h-48 flex items-center justify-center">
-            <p className="text-slate-400">No deployment data available</p>
+            <p className="text-slate-400">No inventory history available</p>
           </div>
         )}
       </CardContent>

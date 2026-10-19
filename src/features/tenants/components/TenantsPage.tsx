@@ -63,9 +63,9 @@ export function TenantsPage() {
     owner: '',
   });
   const [createTenant, createState] = useCreateTenantMutation();
-  const [suspend] = useSuspendTenantMutation();
-  const [reinstate] = useReinstateTenantMutation();
-  const [archive] = useArchiveTenantMutation();
+  const [suspend, suspendState] = useSuspendTenantMutation();
+  const [reinstate, reinstateState] = useReinstateTenantMutation();
+  const [archive, archiveState] = useArchiveTenantMutation();
 
   const tenants = useMemo<Tenant[]>(() => data?.items ?? [], [data]);
 
@@ -145,6 +145,9 @@ export function TenantsPage() {
         }
       />
 
+      {(suspendState.error || reinstateState.error || archiveState.error) && <p role="alert" className="text-red-400">
+        {errorMessage(suspendState.error || reinstateState.error || archiveState.error)}
+      </p>}
       <div className="grid gap-6 lg:grid-cols-3">
         <Card
           role="region"
@@ -169,6 +172,7 @@ export function TenantsPage() {
                   <li key={t.id}>
                     <TenantRow
                       tenant={t}
+                      busy={suspendState.isLoading || reinstateState.isLoading || archiveState.isLoading}
                       onSuspend={() => suspend({ id: t.id, reason: 'admin' })}
                       onReinstate={() => reinstate({ id: t.id })}
                       onArchive={() => archive({ id: t.id, reason: 'admin' })}
@@ -245,11 +249,13 @@ export function TenantsPage() {
 
 function TenantRow({
   tenant,
+  busy,
   onSuspend,
   onReinstate,
   onArchive,
 }: {
   tenant: Tenant;
+  busy: boolean;
   onSuspend: () => void;
   onReinstate: () => void;
   onArchive: () => void;
@@ -282,6 +288,7 @@ function TenantRow({
         {tenant.lifecycle === 'active' ? (
           <button
             type="button"
+            disabled={busy}
             onClick={onSuspend}
             className="rounded-md border border-amber-500 px-2 py-0.5 text-xs text-amber-200"
             data-testid={`tenants-suspend-${tenant.id}`}
@@ -292,6 +299,7 @@ function TenantRow({
         {tenant.lifecycle === 'suspended' ? (
           <button
             type="button"
+            disabled={busy}
             onClick={onReinstate}
             className="rounded-md border border-emerald-500 px-2 py-0.5 text-xs text-emerald-200"
             data-testid={`tenants-reinstate-${tenant.id}`}
@@ -302,6 +310,7 @@ function TenantRow({
         {tenant.lifecycle !== 'archived' ? (
           <button
             type="button"
+            disabled={busy}
             onClick={onArchive}
             className="rounded-md border border-slate-500 px-2 py-0.5 text-xs text-slate-300"
             data-testid={`tenants-archive-${tenant.id}`}

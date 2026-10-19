@@ -12,10 +12,11 @@ export const test = base.extend<{ sessionContract: void }>({
       // Contract tests must never accidentally reach a developer's live API.
       // Page-level feature routes take precedence over this context fallback.
       await context.route('**/api/**', async (route) => {
+        if (!new URL(route.request().url()).pathname.startsWith('/api/')) return route.continue();
         unexpected.add(`${route.request().method()} ${new URL(route.request().url()).pathname}`);
         await route.fulfill({ status: 400, json: { error: 'API route missing from browser contract fixture' } });
       });
-      await context.route('**/api/v1/tenants', (route) => route.fulfill({ json: { items: [], count: 0 } }));
+      await context.route('**/api/v1/tenants', (route) => route.fulfill({ json: { items: [{ id: 'acme', slug: 'acme', displayName: 'Acme', owner: 'browser-test@zara.local', admins: [], lifecycle: 'active' }], count: 1 } }));
       await context.route('**/api/v1/me', async (route) => {
         const authenticated = !!route.request().headers().authorization;
         await route.fulfill({
