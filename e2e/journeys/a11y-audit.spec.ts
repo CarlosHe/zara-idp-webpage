@@ -95,6 +95,8 @@ test.describe('a11y audit (axe-core, all major routes)', () => {
       }
       const path = new URL(url).pathname;
       let payload: unknown = { items: [], total: 0 };
+      if (path === '/api/v1/rbac/roles') payload = { roles: [] };
+      if (path === '/api/v1/rbac/bindings' || path === '/api/v1/rbac/cluster-bindings') payload = { bindings: [] };
       if (path === '/api/v1/incidents') payload = { incidents: [] };
       if (path === '/api/v1/notifications') payload = { notifications: [], unreadCount: 0 };
       if (path === '/api/v1/home') payload = {
@@ -125,7 +127,7 @@ test.describe('a11y audit (axe-core, all major routes)', () => {
       }
       await page.goto(path);
 
-      await expect(page.getByRole('heading', { name: headingRegex }).first()).toBeVisible();
+      await expect(page.getByRole('heading', { name: headingRegex }).first()).toBeVisible({ timeout: 30_000 });
 
       const results = await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])

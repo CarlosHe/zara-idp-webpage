@@ -10,25 +10,14 @@ test.describe('cost journey', () => {
   });
 
   test('cost page renders allocations + budget panels', async ({ page }) => {
-    await page.route('**/api/v1/cost/allocations*', (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          allocations: [
-            { service: 'checkout-api', team: 'team-payments', costUsd: 1240.55, share: 0.31 },
-          ],
-        }),
-      }),
-    );
-    await page.route('**/api/v1/cost/budgets*', (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ budgets: [], anomalies: [] }),
-      }),
-    );
+    const amount = { value: 1240.55, minorUnits: 124055, currency: 'USD' };
+    await page.route('**/api/v1/cost/dashboard*', (route) => route.fulfill({ json: {
+      window: { since: '2026-10-01T00:00:00Z', until: '2026-10-18T00:00:00Z' }, currency: 'USD', totalSpend: amount, allocationsCount: 1,
+      showback: [{ dimension: 'service', label: 'checkout-api', total: amount, share: 1 }],
+      chargeback: [{ team: 'team-payments', service: 'checkout-api', total: amount }], topServices: [], idleResources: [], budgets: [], anomalies: [], findings: [], costImpacts: [],
+    } }));
     await page.goto('/cost');
-    await expect(page.getByText(/checkout-api|cost/i).first()).toBeVisible();
+    await expect(page.getByText('checkout-api', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText(/1,240.55/).first()).toBeVisible();
   });
 });
