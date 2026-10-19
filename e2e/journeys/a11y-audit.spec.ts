@@ -58,6 +58,8 @@ const ROUTES: ReadonlyArray<readonly [string, RegExp]> = [
   ['/assistant', /assistant|ai/i],
   ['/remediation', /remediation/i],
   ['/notifications', /notification/i],
+  ['/access', /access/i],
+  ['/settings', /settings/i],
 ];
 
 const skip = process.env.SKIP_A11Y === '1';

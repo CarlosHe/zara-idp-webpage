@@ -1,5 +1,7 @@
+import { lazy, Suspense, useState } from 'react';
 import {
   Badge,
+  Button,
   Card,
   CardContent,
   CardHeader,
@@ -7,6 +9,8 @@ import {
 } from '@/shared/components/ui';
 import type { BudgetEvaluation } from '../types/cost';
 import { BUDGET_STATE_TONE, formatBP, formatMoney } from './costFormat';
+
+const BudgetManager = lazy(() => import('./BudgetManager').then((m) => ({ default: m.BudgetManager })));
 
 interface BudgetsCardProps {
   budgets: BudgetEvaluation[];
@@ -16,6 +20,7 @@ interface BudgetsCardProps {
 // evaluation per budget; warns + breach states are visually
 // distinct and sorted to the top by the backend.
 export function BudgetsCard({ budgets }: BudgetsCardProps) {
+  const [managing, setManaging] = useState(false);
   return (
     <Card data-testid="cost-budgets">
       <CardHeader>
@@ -24,6 +29,8 @@ export function BudgetsCard({ budgets }: BudgetsCardProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        <Button size="sm" variant="secondary" onClick={() => setManaging(true)}>Manage budgets</Button>
+        {managing && <Suspense fallback={<p>Loading budget editor...</p>}><BudgetManager onClose={() => setManaging(false)} /></Suspense>}
         {budgets.length === 0 ? (
           <p className="text-sm text-slate-400">
             No budgets defined yet — create one to surface chargeback

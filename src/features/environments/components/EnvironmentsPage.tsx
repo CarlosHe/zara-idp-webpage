@@ -107,8 +107,9 @@ export function EnvironmentsPage() {
         description="Self-service preview / dev / staging environments. Every action is a ChangeSet — the apply pipeline is the only path to provider state."
         onRefresh={refetch}
         actions={
-          <div className="flex flex-wrap items-center gap-2" role="tablist">
+          <div className="flex flex-wrap items-center gap-2">
             <button type="button" onClick={() => setCreating(true)} className="rounded bg-blue-600 px-3 py-2 text-sm text-white">Create environment</button>
+            <div role="tablist" className="flex flex-wrap gap-2">
             {STATE_FILTERS.map((filter) => (
               <button
                 type="button"
@@ -126,6 +127,7 @@ export function EnvironmentsPage() {
                 {filter.label}
               </button>
             ))}
+            </div>
           </div>
         }
       />
@@ -220,6 +222,7 @@ export function EnvironmentsPage() {
                   now={now}
                   onDestroy={handleDestroy}
                   onExtend={handleExtend}
+                  busy={destroyState.isLoading || extendState.isLoading}
                 />
               ))}
             </ul>

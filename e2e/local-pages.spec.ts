@@ -246,3 +246,31 @@ test('incident creation, notes and all lifecycle transitions persist', async ({ 
   await expect(detail).toContainText('Persisted investigation note');
   await expect(detail.getByRole('button', { name: 'Resolve', exact: true })).toHaveCount(0);
 });
+
+test('cost budget create, edit and delete persist without fabricated provider costs', async ({ page }) => {
+  test.setTimeout(90_000);
+  const name = `UI Budget ${Date.now().toString(36)}`;
+  await page.goto('/cost');
+  await page.getByRole('button', { name: 'Manage budgets', exact: true }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Budget name', { exact: true }).fill(name);
+  await dialog.getByLabel('Budget amount', { exact: true }).fill('120');
+  await dialog.getByLabel('Budget team', { exact: true }).fill('ui-platform');
+  await dialog.getByRole('button', { name: 'Save budget', exact: true }).click();
+  await expect(dialog.getByRole('status')).toHaveText('Budget saved');
+  await page.reload();
+  await page.getByRole('button', { name: 'Manage budgets', exact: true }).click();
+  await dialog.getByRole('button', { name: `Edit ${name}`, exact: true }).click();
+  await expect(dialog.getByLabel('Budget amount', { exact: true })).toHaveValue('120');
+  await dialog.getByLabel('Budget amount', { exact: true }).fill('150');
+  await dialog.getByRole('button', { name: 'Save budget', exact: true }).click();
+  await expect(dialog.getByRole('status')).toHaveText('Budget saved');
+  await page.reload();
+  await page.getByRole('button', { name: 'Manage budgets', exact: true }).click();
+  await dialog.getByRole('button', { name: `Edit ${name}`, exact: true }).click();
+  await expect(dialog.getByLabel('Budget amount', { exact: true })).toHaveValue('150');
+  await dialog.getByRole('button', { name: `Delete ${name}`, exact: true }).click();
+  await dialog.getByRole('button', { name: 'Confirm delete budget', exact: true }).click();
+  await expect(dialog.getByRole('status')).toHaveText('Budget deleted');
+  await expect(dialog.getByRole('button', { name: `Edit ${name}`, exact: true })).toHaveCount(0);
+});

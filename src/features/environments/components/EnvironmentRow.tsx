@@ -15,6 +15,7 @@ import {
 
 interface EnvironmentRowProps {
   env: Environment;
+  busy?: boolean;
   now?: Date;
   onDestroy?: (env: Environment) => void;
   onExtend?: (env: Environment) => void;
@@ -26,7 +27,7 @@ interface EnvironmentRowProps {
 // health, age, TTL, optional cost projection, and the safe action
 // cards (destroy, extend). Mutating actions are buttons that hand off
 // to the parent component — the row itself never mutates.
-export function EnvironmentRow({ env, now, onDestroy, onExtend }: EnvironmentRowProps) {
+export function EnvironmentRow({ env, now, onDestroy, onExtend, busy = false }: EnvironmentRowProps) {
   const evalNow = now ?? new Date();
   const isTerminal = env.state === 'destroyed' || env.state === 'destroying';
   return (
@@ -111,7 +112,7 @@ export function EnvironmentRow({ env, now, onDestroy, onExtend }: EnvironmentRow
       <div className="flex gap-2 pt-1">
         <button
           type="button"
-          disabled={isTerminal}
+          disabled={isTerminal || busy}
           onClick={() => onExtend?.(env)}
           className="rounded border border-slate-600 bg-slate-900 px-3 py-1 text-xs text-slate-200 hover:bg-slate-800 disabled:opacity-50"
           data-testid={`env-extend-${env.id}`}
@@ -120,7 +121,7 @@ export function EnvironmentRow({ env, now, onDestroy, onExtend }: EnvironmentRow
         </button>
         <button
           type="button"
-          disabled={isTerminal}
+          disabled={isTerminal || busy}
           onClick={() => onDestroy?.(env)}
           className="rounded border border-red-600/40 bg-red-500/10 px-3 py-1 text-xs text-red-200 hover:bg-red-500/20 disabled:opacity-50"
           data-testid={`env-destroy-${env.id}`}
