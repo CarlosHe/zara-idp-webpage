@@ -215,3 +215,34 @@ test('access inspection and account sign out use the actual session', async ({ p
   await page.goto('/settings');
   await page.waitForURL('**/login?redirect=*');
 });
+
+test('incident creation, notes and all lifecycle transitions persist', async ({ page }) => {
+  const suffix = Date.now().toString(36);
+  const title = `UI incident ${suffix}`;
+  await page.goto('/incidents');
+  await page.getByRole('button', { name: 'Open incident', exact: true }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Incident slug', { exact: true }).fill(`ui-incident-${suffix}`);
+  await dialog.getByLabel('Incident title', { exact: true }).fill(title);
+  await dialog.getByLabel('Incident summary', { exact: true }).fill('Real browser lifecycle validation');
+  await dialog.getByLabel('Affected service', { exact: true }).fill('ui-architecture-api');
+  await dialog.getByLabel('Affected namespace', { exact: true }).fill('ui-architecture');
+  await dialog.getByRole('button', { name: 'Create incident', exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  const detail = page.getByRole('region', { name: 'Incident detail', exact: true });
+  await expect(detail).toContainText(title);
+  await detail.getByLabel('Incident note', { exact: true }).fill('Persisted investigation note');
+  await detail.getByRole('button', { name: 'Append', exact: true }).click();
+  await expect(detail.getByText('Persisted investigation note', { exact: true })).toBeVisible();
+  await detail.getByRole('button', { name: 'Acknowledge', exact: true }).click();
+  await expect(detail.getByRole('button', { name: 'Acknowledge', exact: true })).toHaveCount(0);
+  await detail.getByRole('button', { name: 'Mitigate', exact: true }).click();
+  await expect(detail.getByRole('button', { name: 'Mitigate', exact: true })).toHaveCount(0);
+  await detail.getByRole('button', { name: 'Resolve', exact: true }).click();
+  await expect(detail.getByRole('button', { name: 'Resolve', exact: true })).toHaveCount(0);
+  await page.reload();
+  await page.getByTestId('incidents-filter-resolved').click();
+  await page.getByRole('button').filter({ hasText: title }).click();
+  await expect(detail).toContainText('Persisted investigation note');
+  await expect(detail.getByRole('button', { name: 'Resolve', exact: true })).toHaveCount(0);
+});

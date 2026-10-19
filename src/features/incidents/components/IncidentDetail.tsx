@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  Alert,
   Badge,
   Button,
   Card,
@@ -7,7 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/shared/components/ui';
-import { LoadingState } from '@/shared/components/feedback';
+import { ErrorState, LoadingState } from '@/shared/components/feedback';
+import { errorMessage } from '@/shared/lib/api';
 import {
   useAcknowledgeIncidentMutation,
   useAppendIncidentTimelineMutation,
@@ -31,11 +33,11 @@ interface IncidentDetailProps {
 // transition routes through the application service; the component
 // never mutates anything client-side.
 export function IncidentDetail({ id }: IncidentDetailProps) {
-  const { data, isFetching } = useGetIncidentQuery(id);
-  const [ack] = useAcknowledgeIncidentMutation();
-  const [mitigate] = useMitigateIncidentMutation();
-  const [resolve] = useResolveIncidentMutation();
-  const [appendTimeline, { isLoading: appending }] =
+  const { data, isFetching, error, refetch } = useGetIncidentQuery(id);
+  const [ack, ackState] = useAcknowledgeIncidentMutation();
+  const [mitigate, mitigateState] = useMitigateIncidentMutation();
+  const [resolve, resolveState] = useResolveIncidentMutation();
+  const [appendTimeline, { isLoading: appending, error: appendError }] =
     useAppendIncidentTimelineMutation();
   const [note, setNote] = useState('');
   const [changeSetID, setChangeSetID] = useState('');
@@ -44,12 +46,13 @@ export function IncidentDetail({ id }: IncidentDetailProps) {
     return <LoadingState message="Loading incident..." />;
   }
   if (!data) {
-    return null;
+    return <ErrorState message={errorMessage(error) || "Unable to load incident"} onRetry={refetch} />;
   }
   const inc: Incident = data;
 
   return (
     <div role="region" className="space-y-4" aria-label="Incident detail" data-testid={`incident-detail-${inc.id}`}>
+      {(ackState.error || mitigateState.error || resolveState.error || appendError) && <Alert type="error">{errorMessage(ackState.error || mitigateState.error || resolveState.error || appendError)}</Alert>}
       <Card role="region" aria-label={`Incident ${inc.title}`}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -133,6 +136,7 @@ export function IncidentDetail({ id }: IncidentDetailProps) {
               <Button
                 type="button"
                 onClick={() => void ack(inc.id)}
+                disabled={ackState.isLoading}
                 data-testid="incident-ack"
               >
                 Acknowledge
@@ -143,6 +147,7 @@ export function IncidentDetail({ id }: IncidentDetailProps) {
                 type="button"
                 variant="secondary"
                 onClick={() => void mitigate({ id: inc.id })}
+                disabled={mitigateState.isLoading}
                 data-testid="incident-mitigate"
               >
                 Mitigate
@@ -153,6 +158,7 @@ export function IncidentDetail({ id }: IncidentDetailProps) {
                 type="button"
                 variant="secondary"
                 onClick={() => void resolve({ id: inc.id })}
+                disabled={resolveState.isLoading}
                 data-testid="incident-resolve"
               >
                 Resolve
@@ -193,24 +199,18 @@ export function IncidentDetail({ id }: IncidentDetailProps) {
 
           <form
             className="mt-4 flex flex-col gap-2"
-            onSubmit={(ev) => {
+            onSubmit={async (ev) => {
               ev.preventDefault();
-              if (note.trim()) {
-                void appendTimeline({
-                  id: inc.id,
-                  kind: 'note',
-                  message: note,
-                });
-                setNote('');
-              }
-              if (changeSetID.trim()) {
-                void appendTimeline({
-                  id: inc.id,
-                  kind: 'changeset',
-                  references: { changeset: changeSetID },
-                });
-                setChangeSetID('');
-              }
+              try {
+                if (note.trim()) {
+                  await appendTimeline({ id: inc.id, kind: 'note', message: note }).unwrap();
+                  setNote('');
+                }
+                if (changeSetID.trim()) {
+                  await appendTimeline({ id: inc.id, kind: 'changeset', references: { changeset: changeSetID } }).unwrap();
+                  setChangeSetID('');
+                }
+              } catch { /* Preserve failed entries for retry; mutation error is displayed above. */ }
             }}
           >
             <label className="flex flex-col gap-1 text-xs">
