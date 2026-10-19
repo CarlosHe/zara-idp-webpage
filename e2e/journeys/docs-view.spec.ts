@@ -31,6 +31,7 @@ test.describe('docs view journey', () => {
         }),
       }),
     );
+    await page.route('**/api/v1/docs/checkout-api', (route) => route.fulfill({json:{slug:'checkout-api',title:'checkout-api',description:'Checkout documentation',format:'mdx',markdown:'# Checkout API'}}));
     await page.goto('/docs');
     await expect(page.getByText(/checkout-api/i).first()).toBeVisible();
   });

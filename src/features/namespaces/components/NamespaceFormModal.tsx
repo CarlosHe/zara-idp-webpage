@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Button, Input, Modal } from '@/shared/components/ui';
+import { Alert, Button, Input, Modal } from '@/shared/components/ui';
+import { errorMessage } from '@/shared/lib/api';
 import type { Namespace } from '@/shared/types';
 import { NumberField, TextField } from './NamespaceFormFields';
 
@@ -46,13 +47,13 @@ function buildInitialFormState(namespace?: Namespace | null): FormState {
     contextTier: (namespace?.context?.tier as Tier) || 'development',
     contextEnvironment: namespace?.context?.environment || '',
     contextCostCenter: namespace?.context?.costCenter || '',
-    quotaDatabases: namespace?.quotas?.databases || 10,
-    quotaRoles: namespace?.quotas?.roles || 50,
-    quotaSchemas: namespace?.quotas?.schemas || 20,
-    quotaApplications: namespace?.quotas?.applications || 10,
-    quotaSecrets: namespace?.quotas?.secrets || 100,
-    quotaStorageGB: namespace?.quotas?.storageGB || 100,
-    quotaMaxConnections: namespace?.quotas?.maxConnections || 100,
+    quotaDatabases: namespace?.quotas?.databases ?? 10,
+    quotaRoles: namespace?.quotas?.roles ?? 50,
+    quotaSchemas: namespace?.quotas?.schemas ?? 20,
+    quotaApplications: namespace?.quotas?.applications ?? 10,
+    quotaSecrets: namespace?.quotas?.secrets ?? 100,
+    quotaStorageGB: namespace?.quotas?.storageGB ?? 100,
+    quotaMaxConnections: namespace?.quotas?.maxConnections ?? 100,
   };
 }
 
@@ -93,6 +94,7 @@ export function NamespaceFormModal({
 }: NamespaceFormModalProps) {
   const [formData, setFormData] = useState<FormState>(() => buildInitialFormState(namespace));
   const [loading, setLoading] = useState(false);
+  const [failure, setFailure] = useState('');
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -100,11 +102,12 @@ export function NamespaceFormModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setFailure('');
     try {
       await onSubmit(toNamespacePayload(formData));
       onClose();
     } catch (error) {
-      console.error('Error submitting namespace:', error);
+      setFailure(errorMessage(error as Parameters<typeof errorMessage>[0]) || 'Unable to save namespace');
     } finally {
       setLoading(false);
     }
@@ -117,9 +120,9 @@ export function NamespaceFormModal({
       title={namespace ? 'Edit Namespace' : 'Create Namespace'}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
+        {failure && <Alert type="error" title="Namespace save failed">{failure}</Alert>}
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">Name</label>
-          <Input
+          <Input label="Name"
             value={formData.name}
             onChange={(e) => update('name', e.target.value)}
             placeholder="production"
@@ -133,7 +136,7 @@ export function NamespaceFormModal({
 
         <div>
           <label className="block text-sm font-medium text-slate-300 mb-2">Description</label>
-          <textarea
+          <textarea aria-label="Description"
             value={formData.description}
             onChange={(e) => update('description', e.target.value)}
             className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 min-h-[60px]"

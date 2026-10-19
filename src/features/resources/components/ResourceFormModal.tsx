@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Trash2, Plus } from 'lucide-react';
-import { useUpdateResourceMutation } from '@/features/resources/services/resourcesApi';
+import { useApplyYamlMutation } from '@/features/resources/services/resourcesApi';
 import { errorMessage } from '@/shared/lib/api';
 import {
   Select,
@@ -21,7 +22,8 @@ interface ResourceFormModalProps {
 }
 
 export function ResourceFormModal({ isOpen, onClose, resource }: ResourceFormModalProps) {
-  const [updateResource, updateState] = useUpdateResourceMutation();
+  const [applyResource, updateState] = useApplyYamlMutation();
+  const navigate = useNavigate();
   const loading = updateState.isLoading;
   const [error, setError] = useState<string | null>(null);
 
@@ -66,13 +68,10 @@ export function ResourceFormModal({ isOpen, onClose, resource }: ResourceFormMod
     });
 
     try {
-      await updateResource({
-        id: resource.id,
-        body: {
-          spec,
-          metadata: { labels },
-        },
-      }).unwrap();
+      const manifest = {apiVersion:'zara.io/v1',kind:resource.kind,metadata:{name:resource.metadata.name,namespace:resource.metadata.namespace,labels,annotations:resource.metadata.annotations},spec};
+      const result = await applyResource({yaml:JSON.stringify(manifest)}).unwrap();
+      if (result.summary.failed) throw new Error('Resource update could not be queued');
+      if (result.changeset_id) navigate(`/changesets/${result.changeset_id}`);
       onClose();
     } catch (err) {
       setError(errorMessage(err as Parameters<typeof errorMessage>[0]) || 'Failed to update resource');

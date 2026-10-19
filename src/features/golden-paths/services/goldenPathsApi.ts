@@ -37,7 +37,11 @@ export const goldenPathsApi = baseApi.injectEndpoints({
         method: 'POST',
         body: { parameters, dryRun, requestedBy },
       }),
+      extraOptions: { maxRetries: 0 },
       invalidatesTags: (_result, _err, { id }) => [
+        { type: 'Resource' as const, id: 'LIST' },
+        { type: 'ChangeSet' as const, id: 'LIST' },
+        { type: 'Approval' as const, id: 'LIST' },
         { type: 'GoldenPath' as const, id },
         { type: 'GoldenPath' as const, id: 'LIST' },
       ],

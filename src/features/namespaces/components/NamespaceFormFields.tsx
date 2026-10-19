@@ -19,8 +19,7 @@ export function TextField({
 }: TextFieldProps) {
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-300 mb-2">{label}</label>
-      <Input
+      <Input label={label}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
@@ -40,12 +39,11 @@ interface NumberFieldProps {
 export function NumberField({ label, value, onChange }: NumberFieldProps) {
   return (
     <div>
-      <label className="block text-xs text-slate-400 mb-1">{label}</label>
-      <Input
+      <Input label={label}
         type="number"
         value={value}
-        onChange={(e) => onChange(parseInt(e.target.value))}
-        min="1"
+        onChange={(e) => onChange(Number(e.target.value))}
+        min="0"
       />
     </div>
   );

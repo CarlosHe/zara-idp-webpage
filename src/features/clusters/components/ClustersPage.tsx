@@ -17,6 +17,7 @@ export function ClustersPage() {
     loading,
     error,
     saving,
+    actionError,
     searchQuery,
     selectedEnvironment,
     selectedCluster,
@@ -53,7 +54,7 @@ export function ClustersPage() {
         icon={<Globe className="h-6 w-6" />}
         iconClassName="text-cyan-400"
         title="Clusters"
-        description="Multi-cluster management and resource distribution"
+        description="Register cluster metadata and ownership. Live connections and workloads are available in Runtime."
         onRefresh={refetch}
         refreshLabel="Sync All"
         actions={
@@ -103,7 +104,7 @@ export function ClustersPage() {
         onClose={() => setDeletingCluster(null)}
         onConfirm={handleDelete}
         title="Delete Cluster"
-        message={`Are you sure you want to delete the cluster "${deletingCluster?.displayName || deletingCluster?.name}"? This action cannot be undone.`}
+        message={<span>Delete cluster registration "{deletingCluster?.displayName || deletingCluster?.name}"?{actionError && <span role="alert" className="mt-3 block text-red-300">{actionError}</span>}</span>}
         confirmText="Delete"
         variant="danger"
         loading={saving}

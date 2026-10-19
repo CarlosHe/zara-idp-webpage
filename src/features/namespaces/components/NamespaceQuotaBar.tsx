@@ -19,7 +19,7 @@ export function NamespaceQuotaBar({ label, used, quota }: NamespaceQuotaBarProps
     <div>
       <div className="text-xs text-slate-400 mb-1">{label}</div>
       <div className={cn('text-sm font-medium', getQuotaTextColor(percentage))}>
-        {used ?? 0} / {quota}
+        {used ?? '—'} / {quota || 'Unlimited'}
       </div>
       <div className="w-full bg-slate-700/50 rounded-full h-1 mt-1">
         <div

@@ -14,7 +14,7 @@ import { Button } from './Button';
 
 const modalVariants = cva(
   [
-    'w-full rounded-lg border border-slate-700 bg-slate-800 shadow-xl',
+    'flex max-h-[calc(100dvh-2rem)] w-full flex-col overflow-hidden rounded-lg border border-slate-700 bg-slate-800 shadow-xl',
     'transform transition-all animate-scale-in',
   ],
   {
@@ -148,7 +148,7 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
           className={cn(modalVariants({ size }), className)}
           {...rest}
         >
-          <div className="flex items-start justify-between gap-4 border-b border-slate-700 px-6 py-4">
+          <div className="flex shrink-0 items-start justify-between gap-4 border-b border-slate-700 px-6 py-4">
             <div className="min-w-0 flex-1">
               <h2 id="modal-title" className="text-lg font-semibold text-white">
                 {title}
@@ -168,7 +168,7 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
               <X className="h-5 w-5" aria-hidden />
             </button>
           </div>
-          <div className="px-6 py-4">{children}</div>
+          <div className="min-h-0 overflow-y-auto overscroll-contain px-6 py-4">{children}</div>
         </div>
       </div>
     );

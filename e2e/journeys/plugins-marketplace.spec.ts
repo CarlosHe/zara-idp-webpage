@@ -30,6 +30,7 @@ test.describe('plugins journey', () => {
         }),
       }),
     );
+    await page.route('**/api/v1/plugins/slots', (route) => route.fulfill({json:{items:[]}}));
     await page.goto('/plugins');
     await expect(page.getByText(/github-source/i).first()).toBeVisible();
   });

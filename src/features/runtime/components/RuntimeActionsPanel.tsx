@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import {
   Card,
@@ -148,7 +149,7 @@ export function RuntimeActionsPanel({ workload }: Props) {
 
         {lastResponse && (
           <Alert type={lastResponse.requiresApproval ? 'warning' : 'success'} title={lastResponse.message}>
-            ChangeSet: {lastResponse.changeSetId}
+            <Link to={`/changesets/${lastResponse.changeSetId}`} className="underline">Open ChangeSet</Link>
           </Alert>
         )}
       </CardContent>

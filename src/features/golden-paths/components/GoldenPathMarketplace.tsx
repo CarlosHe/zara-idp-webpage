@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+import { useListNamespacesQuery } from '@/features/namespaces/services/namespacesApi';
 import { useMemo, useState } from 'react';
 import { Sparkles, ShieldCheck, RotateCcw, Lock, Workflow } from 'lucide-react';
 import { PageHeader } from '@/shared/components/feedback';
@@ -99,13 +101,15 @@ interface PathDetailProps {
 
 function PathDetail({ path, onBack }: PathDetailProps) {
   const [execute, executeState] = useExecuteGoldenPathMutation();
+  const { data: namespaces = [] } = useListNamespacesQuery();
   const [params, setParams] = useState<Record<string, string>>(() => initialParams(path));
   const [response, setResponse] = useState<GoldenPathExecuteResponse | null>(null);
+  const [previewed, setPreviewed] = useState('');
   const [mode, setMode] = useState<'dry-run' | 'execute' | null>(null);
 
   const isFormValid = useMemo(
-    () => path.parameters.every((p) => !p.required || (params[p.name] ?? '').trim() !== ''),
-    [path.parameters, params],
+    () => path.parameters.every((p) => { const value=params[p.name] ?? ''; return (!p.required || value.trim() !== '') && (!p.pattern || !value || new RegExp(p.pattern).test(value)) && (p.name !== 'namespace' || namespaces.some((namespace) => namespace.name === value)); }),
+    [path.parameters, params, namespaces],
   );
 
   const handleSubmit = async (dryRun: boolean) => {
@@ -113,6 +117,7 @@ function PathDetail({ path, onBack }: PathDetailProps) {
     try {
       const result = await execute({ id: path.id, parameters: params, dryRun }).unwrap();
       setResponse(result);
+      if (dryRun) setPreviewed(JSON.stringify(params));
     } catch {
       setResponse(null);
     }
@@ -132,7 +137,8 @@ function PathDetail({ path, onBack }: PathDetailProps) {
       <h2 className="text-xl font-semibold text-slate-100">{path.name}</h2>
       <p className="text-sm text-slate-400">{path.description}</p>
 
-      <ParamsForm path={path} values={params} onChange={setParams} />
+      {namespaces.length === 0 && <Alert type="info" title="Create a namespace first"><Link className="underline" to="/namespaces">Open Namespaces</Link></Alert>}
+      <ParamsForm path={path} values={params} onChange={(next) => { setParams(next); setResponse(null); setPreviewed(''); }} />
 
       <div className="flex flex-wrap gap-2">
         <Button
@@ -146,7 +152,7 @@ function PathDetail({ path, onBack }: PathDetailProps) {
         <Button
           type="button"
           variant="primary"
-          disabled={!isFormValid || executeState.isLoading || isBlocked(response)}
+          disabled={!isFormValid || executeState.isLoading || isBlocked(response) || previewed !== JSON.stringify(params) || (mode === 'execute' && !!response?.changeSet?.id)}
           onClick={() => void handleSubmit(false)}
         >
           Execute
@@ -171,6 +177,7 @@ interface ParamsFormProps {
 }
 
 function ParamsForm({ path, values, onChange }: ParamsFormProps) {
+  const { data: namespaces = [] } = useListNamespacesQuery();
   if (path.parameters.length === 0) {
     return <p className="text-sm text-slate-400">This Golden Path requires no parameters.</p>;
   }
@@ -182,7 +189,7 @@ function ParamsForm({ path, values, onChange }: ParamsFormProps) {
             {p.label || p.name}
             {p.required && <span className="text-red-400"> *</span>}
           </span>
-          {p.type === 'select' ? (
+          {p.name === 'namespace' ? <select aria-label={p.label} className="mt-1 w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100" value={values[p.name] ?? ''} onChange={(event) => onChange({ ...values, [p.name]: event.target.value })}><option value="">Select a namespace…</option>{namespaces.map((namespace) => <option key={namespace.id} value={namespace.name}>{namespace.name}</option>)}</select> : p.type === 'bool' ? <input type="checkbox" checked={values[p.name] === 'true'} onChange={(event) => onChange({ ...values, [p.name]: String(event.target.checked) })} /> : p.type === 'select' ? (
             <select
               className="mt-1 w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
               value={values[p.name] ?? ''}
@@ -198,7 +205,10 @@ function ParamsForm({ path, values, onChange }: ParamsFormProps) {
           ) : (
             <input
               className="mt-1 w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
-              type="text"
+              type={p.type === 'int' ? 'number' : 'text'}
+              required={p.required}
+              pattern={p.pattern}
+              min={p.type === 'int' ? 0 : undefined}
               placeholder={p.example}
               value={values[p.name] ?? ''}
               onChange={(e) => onChange({ ...values, [p.name]: e.target.value })}
@@ -224,12 +234,14 @@ function ExecutionResult({ response, mode }: ExecutionResultProps) {
     <div className="rounded-lg border border-slate-700 bg-slate-900/40 p-4 space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-slate-100">
-          {blocked ? 'Blocked by policy preview' : `${mode === 'dry-run' ? 'Dry-run' : 'Execution'} complete`}
+          {blocked ? 'Blocked by policy preview' : (mode === 'dry-run' ? 'Preview ready' : response.changeSet?.requiresApproval ? 'Awaiting approval' : 'Provisioning requested')}
         </h3>
         {response.executionId && (
           <code className="text-xs text-slate-500">execId: {response.executionId}</code>
         )}
       </div>
+      {mode !== 'dry-run' && response.changeSet?.id && <Link className="inline-block underline text-blue-300" to={`/changesets/${response.changeSet.id}`}>Open ChangeSet</Link>}
+      {mode === 'dry-run' && response.resourcesYaml && <details><summary className="cursor-pointer text-sm">Generated manifests</summary><pre className="mt-2 max-h-80 overflow-auto whitespace-pre-wrap text-xs">{response.resourcesYaml}</pre></details>}
       {response.message && <p className="text-sm text-slate-300">{response.message}</p>}
       {response.policyPreview && (
         <PolicyBadge

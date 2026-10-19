@@ -1,8 +1,10 @@
+import { lazy, Suspense, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Sparkles } from 'lucide-react';
 import { ROUTES } from '@/shared/config';
 import {
   buttonVariants,
+  Button,
   ConfirmModal,
   Alert,
   DriftReportModal,
@@ -12,10 +14,14 @@ import { cn } from '@/shared/utils';
 import { errorMessage } from '@/shared/lib/api';
 import { ResourceFilterBar } from './ResourceFilterBar';
 import { ResourceListView } from './ResourceListView';
-import { ResourceFormModal } from './ResourceFormModal';
 import { useResourcesDashboard } from './useResourcesDashboard';
 
+const ResourceFormModal = lazy(() => import('./ResourceFormModal').then((module) => ({default: module.ResourceFormModal})));
+
+const ManifestApplyModal = lazy(() => import('./ManifestApplyModal'));
+
 export function ResourcesPage() {
+ const [applying, setApplying] = useState(false);
   const {
     items,
     namespaces,
@@ -27,6 +33,8 @@ export function ResourcesPage() {
     setIsFormOpen,
     editingResource,
     deletingResource,
+    cascadeDelete,
+    setCascadeDelete,
     setDeletingResource,
     isDriftModalOpen,
     driftReport,
@@ -59,15 +67,17 @@ export function ResourcesPage() {
         description="Browse and manage infrastructure resources"
         onRefresh={refetch}
         actions={
-          <Link
+          <div className="flex gap-2"><Button onClick={() => setApplying(true)}>Apply manifests</Button><Link
             to={ROUTES.GOLDEN_PATHS}
             className={cn(buttonVariants({ size: 'sm' }))}
           >
             <Sparkles className="h-4 w-4 mr-2" aria-hidden />
             Create via Golden Path
-          </Link>
+          </Link></div>
         }
       />
+
+      {applying && <Suspense fallback={null}><ManifestApplyModal onClose={() => setApplying(false)} /></Suspense>}
 
       <ResourceFilterBar
         kindFilter={filters.kind}
@@ -89,20 +99,20 @@ export function ResourcesPage() {
         onDelete={setDeletingResource}
       />
 
-      {editingResource && (
-        <ResourceFormModal
+      {editingResource && isFormOpen && (
+        <Suspense fallback={null}><ResourceFormModal
           isOpen={isFormOpen}
           onClose={() => setIsFormOpen(false)}
           resource={editingResource}
-        />
+        /></Suspense>
       )}
 
       <ConfirmModal
         isOpen={!!deletingResource}
-        onClose={() => setDeletingResource(null)}
+        onClose={() => { setDeletingResource(null); setCascadeDelete(false); }}
         onConfirm={handleDelete}
         title="Delete Resource"
-        message={`Are you sure you want to delete ${deletingResource?.metadata?.name}? This action cannot be undone.`}
+        message={<span>Request deletion of {deletingResource?.metadata?.name}. Approval may be required before the workers remove the infrastructure.<label className="mt-3 flex items-center gap-2"><input type="checkbox" checked={cascadeDelete} onChange={(event) => setCascadeDelete(event.target.checked)} />Also delete dependent resources (administrator)</label>{driftError && <span role="alert" className="mt-3 block text-red-300">{driftError}</span>}</span>}
         confirmText="Delete"
         loading={deleteLoading}
       />

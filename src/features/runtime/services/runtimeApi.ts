@@ -102,6 +102,7 @@ export const runtimeApi = baseApi.injectEndpoints({
     }),
 
     proposeRuntimeRestart: build.mutation<RuntimeActionResponse, RuntimeRestartRequest>({
+      extraOptions: { maxRetries: 0 },
       query: (body) => ({
         url: '/runtime/actions/restart',
         method: 'POST',
@@ -114,6 +115,7 @@ export const runtimeApi = baseApi.injectEndpoints({
     }),
 
     proposeRuntimeScale: build.mutation<RuntimeActionResponse, RuntimeScaleRequest>({
+      extraOptions: { maxRetries: 0 },
       query: (body) => ({
         url: '/runtime/actions/scale',
         method: 'POST',
@@ -126,6 +128,7 @@ export const runtimeApi = baseApi.injectEndpoints({
     }),
 
     proposeRuntimeRollback: build.mutation<RuntimeActionResponse, RuntimeRollbackRequest>({
+      extraOptions: { maxRetries: 0 },
       query: (body) => ({
         url: '/runtime/actions/rollback',
         method: 'POST',

@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { errorMessage } from '@/shared/lib/api';
 import {
   useListClustersQuery,
   useDeleteClusterMutation,
@@ -13,6 +14,7 @@ interface UseClusterDashboardResult {
   loading: boolean;
   error: unknown;
   saving: boolean;
+  actionError: string | null;
   searchQuery: string;
   selectedEnvironment: string | null;
   selectedCluster: ClusterView | null;
@@ -46,7 +48,7 @@ function mapClusters(reduxClusters: ClusterType[]): ClusterView[] {
     resourceCount: c.status?.resourceCount || 0,
     cpu: c.status?.cpu || { used: 0, total: 100 },
     memory: c.status?.memory || { used: 0, total: 100 },
-    lastSyncAt: c.status?.lastSyncAt || c.createdAt || new Date().toISOString(),
+    lastSyncAt: c.status?.lastSyncAt || '',
     endpoints: { api: c.spec?.endpoints?.api ?? '', argocd: c.spec?.endpoints?.argocd },
   }));
 }
@@ -101,7 +103,7 @@ export function useClusterDashboard(): UseClusterDashboardResult {
 
   const handleDelete = useCallback(async () => {
     if (deletingCluster?.id) {
-      await deleteCluster(deletingCluster.id).unwrap().catch(() => undefined);
+      try { await deleteCluster(deletingCluster.id).unwrap(); } catch { return; }
       setDeletingCluster(null);
       if (selectedCluster?.id === deletingCluster.id) {
         setSelectedCluster(null);
@@ -116,7 +118,7 @@ export function useClusterDashboard(): UseClusterDashboardResult {
     loading,
     error,
     saving,
-    searchQuery,
+    actionError: errorMessage(deleteState.error) || null,    searchQuery,
     selectedEnvironment,
     selectedCluster,
     isFormOpen,

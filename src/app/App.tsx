@@ -1,7 +1,6 @@
 import { RouterProvider } from 'react-router-dom';
 import { AppProviders } from './providers';
 import { router } from './router';
-import { VitalsDebugPanel } from '@/shared/lib/observability/VitalsDebugPanel';
 import { addBreadcrumb } from '@/shared/lib/observability';
 
 router.subscribe((state) => {
@@ -19,7 +18,6 @@ function App() {
   return (
     <AppProviders>
       <RouterProvider router={router} />
-      <VitalsDebugPanel />
     </AppProviders>
   );
 }

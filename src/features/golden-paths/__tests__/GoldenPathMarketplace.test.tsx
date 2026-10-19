@@ -90,7 +90,7 @@ describe('<GoldenPathMarketplace />', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Dry-run' }));
 
     await waitFor(() => {
-      expect(screen.getByText('Dry-run complete')).toBeInTheDocument();
+      expect(screen.getByText('Preview ready')).toBeInTheDocument();
     });
     expect(screen.getByText('Action plan')).toBeInTheDocument();
     expect(screen.getByText('Declared secrets')).toBeInTheDocument();

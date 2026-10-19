@@ -18,6 +18,7 @@ export function TeamListView() {
     error,
     refetch,
     deleting,
+    actionError,
     isFormOpen,
     editingTeam,
     deletingTeam,
@@ -89,9 +90,7 @@ export function TeamListView() {
         onClose={cancelDelete}
         onConfirm={confirmDelete}
         title="Delete Team"
-        message={`Are you sure you want to delete the team "${
-          deletingTeam?.spec.displayName || deletingTeam?.metadata.name
-        }"? This action cannot be undone.`}
+        message={<span>Delete team "{deletingTeam?.spec.displayName || deletingTeam?.metadata.name}"?{actionError && <span role="alert" className="mt-3 block text-red-300">{actionError}</span>}</span>}
         confirmText="Delete"
         variant="danger"
         loading={deleting}

@@ -62,9 +62,13 @@ export const changesetsApi = baseApi.injectEndpoints({
       providesTags: (_r, _e, id) => [{ type: 'ChangeSet', id }],
     }),
 
+    getChangeSetJobs: build.query<{items:Array<{id:string;resourceId:string;resourceKind?:string;resourceName?:string;namespace?:string;action:string;status:string;attempts:number;error?:string}>}, string>({
+      query: (id) => `/changesets/${id}/jobs`,
+      providesTags: (_r, _e, id) => [{ type: 'ChangeSet', id }],
+    }),
     getChangeSetDiff: build.query<unknown, string>({
       query: (id) => `/changesets/${id}/diff`,
-      providesTags: (_r, _e, id) => [{ type: 'ChangeSet', id: `diff-${id}` }],
+      providesTags: (_r, _e, id) => [{ type: 'ChangeSet', id }],
     }),
 
     approveChangeSet: build.mutation<unknown, { id: string; comment?: string }>({
@@ -104,6 +108,7 @@ export const changesetsApi = baseApi.injectEndpoints({
 });
 
 export const {
+  useGetChangeSetJobsQuery,
   useListChangeSetsQuery,
   useGetChangeSetQuery,
   useGetChangeSetDiffQuery,

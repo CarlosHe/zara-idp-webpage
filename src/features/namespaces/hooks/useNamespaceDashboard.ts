@@ -5,13 +5,14 @@ import {
   useUpdateNamespaceMutation,
   useDeleteNamespaceMutation,
 } from '@/features/namespaces/services/namespacesApi';
+import { errorMessage } from '@/shared/lib/api';
 import type { Namespace } from '@/shared/types';
 
 interface NamespaceStats {
   total: number;
   active: number;
   totalDatabases: number;
-  totalStorage: number;
+  totalStorage: number | undefined;
 }
 
 interface UseNamespaceDashboardResult {
@@ -20,6 +21,7 @@ interface UseNamespaceDashboardResult {
   stats: NamespaceStats;
   loading: boolean;
   error: unknown;
+  actionError: string;
   refetch: () => void;
   searchQuery: string;
   setSearchQuery: (value: string) => void;
@@ -45,6 +47,7 @@ export function useNamespaceDashboard(): UseNamespaceDashboardResult {
   const [updateNamespace] = useUpdateNamespaceMutation();
   const [deleteNamespace] = useDeleteNamespaceMutation();
 
+  const [actionError, setActionError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTier, setSelectedTier] = useState<string>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -68,29 +71,27 @@ export function useNamespaceDashboard(): UseNamespaceDashboardResult {
     const total = namespaces.length;
     const active = namespaces.filter((ns) => ns.status === 'active').length;
     const totalDatabases = namespaces.reduce((acc, ns) => acc + (ns.usage?.databases || 0), 0);
-    const totalStorage = namespaces.reduce((acc, ns) => acc + (ns.usage?.storageGB || 0), 0);
+    const totalStorage = namespaces.every((ns) => ns.usage?.storageGB !== undefined) ? namespaces.reduce((acc, ns) => acc + (ns.usage?.storageGB || 0), 0) : undefined;
 
     return { total, active, totalDatabases, totalStorage };
   }, [namespaces]);
 
   const handleCreateNamespace = async (data: Partial<Namespace>) => {
     await createNamespace(data as Parameters<typeof createNamespace>[0])
-      .unwrap()
-      .catch(() => undefined);
+      .unwrap();
     setIsCreateModalOpen(false);
   };
 
   const handleUpdateNamespace = async (data: Partial<Namespace>) => {
     if (editingNamespace) {
-      await updateNamespace({ id: editingNamespace.id, data }).unwrap().catch(() => undefined);
+      await updateNamespace({ id: editingNamespace.id, data }).unwrap();
       setEditingNamespace(null);
     }
   };
 
   const handleDeleteNamespace = async () => {
     if (deletingNamespace) {
-      await deleteNamespace(deletingNamespace.id).unwrap().catch(() => undefined);
-      setDeletingNamespace(null);
+      try { await deleteNamespace(deletingNamespace.id).unwrap(); setDeletingNamespace(null); } catch (error) { setActionError(errorMessage(error as Parameters<typeof errorMessage>[0]) || 'Unable to delete namespace'); }
     }
   };
 
@@ -100,6 +101,7 @@ export function useNamespaceDashboard(): UseNamespaceDashboardResult {
     stats,
     loading,
     error,
+    actionError,
     refetch,
     searchQuery,
     setSearchQuery,

@@ -41,10 +41,10 @@ export function NamespaceCard({ namespace, onEdit, onDelete }: NamespaceCardProp
             </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="secondary" size="sm" onClick={() => onEdit(namespace)}>
+              <Button variant="secondary" size="sm" aria-label={`Edit namespace ${namespace.name}`} onClick={() => onEdit(namespace)}>
                 <Pencil className="h-3 w-3" />
               </Button>
-              <Button variant="secondary" size="sm" onClick={() => onDelete(namespace)}>
+              <Button variant="secondary" size="sm" aria-label={`Delete namespace ${namespace.name}`} onClick={() => onDelete(namespace)}>
                 <Trash2 className="h-3 w-3 text-red-400" />
               </Button>
             </div>

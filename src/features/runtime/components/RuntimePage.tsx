@@ -27,7 +27,7 @@ export function RuntimePage() {
   const activeCluster = clusterId || clusters.data?.[0] || '';
   const inventory = useGetRuntimeInventoryQuery(
     { clusterId: activeCluster },
-    { skip: !activeCluster },
+    { skip: !activeCluster, pollingInterval: 3000, skipPollingIfUnfocused: true },
   );
 
   const [namespaceFilter, setNamespaceFilter] = useState<string>('');
@@ -63,7 +63,7 @@ export function RuntimePage() {
           workloadName: selectedWorkload.name,
         }
       : { clusterId: '', namespace: '', workloadName: '' },
-    { skip: !selectedWorkload },
+    { skip: !selectedWorkload, pollingInterval: 3000, skipPollingIfUnfocused: true },
   );
 
   if (clusters.isLoading) {
@@ -103,6 +103,7 @@ export function RuntimePage() {
         iconClassName="text-cyan-400"
         title="Runtime"
         description="Live runtime state (Kubernetes or ECS) and governed actions"
+        onRefresh={inventory.refetch}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

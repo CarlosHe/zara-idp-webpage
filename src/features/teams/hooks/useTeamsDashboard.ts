@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { errorMessage } from '@/shared/lib/api';
 import {
   useListTeamsQuery,
   useDeleteTeamMutation,
@@ -11,6 +12,7 @@ interface UseTeamsDashboardResult {
   error: unknown;
   refetch: () => void;
   deleting: boolean;
+  actionError: string | null;
   isFormOpen: boolean;
   editingTeam: Team | null;
   deletingTeam: Team | null;
@@ -46,8 +48,7 @@ export function useTeamsDashboard(): UseTeamsDashboardResult {
 
   const confirmDelete = async () => {
     if (deletingTeam?.id) {
-      await deleteTeam(deletingTeam.id).unwrap().catch(() => undefined);
-      setDeletingTeam(null);
+      try { await deleteTeam(deletingTeam.id).unwrap(); setDeletingTeam(null); } catch { /* Mutation state keeps the error visible in the dialog. */ }
     }
   };
 
@@ -57,6 +58,7 @@ export function useTeamsDashboard(): UseTeamsDashboardResult {
     error,
     refetch,
     deleting: deleteState.isLoading,
+    actionError: errorMessage(deleteState.error) || null,
     isFormOpen,
     editingTeam,
     deletingTeam,

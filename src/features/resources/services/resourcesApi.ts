@@ -42,12 +42,16 @@ interface UpdateResourceBody {
   };
 }
 
-interface ApplyYamlResponse {
+export interface ApplyYamlResponse {
+  changeset_id?: string;
+  approval_required?: boolean;
+  approval_id?: string;
+  dry_run?: boolean;
   results: Array<{
     kind: string;
     name: string;
     namespace: string;
-    action: 'CREATED' | 'UPDATED' | 'ERROR';
+    action: string;
     error?: string;
   }>;
   summary: {
@@ -127,16 +131,18 @@ export const resourcesApi = baseApi.injectEndpoints({
       ],
     }),
 
-    deleteResource: build.mutation<void, { id: string }>({
-      query: ({ id }) => ({ url: `/resources/${id}`, method: 'DELETE' }),
+    deleteResource: build.mutation<{ changeset_id?: string; approval_required?: boolean } | void, { id: string; cascade?: boolean }>({
+      query: ({ id, cascade }) => ({ url: `/resources/${id}`, method: 'DELETE', params: cascade ? { cascade: true } : undefined }),
+      extraOptions: { maxRetries: 0 },
       invalidatesTags: [
         { type: 'Resource', id: 'LIST' },
         { type: 'DashboardSummary', id: 'SINGLETON' },
       ],
     }),
 
-    applyYaml: build.mutation<ApplyYamlResponse, { yaml: string }>({
+    applyYaml: build.mutation<ApplyYamlResponse, { yaml: string; dry_run?: boolean }>({
       query: (body) => ({ url: '/apply', method: 'POST', body }),
+      extraOptions: { maxRetries: 0 },
       invalidatesTags: [
         { type: 'Resource', id: 'LIST' },
         { type: 'DashboardSummary', id: 'SINGLETON' },

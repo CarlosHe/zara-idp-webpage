@@ -124,8 +124,8 @@ export interface Namespace {
     schemas: number;
     applications: number;
     secrets: number;
-    storageGB: number;
-    connections: number;
+    storageGB?: number;
+    connections?: number;
   };
 }
 

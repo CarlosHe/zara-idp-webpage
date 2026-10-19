@@ -5,7 +5,7 @@ interface NamespaceStatsProps {
   total: number;
   active: number;
   totalDatabases: number;
-  totalStorage: number;
+  totalStorage: number | undefined;
 }
 
 export function NamespaceStats({
@@ -36,7 +36,7 @@ export function NamespaceStats({
       />
       <StatCard
         label="Total Storage"
-        value={`${totalStorage} GB`}
+        value={totalStorage === undefined ? 'Unavailable' : `${totalStorage} GB`}
         icon={<HardDrive className="h-4 w-4 text-orange-400" />}
         iconBgColor="bg-orange-500/20"
       />

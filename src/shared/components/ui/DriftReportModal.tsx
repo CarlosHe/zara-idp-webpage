@@ -51,7 +51,7 @@ const changeTypeConfig: Record<ChangeType, { color: string; label: string }> = {
 export function DriftReportModal({ isOpen, onClose, driftReport, onReconcile, isReconciling }: DriftReportModalProps) {
   if (!driftReport) return null;
 
-  const severityInfo = severityConfig[driftReport.severity];
+  const severityInfo = severityConfig[driftReport.severity] ?? severityConfig.NONE;
   const hasDrift = driftReport.has_drift;
 
   return (
@@ -118,8 +118,8 @@ export function DriftReportModal({ isOpen, onClose, driftReport, onReconcile, is
                   </thead>
                   <tbody className="divide-y divide-slate-700">
                     {driftReport.changes.map((change, index) => {
-                      const changeInfo = changeTypeConfig[change.changeType];
-                      const changeSeverity = severityConfig[change.severity];
+                      const changeInfo = changeTypeConfig[change.changeType] ?? changeTypeConfig.MISMATCH;
+                      const changeSeverity = severityConfig[change.severity] ?? severityInfo;
                       
                       return (
                         <tr key={index} className="hover:bg-slate-900/30">

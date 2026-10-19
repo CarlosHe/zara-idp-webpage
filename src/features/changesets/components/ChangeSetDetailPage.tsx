@@ -18,6 +18,7 @@ import {
   useApproveChangeSetMutation,
   useGetChangeSetDiffQuery,
   useGetChangeSetQuery,
+  useGetChangeSetJobsQuery,
   useRejectChangeSetMutation,
   useApplyChangeSetMutation,
 } from '../services/changesetsApi';
@@ -30,6 +31,7 @@ export function ChangeSetDetailPage() {
     skipPollingIfUnfocused: true,
   });
   const { data: diff } = useGetChangeSetDiffQuery(id, { skip: !id });
+  const jobs = useGetChangeSetJobsQuery(id, {skip:!id, pollingInterval:cs?.appliedAt ? 0 : 3000, skipPollingIfUnfocused:true});
   const [approve, approveState] = useApproveChangeSetMutation();
   const [reject, rejectState] = useRejectChangeSetMutation();
   const [apply, applyState] = useApplyChangeSetMutation();
@@ -168,6 +170,13 @@ export function ChangeSetDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      <Card><CardHeader><CardTitle>Execution jobs ({jobs.data?.items?.length ?? 0})</CardTitle></CardHeader><CardContent>
+        {jobs.isError ? <Alert type="error" title="Unable to load execution jobs">{errorMessage(jobs.error)}</Alert> : jobs.data?.items?.length ? <ul className="space-y-3">{jobs.data.items.map((job) => <li key={job.id} className="rounded border border-slate-700 p-3 text-sm">
+          <div className="flex flex-wrap gap-2"><Badge>{job.status}</Badge><span>{job.action}</span><code>{job.resourceName ? `${job.resourceKind}/${job.namespace}/${job.resourceName}` : job.resourceId}</code><span>Attempts: {job.attempts}</span></div>
+          {job.error && <p role="alert" className="mt-2 text-red-300">{job.error}</p>}
+        </li>)}</ul> : <p className="text-sm text-slate-300">{pending ? 'Jobs will be queued after approval.' : cs.appliedAt ? 'Execution finished.' : 'No execution jobs yet. Apply the approved ChangeSet to start.'}</p>}
+      </CardContent></Card>
 
       {yaml ? (
         <Card>

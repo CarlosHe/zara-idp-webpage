@@ -80,7 +80,7 @@ export function NamespacesPage() {
           onClose={dashboard.cancelDeleting}
           onConfirm={dashboard.handleDeleteNamespace}
           title="Delete Namespace"
-          message={`Are you sure you want to delete the namespace "${dashboard.deletingNamespace.name}"? This action cannot be undone and will affect all resources in this namespace.`}
+          message={<span>Delete namespace "{dashboard.deletingNamespace.name}"? Remove its resources first.{dashboard.actionError && <span role="alert" className="mt-3 block text-red-300">{dashboard.actionError}</span>}</span>}
           confirmText="Delete Namespace"
           variant="danger"
         />

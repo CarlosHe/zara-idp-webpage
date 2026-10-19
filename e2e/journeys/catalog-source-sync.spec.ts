@@ -10,7 +10,7 @@ test.describe('catalog source sync journey', () => {
   });
 
   test('catalog source list renders configured sources + sync state', async ({ page }) => {
-    await page.route('**/api/v1/catalog/sources*', (route) =>
+    await page.route('**/api/v1/catalog-sources*', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -18,12 +18,11 @@ test.describe('catalog source sync journey', () => {
           items: [
             {
               id: 'src-1',
-              kind: 'github',
+              provider: 'github',
+              manifestGlobs: ['catalog-info.yaml'],
+              createdAt: '2026-04-28T11:00:00Z',
               url: 'https://github.com/example/services',
-              lastSync: '2026-04-28T11:00:00Z',
-              status: 'fresh',
-              discovered: 24,
-              rejected: 0,
+              status: { lastSyncAt: '2026-04-28T11:00:00Z', lastSyncOk: true, lastRecordsCount: 24, lastErrorsCount: 0, requiresApproval: false },
             },
           ],
           total: 1,
@@ -32,7 +31,7 @@ test.describe('catalog source sync journey', () => {
     );
     await page.goto('/catalog/sources');
     await expect(
-      page.getByText(/example\/services|github/i).first(),
+      page.getByText('https://github.com/example/services', {exact:true}),
     ).toBeVisible();
   });
 });

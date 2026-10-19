@@ -60,6 +60,7 @@ export function getEnvColor(env: ClusterView['environment']) {
 
 export function formatRelativeTime(dateStr: string) {
   const date = new Date(dateStr);
+  if (!Number.isFinite(date.getTime()) || date.getUTCFullYear() < 1970) return 'Never synced';
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffMins = Math.floor(diffMs / 60000);

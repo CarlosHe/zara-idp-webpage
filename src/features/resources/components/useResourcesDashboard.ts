@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useToast } from '@/shared/components/ui';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import {
   setKindFilter,
@@ -19,6 +20,8 @@ import type { Resource, ResourceKind, DriftReport } from '@/shared/types';
 
 export function useResourcesDashboard() {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const toast = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const filters = useAppSelector(selectResourcesFilters);
 
@@ -27,7 +30,7 @@ export function useResourcesDashboard() {
     isLoading: loading,
     error,
     refetch,
-  } = useListResourcesQuery({ kind: filters.kind });
+  } = useListResourcesQuery({ kind: filters.kind }, { pollingInterval: 3000, skipPollingIfUnfocused: true });
   const { data: namespaces = [] } = useListNamespacesQuery();
   const [deleteResource, deleteState] = useDeleteResourceMutation();
   const [triggerDetectDrift] = useLazyDetectDriftQuery();
@@ -36,6 +39,7 @@ export function useResourcesDashboard() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<Resource | null>(null);
   const [deletingResource, setDeletingResource] = useState<Resource | null>(null);
+  const [cascadeDelete, setCascadeDelete] = useState(false);
 
   const [isDriftModalOpen, setIsDriftModalOpen] = useState(false);
   const [driftReport, setDriftReport] = useState<DriftReport | null>(null);
@@ -100,7 +104,7 @@ export function useResourcesDashboard() {
       setDriftReport(null);
       // The mutation already invalidates Resource/LIST so the list
       // refetches automatically. We just need the user-facing toast.
-      alert(`Reconciliation started: ${response.message}`);
+      toast.success(response.message, 'Reconciliation requested');
     } catch (err) {
       setDriftError(errorMessage(err as Parameters<typeof errorMessage>[0]) || 'Failed to reconcile resource');
     }
@@ -128,8 +132,14 @@ export function useResourcesDashboard() {
 
   const handleDelete = async () => {
     if (deletingResource) {
-      await deleteResource({ id: deletingResource.id }).unwrap().catch(() => undefined);
-      setDeletingResource(null);
+      try {
+        const result = await deleteResource({ id: deletingResource.id, cascade: cascadeDelete }).unwrap();
+        setDeletingResource(null);
+        setCascadeDelete(false);
+        if (result?.changeset_id) navigate(`/changesets/${result.changeset_id}`);
+      } catch (err) {
+        setDriftError(errorMessage(err as Parameters<typeof errorMessage>[0]) || 'Deletion request failed');
+      }
     }
   };
 
@@ -157,6 +167,8 @@ export function useResourcesDashboard() {
     setIsFormOpen,
     editingResource,
     deletingResource,
+    cascadeDelete,
+    setCascadeDelete,
     setDeletingResource,
     isDriftModalOpen,
     driftReport,
