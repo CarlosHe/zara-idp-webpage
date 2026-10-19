@@ -25,6 +25,10 @@ interface AppendTimelineArgs {
 
 export const incidentsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
+    openIncident: build.mutation<Incident, Pick<Incident, 'slug' | 'title' | 'severity'> & Partial<Pick<Incident, 'summary' | 'affected' | 'owners'>>>({
+      query: (body) => ({ url: '/incidents', method: 'POST', body: { ...body, source: 'manual' } }),
+      invalidatesTags: [{ type: 'Incident', id: 'LIST' }],
+    }),
     listIncidents: build.query<IncidentListResponse, ListArgs | void>({
       query: (args) => {
         const params = new URLSearchParams();
@@ -103,6 +107,7 @@ export const incidentsApi = baseApi.injectEndpoints({
 });
 
 export const {
+  useOpenIncidentMutation,
   useListIncidentsQuery,
   useGetIncidentQuery,
   useAcknowledgeIncidentMutation,

@@ -18,7 +18,7 @@ export function PageHeader({
   title,
   description,
   onRefresh,
-  refreshLabel = 'Sync All',
+  refreshLabel = 'Refresh',
   actions,
 }: PageHeaderProps) {
   return (

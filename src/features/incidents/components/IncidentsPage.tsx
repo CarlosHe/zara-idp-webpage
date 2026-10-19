@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { Siren } from 'lucide-react';
 import {
   Badge,
+  Button,
   Card,
   CardContent,
   CardHeader,
@@ -18,6 +19,8 @@ import type { Incident, IncidentState } from '../types/incidents';
 import { SEVERITY_TONE, STATE_LABEL, STATE_TONE } from './IncidentUtils';
 import { IncidentDetail } from './IncidentDetail';
 
+const IncidentCreateModal = lazy(() => import('./IncidentCreateModal').then((m) => ({ default: m.IncidentCreateModal })));
+
 const STATE_FILTERS: Array<IncidentState | ''> = [
   '',
   'open',
@@ -32,6 +35,7 @@ const STATE_FILTERS: Array<IncidentState | ''> = [
 // human acks share the same audit trail.
 export function IncidentsPage() {
   const [state, setState] = useState<IncidentState | ''>('open');
+  const [creating, setCreating] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const { data, isFetching, error, refetch } = useListIncidentsQuery({
     state,
@@ -65,7 +69,9 @@ export function IncidentsPage() {
         description="Open incidents, timeline, owners, runbooks, and rollback candidates."
         onRefresh={refetch}
         actions={
-          <div className="flex items-center gap-2" role="tablist">
+          <div className="flex items-center gap-2">
+            <Button onClick={() => setCreating(true)}>Open incident</Button>
+            <div role="tablist" className="flex gap-2">
             {STATE_FILTERS.map((filter) => (
               <button
                 type="button"
@@ -83,10 +89,14 @@ export function IncidentsPage() {
                 {filter ? STATE_LABEL[filter] : 'All'}
               </button>
             ))}
+            </div>
           </div>
         }
       />
 
+      {creating && <Suspense fallback={<LoadingState message="Loading incident form..." />}>
+        <IncidentCreateModal onClose={() => setCreating(false)} onCreated={(id) => { setState(''); setSelected(id); setCreating(false); }} />
+      </Suspense>}
       <div className="grid gap-6 lg:grid-cols-3">
         <Card
           role="region"
