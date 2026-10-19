@@ -212,6 +212,13 @@ export function ResourceDetailPage() {
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 <SpecItem label="Image" value={app.image} mono />
                 <SpecItem label="Port" value={app.port != null ? String(app.port) : undefined} mono />
+                <SpecItem label="Ports" value={app.ports?.map((port) => `${port.name}: ${port.service_port ?? port.port} → ${port.port}/${port.protocol ?? 'TCP'}`).join(', ')} mono />
+                <SpecItem label="Command" value={app.command?.join(' ')} mono />
+                <SpecItem label="Arguments" value={app.args?.join(' ')} mono />
+                <SpecItem label="Init containers" value={app.init_containers?.map((container) => container.name).join(', ')} />
+                <SpecItem label="Volume mounts" value={app.volume_mounts?.map((mount) => `${mount.name} → ${mount.mount_path}`).join(', ')} mono />
+                <SpecItem label="Probes" value={[app.readiness_probe && 'readiness', app.liveness_probe && 'liveness', app.startup_probe && 'startup'].filter(Boolean).join(', ') || undefined} />
+                <SpecItem label="Capacity providers" value={app.capacity_provider_strategy?.map((provider) => `${provider.name} (weight ${provider.weight ?? 0}, base ${provider.base ?? 0})`).join(', ')} />
                 <SpecItem
                   label="Replicas"
                   value={app.replicas != null ? String(app.replicas) : undefined}

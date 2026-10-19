@@ -16,6 +16,21 @@ export interface ApplicationSpec {
   oncall_slack_channel?: string;
   service_level?: 'critical' | 'high' | 'medium' | 'low' | string;
   image?: string;
+  ports?: { name: string; port: number; service_port?: number; protocol?: 'TCP' | 'UDP' }[];
+  command?: string[];
+  args?: string[];
+  env_refs?: Record<string, { kind: 'Secret' | 'ConfigMap'; name: string; key: string; optional?: boolean }>;
+  env_from?: { kind: 'Secret' | 'ConfigMap'; name: string; optional?: boolean }[];
+  volumes?: { name: string; config_map?: string; secret?: string; claim?: string; empty_dir?: boolean }[];
+  volume_mounts?: ApplicationVolumeMount[];
+  init_containers?: { name: string; image: string; command?: string[]; args?: string[]; env?: Record<string, string>; volume_mounts?: ApplicationVolumeMount[] }[];
+  readiness_probe?: ApplicationProbe;
+  liveness_probe?: ApplicationProbe;
+  startup_probe?: ApplicationProbe;
+  launch_type?: 'EC2' | 'FARGATE';
+  network_mode?: 'awsvpc' | 'bridge' | 'host';
+  capacity_provider_strategy?: { name: string; weight?: number; base?: number }[];
+  load_balancers?: { target_group_arn: string; container_port: number }[];
   port?: number;
   replicas?: number;
   cpu?: string;
@@ -57,3 +72,6 @@ export function resolvePlatformLabel(
   if (p.includes('k8s') || p.includes('kubernetes') || p.includes('eks')) return 'Kubernetes';
   return provider;
 }
+
+export interface ApplicationVolumeMount { name: string; mount_path: string; sub_path?: string; read_only?: boolean }
+export interface ApplicationProbe { http_path?: string; port?: number; command?: string[]; tcp?: boolean; initial_delay_seconds?: number; period_seconds?: number; timeout_seconds?: number; failure_threshold?: number }

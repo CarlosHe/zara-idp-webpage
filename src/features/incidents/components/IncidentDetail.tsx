@@ -39,6 +39,7 @@ export function IncidentDetail({ id }: IncidentDetailProps) {
   const [resolve, resolveState] = useResolveIncidentMutation();
   const [appendTimeline, { isLoading: appending, error: appendError }] =
     useAppendIncidentTimelineMutation();
+  const mutating = appending || ackState.isLoading || mitigateState.isLoading || resolveState.isLoading;
   const [note, setNote] = useState('');
   const [changeSetID, setChangeSetID] = useState('');
 
@@ -136,7 +137,7 @@ export function IncidentDetail({ id }: IncidentDetailProps) {
               <Button
                 type="button"
                 onClick={() => void ack(inc.id)}
-                disabled={ackState.isLoading}
+                disabled={mutating}
                 data-testid="incident-ack"
               >
                 Acknowledge
@@ -147,7 +148,7 @@ export function IncidentDetail({ id }: IncidentDetailProps) {
                 type="button"
                 variant="secondary"
                 onClick={() => void mitigate({ id: inc.id })}
-                disabled={mitigateState.isLoading}
+                disabled={mutating}
                 data-testid="incident-mitigate"
               >
                 Mitigate
@@ -158,7 +159,7 @@ export function IncidentDetail({ id }: IncidentDetailProps) {
                 type="button"
                 variant="secondary"
                 onClick={() => void resolve({ id: inc.id })}
-                disabled={resolveState.isLoading}
+                disabled={mutating}
                 data-testid="incident-resolve"
               >
                 Resolve
@@ -234,7 +235,7 @@ export function IncidentDetail({ id }: IncidentDetailProps) {
               />
             </label>
             <div className="flex justify-end">
-              <Button type="submit" disabled={appending} data-testid="incident-append-timeline">
+              <Button type="submit" disabled={mutating} data-testid="incident-append-timeline">
                 {appending ? 'Saving...' : 'Append'}
               </Button>
             </div>

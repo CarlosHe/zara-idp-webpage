@@ -76,6 +76,11 @@ export function ChangeSetDetailPage() {
     (cs.approvalStatus || '').toLowerCase() === 'pending';
   const actionError = errorMessage(approveState.error) || errorMessage(rejectState.error) || errorMessage(applyState.error);
   const yaml = cs.resourcesYaml ?? cs.resourcesYAML;
+  const executionJobs = jobs.data?.items ?? [];
+  const executionStatus = cs.appliedAt ? 'applied'
+    : executionJobs.some((job) => job.status.toUpperCase() === 'FAILED') ? 'failed'
+      : executionJobs.length ? 'applying' : null;
+
 
   return (
     <div className="space-y-6 animate-fade-in" data-testid="changeset-detail-page">
@@ -95,7 +100,8 @@ export function ChangeSetDetailPage() {
             {cs.updatedAt ? ` · ${formatRelativeTime(String(cs.updatedAt))}` : null}
           </p>
           <div className="flex flex-wrap gap-2 mt-2">
-            <Badge variant="outline">{cs.appliedAt ? 'applied' : cs.approvalStatus ?? 'unknown'}</Badge>
+            <Badge variant="outline" aria-label={`Approval: ${cs.approvalStatus ?? 'unknown'}`}>{cs.approvalStatus ?? 'unknown'}</Badge>
+            {executionStatus && <Badge variant={executionStatus === 'failed' ? 'danger' : 'outline'} aria-label={`Execution: ${executionStatus}`}>{executionStatus}</Badge>}
             {cs.totalRisk ? <Badge variant="warning">risk:{cs.totalRisk}</Badge> : null}
             {cs.environment ? <Badge variant="outline">{cs.environment}</Badge> : null}
           </div>

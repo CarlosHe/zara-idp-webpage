@@ -26,6 +26,8 @@ export default defineConfig({
     },
   },
   test: {
+    // Keep the full suite usable alongside the local control plane and cluster.
+    maxWorkers: 2,
     globals: true,
     environment: 'jsdom',
     // jsdom 29 forbids localStorage on opaque origins ("about:blank"). MSW's

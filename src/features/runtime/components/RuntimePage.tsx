@@ -170,7 +170,7 @@ export function RuntimePage() {
           <div className="space-y-4">
             {selectedWorkload ? (
               <>
-                <RuntimeActionsPanel workload={selectedWorkload} />
+                {!['Job', 'CronJob'].includes(selectedWorkload.kind) && <RuntimeActionsPanel workload={selectedWorkload} />}
                 <DeployHistory
                   deploys={deploys.data ?? []}
                   loading={deploys.isLoading}

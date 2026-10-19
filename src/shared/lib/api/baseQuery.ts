@@ -114,6 +114,10 @@ const baseQueryWithAuth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQuery
   });
 
   if (status === 401) {
+    // An old response must not invalidate a replacement session or race logout.
+    const currentToken = readStoredValue(AUTH_TOKEN_KEY);
+    const currentAuthorization = currentToken ? `Bearer ${currentToken}` : null;
+    if (result.meta?.request.headers.get('Authorization') !== currentAuthorization) return result;
     try {
       if (typeof window !== 'undefined') {
         window.localStorage.removeItem(AUTH_TOKEN_KEY);

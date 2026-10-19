@@ -10,6 +10,10 @@ import {
 
 export const kindIcons: Record<string, typeof Box> = {
   Application: Box,
+  ConfigMap: FileJson,
+  Volume: Database,
+  Job: Box,
+  CronJob: Box,
   PostgresDatabase: Database,
   PostgresSchema: Folder,
   PostgresRole: KeyRound,
@@ -25,6 +29,7 @@ export const kindIcons: Record<string, typeof Box> = {
 export const kindOptions = [
   { value: '', label: 'All Kinds' },
   { value: 'Application', label: 'Application' },
+  ...['ConfigMap', 'Volume', 'Job', 'CronJob'].map((kind) => ({ value: kind, label: kind })),
   { value: 'PostgresDatabase', label: 'Postgres Database' },
   { value: 'PostgresSchema', label: 'Postgres Schema' },
   { value: 'PostgresRole', label: 'Postgres Role' },
