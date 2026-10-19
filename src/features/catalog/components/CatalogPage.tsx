@@ -2,18 +2,24 @@ import { lazy, Suspense, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Boxes, GitBranch } from 'lucide-react';
 import { PageHeader, ErrorState, LoadingState } from '@/shared/components/feedback';
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui';
+import { Badge, Button, Input, Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui';
 import { ROUTES } from '@/shared/config';
 import { errorMessage } from '@/shared/lib/api';
 import { useListCatalogEntitiesQuery, useReindexCatalogEntityMutation } from '../services/catalogApi';
 import type { CatalogEntity } from '../types';
 
 const CatalogEntityForm = lazy(() => import('./CatalogEntityForm').then((m) => ({ default: m.CatalogEntityForm })));
+const CatalogImportForm = lazy(() => import('./CatalogImportForm').then((m) => ({ default: m.CatalogImportForm })));
 
 export function CatalogPage() {
   const { data: entities = [], isLoading, error, refetch } = useListCatalogEntitiesQuery();
   const [registering, setRegistering] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [filter, setFilter] = useState('');
+  const [page, setPage] = useState(0);
   const [reindex, reindexState] = useReindexCatalogEntityMutation();
+  const filtered = entities.filter((e) => `${e.kind} ${e.metadata.namespace}/${e.metadata.name} ${String(e.spec.type ?? '')} ${String(e.spec.description ?? '')}`.toLowerCase().includes(filter.toLowerCase()));
+  const currentPage = Math.min(page, Math.max(0, Math.ceil(filtered.length / 50) - 1));
 
   if (isLoading) return <LoadingState message="Loading catalog..." />;
   if (error) {
@@ -28,14 +34,21 @@ export function CatalogPage() {
         title="Catalog"
         description="Control-plane backed catalog entities with versions, generations, and relationships"
         onRefresh={refetch}
-        actions={<Button onClick={() => setRegistering(true)}>Register entity</Button>}
+        actions={<><Button variant="secondary" onClick={() => setImporting(true)}>Import inventory</Button><Button onClick={() => setRegistering(true)}>Register entity</Button></>}
       />
 
       {reindexState.error && <p role="alert" className="text-red-400">{errorMessage(reindexState.error)}</p>}
       {registering && <Suspense fallback={null}><CatalogEntityForm onClose={() => setRegistering(false)} /></Suspense>}
+      {importing && <Suspense fallback={null}><CatalogImportForm onClose={() => setImporting(false)} /></Suspense>}
+      <Input label="Filter catalog" value={filter} onChange={(event) => { setFilter(event.target.value); setPage(0); }} placeholder="Namespace, name, kind or resource type" />
+      <div className="flex items-center gap-3">
+        <p role="status">{filtered.length} of {entities.length} catalog entities · Page {currentPage + 1} of {Math.max(1, Math.ceil(filtered.length / 50))}</p>
+        <Button variant="secondary" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>Previous</Button>
+        <Button variant="secondary" disabled={(currentPage + 1) * 50 >= filtered.length} onClick={() => setPage(currentPage + 1)}>Next</Button>
+      </div>
       {entities.length === 0 && <p className="text-slate-300">No catalog entities yet. Register a service, API, or resource to enable search and scorecard evaluation.</p>}
       <section aria-label="Catalog entities" className="grid gap-4 xl:grid-cols-2">
-        {entities.map((entity) => (
+        {filtered.slice(currentPage * 50, (currentPage + 1) * 50).map((entity) => (
           <CatalogEntityCard
             key={entity.key}
             entity={entity}
@@ -82,6 +95,9 @@ function CatalogEntityCard({ entity, reindexing, onReindex }: CatalogEntityCardP
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {entity.spec.managementMode === 'catalog-only' && <Badge variant="warning">Inventory snapshot · Metadata only</Badge>}
+        {typeof entity.spec.description === 'string' && <p className="break-words text-sm text-slate-300">{entity.spec.description}</p>}
+        {typeof entity.spec.type === 'string' && <p className="text-sm text-slate-400">{entity.spec.type}</p>}
         <div className="grid grid-cols-3 gap-3 text-sm">
           <Metric label="Version" value={entity.version.toString()} />
           <Metric label="Generation" value={entity.generation.toString()} />

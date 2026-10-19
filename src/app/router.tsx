@@ -171,6 +171,7 @@ const RemediationInboxPage = lazy(() =>
 
 const AccessPage = lazy(() => import('@/features/access/components/AccessPage').then((m) => ({ default: m.AccessPage })));
 const SettingsPage = lazy(() => import('@/features/settings/components/SettingsPage').then((m) => ({ default: m.SettingsPage })));
+const DevelopmentPage = lazy(() => import('@/features/development/DevelopmentPage').then((m) => ({ default: m.DevelopmentPage })));
 
 function withSuspense(Component: ComponentType) {
   return (
@@ -279,6 +280,7 @@ export const router = createBrowserRouter([
           { path: 'tenants', element: withSuspense(TenantsPage) },
           { path: 'access', element: withSuspense(AccessPage) },
           { path: 'settings', element: withSuspense(SettingsPage) },
+          { path: 'development', element: withSuspense(DevelopmentPage) },
           // Sprint-30 / L-3005 — AI assistant console.
           { path: 'assistant', element: <Suspense fallback={<LoadingState message="Loading..." />}><RequireTenant><AssistantPage /></RequireTenant></Suspense> },
           // Sprint-31 / L-3104 — automated remediation inbox.

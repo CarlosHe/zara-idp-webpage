@@ -13,14 +13,14 @@ test.beforeEach(async ({ page }) => {
 const screens = ['/', '/home', '/resources', '/changesets', '/stacks', '/catalog', '/catalog/sources',
   '/search', '/docs', '/apis', '/teams', '/approvals', '/audit', '/policies', '/freezes', '/golden-paths',
   '/calendar', '/domains', '/clusters', '/namespaces', '/analytics', '/analytics/executive', '/runtime',
-  '/scorecards', '/plugins', '/notifications', '/incidents', '/cost', '/environments', '/tenants', '/assistant', '/remediation', '/access', '/settings'];
+  '/scorecards', '/plugins', '/notifications', '/incidents', '/cost', '/environments', '/tenants', '/assistant', '/remediation', '/access', '/settings', '/development'];
 
 async function loaded(page: Page) {
   await expect(page.locator('#main-content').getByRole('heading').first()).toBeVisible();
   await page.waitForLoadState('networkidle');
 }
 
-test('all 34 screens: fresh session has no API failures, tenant pages guide selection', async ({ page }) => {
+test('all 35 screens: fresh session has no API failures, tenant pages guide selection', async ({ page }) => {
   test.setTimeout(180_000);
   const failures: string[] = [];
   page.on('pageerror', (error) => failures.push(error.message));
@@ -127,6 +127,7 @@ test('preferences save, domain CRUD, scorecard create and evaluate use persisted
   await dialog.getByLabel('Specification JSON', { exact: true }).fill(JSON.stringify({ owner: 'ui-platform', description: 'Browser validation', lifecycle: 'development' }));
   await dialog.getByRole('button', { name: 'Register entity', exact: true }).click();
   await expect(dialog).not.toBeVisible();
+  await page.getByLabel('Filter catalog', { exact: true }).fill(`ui-architecture/ui-catalog-${suffix}`);
   await page.getByRole('link', { name: `ui-architecture/ui-catalog-${suffix}`, exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Desired specification', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Edit entity', exact: true }).click();

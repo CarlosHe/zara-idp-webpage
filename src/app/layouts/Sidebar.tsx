@@ -72,6 +72,7 @@ const navigation = [
   { name: 'Tenants', href: ROUTES.TENANTS, icon: Building2 },
   { name: 'Access control', href: ROUTES.ACCESS, icon: ShieldCheck },
   { name: 'Settings', href: ROUTES.SETTINGS, icon: Users },
+  { name: 'Local development', href: ROUTES.DEVELOPMENT, icon: Boxes },
   { name: 'Assistant', href: ROUTES.ASSISTANT, icon: Sparkles },
   { name: 'Remediation', href: ROUTES.REMEDIATION, icon: Wrench },
 ];

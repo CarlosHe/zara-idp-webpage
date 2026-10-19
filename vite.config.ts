@@ -87,6 +87,11 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
+      '/local-aws': {
+        target: 'http://127.0.0.1:18081',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/local-aws/, '') || '/',
+      },
       '/api/': {
         target: 'http://localhost:8080',
         changeOrigin: true,

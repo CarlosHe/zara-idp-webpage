@@ -1,6 +1,8 @@
 import { Badge, Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui';
 import { ErrorState, LoadingState } from '@/shared/components/feedback';
 import { errorMessage } from '@/shared/lib/api';
+import { Link } from 'react-router-dom';
+import { ROUTES } from '@/shared/config';
 import { useGetCatalogEntityGraphQuery } from '../services/catalogApi';
 import type { CatalogGraphRelationship, QualityFinding, QualitySeverity } from '../types';
 
@@ -47,9 +49,9 @@ function RelationshipList({
                 className="flex items-center justify-between gap-3 rounded-lg border border-slate-700/60 p-3"
               >
                 <div className="flex flex-col gap-1">
-                  <span className="text-sm text-slate-200">
+                  <Link to={ROUTES.CATALOG.DETAIL(rel.kind, rel.namespace, rel.name)} className="text-sm text-blue-300 hover:underline">
                     {rel.namespace}/{rel.name}
-                  </span>
+                  </Link>
                   <span className="text-xs text-slate-400">{rel.kind}</span>
                 </div>
                 <Badge>{rel.type}</Badge>

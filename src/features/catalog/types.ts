@@ -1,8 +1,10 @@
 import type { ResourceKind } from '@/shared/types';
 
+export type CatalogKind = ResourceKind | 'Service' | 'API' | 'System' | 'Domain' | 'Group' | 'User' | 'Resource' | 'DocSet' | 'Environment' | 'Location';
+
 export interface CatalogRelationship {
   type: string;
-  targetKind: ResourceKind;
+  targetKind: CatalogKind;
   targetName: string;
   namespace: string;
 }
@@ -10,7 +12,7 @@ export interface CatalogRelationship {
 export interface CatalogEntity {
   id: string;
   key: string;
-  kind: ResourceKind;
+  kind: CatalogKind;
   metadata: {
     name: string;
     namespace: string;
@@ -30,6 +32,14 @@ export interface CatalogListParams {
   kind?: string;
   limit?: number;
   offset?: number;
+}
+
+export interface CatalogRegistration {
+  kind: string;
+  namespace: string;
+  name: string;
+  spec: Record<string, unknown>;
+  relationships?: CatalogRelationship[];
 }
 
 export type QualitySeverity = 'high' | 'medium' | 'low';

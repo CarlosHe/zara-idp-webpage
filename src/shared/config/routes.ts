@@ -12,6 +12,7 @@ export const ROUTES = {
   LOGIN: '/login',
   ACCESS: '/access',
   SETTINGS: '/settings',
+  DEVELOPMENT: '/development',
 
   RESOURCES: {
     LIST: '/resources',

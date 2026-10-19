@@ -46,6 +46,16 @@ export function CatalogDetailPage() {
       <ConfirmModal isOpen={deleting} onClose={() => setDeleting(false)} title="Delete catalog entity" message="Remove this catalog registration? Provisioned infrastructure is managed from Resources." confirmText="Delete registration" loading={removeState.isLoading} onConfirm={async () => {
         try { await remove(key).unwrap(); navigate(ROUTES.CATALOG.LIST); } catch { /* Error remains visible and dialog stays open. */ }
       }} />
+      {entity.spec.managementMode === 'catalog-only' && <Card>
+        <CardHeader><CardTitle>Inventory registration</CardTitle></CardHeader>
+        <CardContent className="space-y-2">
+          <Badge variant="warning">Inventory snapshot · Metadata only</Badge>
+          <p>This entry describes a resource or component. It does not represent a running local deployment.</p>
+          {typeof entity.spec.type === 'string' && <p>Resource type: {entity.spec.type}</p>}
+          {typeof entity.spec.repositoryPath === 'string' && <p>Repository: {entity.spec.repositoryPath}</p>}
+          {entity.spec.cloud && typeof entity.spec.cloud === 'object' ? <pre className="overflow-auto whitespace-pre-wrap text-sm">{JSON.stringify(entity.spec.cloud, null, 2)}</pre> : null}
+        </CardContent>
+      </Card>}
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <Card>
           <CardHeader>
