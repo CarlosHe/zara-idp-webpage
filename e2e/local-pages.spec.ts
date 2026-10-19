@@ -57,7 +57,8 @@ test('tenant creation, selection, suspend recovery, reinstate and archive persis
   await page.getByTestId('tenants-create-owner').fill(email);
   await page.getByTestId('tenants-create-submit').click();
   await expect(page.getByTestId(`tenants-row-${id}`)).toBeVisible();
-  await page.getByLabel('Tenant', { exact: true }).selectOption(id);
+  await Promise.all([page.waitForEvent('load'), page.getByLabel('Tenant', { exact: true }).selectOption(id)]);
+  await expect(page.getByLabel('Tenant', { exact: true })).toHaveValue(id);
   await page.goto('/assistant');
   await expect(page.getByTestId('assistant-page')).toBeVisible();
   const prompt = `What services exist in tenant ${id}?`;
@@ -273,4 +274,28 @@ test('cost budget create, edit and delete persist without fabricated provider co
   await dialog.getByRole('button', { name: 'Confirm delete budget', exact: true }).click();
   await expect(dialog.getByRole('status')).toHaveText('Budget deleted');
   await expect(dialog.getByRole('button', { name: `Edit ${name}`, exact: true })).toHaveCount(0);
+});
+
+test('notification publication reaches the inbox and read state persists', async ({ page }) => {
+  const title = `UI notification ${Date.now().toString(36)}`;
+  const headers = { Authorization: `Bearer ${process.env.ZARA_LIVE_TOKEN}` };
+  const principal = await page.request.get('/api/v1/me', { headers });
+  expect(principal.ok()).toBeTruthy();
+  const { subject } = await principal.json() as { subject: string };
+  // Seed through the actual publisher; no mocked inbox response.
+  const published = await page.request.post('/api/v1/notifications/publish', { headers, data: {
+    source: 'system', severity: 'info', title, body: 'Persisted inbox validation', subjects: [subject],
+    scope: 'ui-validation', idempotencyKey: title, action: { kind: 'environment', id: 'ui-validation', path: '/environments' },
+  } });
+  expect(published.ok()).toBeTruthy();
+  await page.goto('/notifications');
+  const article = page.locator('article').filter({ has: page.getByRole('link', { name: title, exact: true }) });
+  await expect(article).toBeVisible();
+  await article.getByRole('button', { name: 'Mark read', exact: true }).click();
+  await expect(article.getByRole('button', { name: 'Mark read', exact: true })).toHaveCount(0);
+  await page.reload();
+  await expect(article).toBeVisible();
+  await expect(article.getByRole('button', { name: 'Mark read', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Unread only', exact: true }).click();
+  await expect(article).toHaveCount(0);
 });
