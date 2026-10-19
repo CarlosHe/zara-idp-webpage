@@ -56,7 +56,7 @@ export default function ManifestApplyModal({ onClose }: { onClose: () => void })
         <p className="text-slate-400">Dry run: no resources or jobs have been created.</p>
       </div>}
       {result && <Alert type="success" title={result.approval_required ? 'Awaiting approval' : 'Provisioning requested'}>
-        <p>{result.approval_required ? 'The infrastructure will be changed after approval.' : 'Workers will execute the request. Check each job before considering the architecture ready.'}</p>
+        <p>{result.approval_required ? 'The infrastructure will be changed after approval.' : 'Workers will execute the request. After jobs complete, verify workload readiness in Runtime and test the application endpoints.'}</p>
         {result.changeset_id && <Link className="mt-2 inline-block underline" to={`/changesets/${result.changeset_id}`} onClick={onClose}>Open ChangeSet</Link>}
       </Alert>}
       {!result && <div className="flex gap-3">

@@ -62,6 +62,7 @@ function redirectToLogin(): void {
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: API_BASE_URL,
+  timeout: 15_000,
   // Sprint 11 / L-1107: explicit `credentials: 'omit'` documents that
   // the app authenticates exclusively via Bearer tokens stored in
   // localStorage. No session cookies are sent, so CSRF is N/A — the
@@ -173,6 +174,8 @@ function methodFromArgs(args: string | FetchArgs): string {
 // out on 4xx by default when we return its standard bail condition.
 export const baseQueryWithRetry = retry(baseQueryWithAuth, {
   retryCondition: (error, args, { attempt, baseQueryApi }) => {
+    // Session checks expose connection errors promptly and offer an explicit retry.
+    if (baseQueryApi.endpoint === 'getMe') return false;
     const method = methodFromArgs(args).toUpperCase();
     if (!error || typeof error !== 'object' || !('status' in error)) return false;
     // Never repeat writes automatically: a lost response may already have

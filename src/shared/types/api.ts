@@ -8,6 +8,7 @@ export type ResourceKind =
   | 'Volume'
   | 'Job'
   | 'CronJob'
+  | 'NetworkPolicy'
   | 'Service'
   | 'Ingress'
   | 'Team'

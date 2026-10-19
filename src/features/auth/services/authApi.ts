@@ -65,7 +65,7 @@ export const authApi = baseApi.injectEndpoints({
      * (redirects to /login). Other failures bubble normally.
      */
     getMe: build.query<Principal, void>({
-      query: () => '/me',
+      query: () => ({ url: '/me', timeout: 5_000 }),
       transformResponse: (raw: MeResponseRaw) => normalizeMe(raw),
       // Cache through the session — we don't expect roles/scopes to
       // mutate without a fresh login.

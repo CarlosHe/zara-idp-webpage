@@ -51,6 +51,26 @@ test('persistent architecture: frontend migration, PVC, application, actual sche
     expect(pvc.status.phase).toBe('Bound');
     const file = await run('kubectl', ['-n', namespace, 'exec', 'deployment/architecture-web', '--', 'cat', '/data/index.html'], { env });
     expect(file.stdout.trim()).toBe('Zara persistent architecture ready');
+    // Probe clients are test instrumentation; all seven managed objects above are created through the frontend.
+    for (const [name, label] of [['allowed-probe', 'architecture-client'], ['blocked-probe', 'untrusted-client']]) {
+      await run('kubectl', ['-n', namespace, 'run', name, '--image=nginx:alpine', `--labels=app=${label}`, '--restart=Never', '--command', '--', 'sleep', '300'], { env });
+      await run('kubectl', ['-n', namespace, 'wait', '--for=condition=Ready', `pod/${name}`, '--timeout=60s'], { env });
+    }
+    const probe = async (name: string) => {
+      try { return (await run('kubectl', ['-n', namespace, 'exec', name, '--', 'wget', '-q', '-T', '2', '-O', '-', 'http://architecture-web:8080'], { env, timeout: 12_000 })).stdout.trim(); }
+      catch (error) {
+        const failure = error as { code?: number; stderr?: string };
+        if (failure.code === 1 && /wget:.*(timed out|refused|unreachable)/i.test(failure.stderr ?? '')) return 'connection-denied';
+        throw error;
+      }
+    };
+    // A positive control proves that a timeout isn't merely a broken application or DNS.
+    await expect.poll(() => probe('allowed-probe'), { timeout: 45_000 }).toBe('Zara persistent architecture ready');
+    await expect.poll(() => probe('blocked-probe'), { timeout: 45_000 }).toBe('connection-denied');
+    await run('kubectl', ['-n', namespace, 'delete', 'pod', 'allowed-probe', 'blocked-probe', '--wait=false'], { env });
+    const secret = JSON.parse((await run('kubectl', ['-n', namespace, 'get', 'secret/architecture-credentials', '-o', 'json'], { env })).stdout);
+    expect(Buffer.from(secret.data.API_KEY, 'base64').length).toBe(43);
+    expect(secret.immutable).toBe(true);
     await page.goto('/runtime');
     await page.getByRole('button', { name: 'Select workload architecture-migrate', exact: true }).click();
     await expect(page.getByRole('heading', { name: /Instances \/ pods/ })).toBeVisible();
@@ -64,7 +84,7 @@ test('persistent architecture: frontend migration, PVC, application, actual sche
     await fs.writeFile(input, manifests.map((resource) => JSON.stringify(resource)).join('\n---\n'), { mode: 0o600 });
     const cli = path.resolve('../zaractl/bin/zaractl');
     const plan = await run(cli, ['--server', 'http://127.0.0.1:8080', 'plan', '-f', input, '-o', 'json'], { env });
-    expect(JSON.parse(plan.stdout).summary).toMatchObject({ create: 0, update: 0, unchanged: 5 });
+    expect(JSON.parse(plan.stdout).summary).toMatchObject({ create: 0, update: 0, unchanged: 7 });
     // No manually created Job: this file must come from the actual CronJob controller.
     await expect.poll(async () => {
       try { return (await run('kubectl', ['-n', namespace, 'exec', 'deployment/architecture-web', '--', 'cat', '/data/last-refresh.txt'], { env })).stdout.trim(); }
@@ -105,14 +125,14 @@ test('persistent architecture: frontend migration, PVC, application, actual sche
     });
     await page.goto(`http://127.0.0.1:${port}`); await expect(page.locator('body')).toContainText('Zara persistent architecture ready');
     forward.kill('SIGTERM'); forward = undefined;
-    for (const [kind, name] of [['CronJob', 'architecture-refresh'], ['Application', 'architecture-web'], ['Job', 'architecture-migrate'], ['Volume', 'architecture-data'], ['ConfigMap', 'architecture-settings']]) {
+    for (const [kind, name] of [['NetworkPolicy', 'architecture-ingress'], ['CronJob', 'architecture-refresh'], ['Application', 'architecture-web'], ['Job', 'architecture-migrate'], ['Volume', 'architecture-data'], ['ConfigMap', 'architecture-settings'], ['Secret', 'architecture-credentials']]) {
       await page.goto('/resources');
       await page.getByLabel('Namespace', { exact: true }).selectOption(namespace);
       await page.getByRole('button', { name: `Delete ${kind} ${name}`, exact: true }).click();
       await page.getByRole('dialog').getByRole('button', { name: 'Delete', exact: true }).click();
       await page.waitForURL('**/changesets/*'); await applied();
     }
-    await expect.poll(async () => JSON.parse((await run('kubectl', ['-n', namespace, 'get', 'pvc,jobs,cronjobs,deployments,services', '-o', 'json'], { env })).stdout).items.length, { timeout: 45_000 }).toBe(0);
+    await expect.poll(async () => JSON.parse((await run('kubectl', ['-n', namespace, 'get', 'pvc,jobs,cronjobs,deployments,services,secrets,networkpolicies', '-o', 'json'], { env })).stdout).items.length, { timeout: 45_000 }).toBe(0);
     // A real failing migration must prevent the dependent Deployment from being created.
     const negative = [
       { apiVersion: 'zara.internal/v1', kind: 'Job', metadata: { name: 'blocked-migrate', namespace }, spec: { name: 'blocked-migrate', namespace, image: 'nginx:alpine', command: ['sh', '-c', 'exit 7'], backoff_limit: 0, active_deadline_seconds: 30 } },

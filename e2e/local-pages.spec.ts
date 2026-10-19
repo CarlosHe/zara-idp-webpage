@@ -29,6 +29,7 @@ test('all 35 screens: fresh session has no API failures, tenant pages guide sele
   });
   for (const route of screens) {
     await test.step(route, async () => {
+      console.info(`Validating route ${route}`);
       await page.goto(route);
       await loaded(page);
       await expect(page.locator('#main-content')).not.toContainText('missing X-Zara-Tenant');

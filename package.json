@@ -22,7 +22,7 @@
     "install-hooks": "bash scripts/install-hooks.sh"
   },
   "dependencies": {
-    "@reduxjs/toolkit": "^2.11.0",
+    "@reduxjs/toolkit": "2.11.2",
     "@sentry/react": "^10.50.0",
     "@tailwindcss/vite": "^4.1.17",
     "@types/react-window": "^1.8.8",

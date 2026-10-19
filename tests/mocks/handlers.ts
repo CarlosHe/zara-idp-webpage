@@ -143,6 +143,7 @@ export const handlers = [
   http.get(`${API}/business-domains`, () => HttpResponse.json({ items: [] })),
   http.get(`${API}/analytics/summary`, () => HttpResponse.json({ series: [] })),
   http.get(`${API}/plugins`, () => HttpResponse.json({ items: [] })),
+  http.get(`${API}/plugins/slots`, () => HttpResponse.json({ items: [] })),
   http.get(`${API}/catalog-sources`, () => HttpResponse.json({ items: [] })),
   http.get(`${API}/docs`, () => HttpResponse.json({ items: [] })),
   http.get(`${API}/docsets`, () => HttpResponse.json({ items: [] })),
