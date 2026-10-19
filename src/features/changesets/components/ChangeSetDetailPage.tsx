@@ -31,7 +31,13 @@ export function ChangeSetDetailPage() {
     skipPollingIfUnfocused: true,
   });
   const { data: diff } = useGetChangeSetDiffQuery(id, { skip: !id });
-  const jobs = useGetChangeSetJobsQuery(id, {skip:!id, pollingInterval:cs?.appliedAt ? 0 : 3000, skipPollingIfUnfocused:true});
+  // The ChangeSet and jobs are persisted independently. An applied ChangeSet
+  // must not stop polling a job response fetched before execution finished.
+  const jobs = useGetChangeSetJobsQuery(id, {
+    skip: !id,
+    pollingInterval: 3000,
+    skipPollingIfUnfocused: true,
+  });
   const [approve, approveState] = useApproveChangeSetMutation();
   const [reject, rejectState] = useRejectChangeSetMutation();
   const [apply, applyState] = useApplyChangeSetMutation();
